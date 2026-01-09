@@ -1,0 +1,78 @@
+# =============================================================================
+# GCHPRO - Systemd Service Configuration
+# =============================================================================
+# 
+# Installation:
+# 1. Copy this file to /etc/systemd/system/gchpro.service
+# 2. Run: sudo systemctl daemon-reload
+# 3. Run: sudo systemctl enable gchpro
+# 4. Run: sudo systemctl start gchpro
+#
+# Management:
+# - Status: sudo systemctl status gchpro
+# - Start: sudo systemctl start gchpro
+# - Stop: sudo systemctl stop gchpro
+# - Restart: sudo systemctl restart gchpro
+# - Logs: sudo journalctl -u gchpro -f
+# =============================================================================
+
+[Unit]
+Description=GCHPRO - Russian Legal Documents Analysis System
+Documentation=https://docs.your-org.com/gchpro
+After=network.target docker.service
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=gchpro
+Group=gchpro
+WorkingDirectory=/opt/gchpro/app
+
+# Environment
+Environment=COMPOSE_PROJECT_NAME=gchpro-prod
+Environment=COMPOSE_FILE=docker-compose.prod.yml
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Commands
+ExecStartPre=/usr/bin/docker compose -f docker-compose.prod.yml down --remove-orphans
+ExecStartPre=/usr/bin/docker compose -f docker-compose.prod.yml pull
+ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up --no-recreate
+ExecStop=/usr/bin/docker compose -f docker-compose.prod.yml down --timeout 60
+ExecReload=/usr/bin/docker compose -f docker-compose.prod.yml restart
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/gchpro
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+MemoryLimit=8G
+
+# Timeouts
+TimeoutStartSec=300
+TimeoutStopSec=120
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=gchpro
+
+# Kill settings
+KillMode=mixed
+KillSignal=SIGTERM
+FinalKillSignal=SIGKILL
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

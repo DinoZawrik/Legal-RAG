@@ -1,0 +1,155 @@
+# MkDocs Configuration для LegalRAG Documentation
+# Красивая документация в стиле FastAPI
+
+site_name: LegalRAG Documentation
+site_description: AI система для анализа российских юридических документов
+site_author: LegalRAG Team
+site_url: https://legal_rag.local
+
+# Repository
+repo_name: LegalRAG
+repo_url: https://github.com/DinoZawrik/Gov_wiki
+edit_uri: ""
+
+# Copyright
+copyright: Copyright &copy; 2025 LegalRAG Team
+
+# Theme Configuration (Material - как у FastAPI)
+theme:
+  name: material
+  language: ru
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Переключить на темную тему
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Переключить на светлую тему
+
+  features:
+    - navigation.instant      # Мгновенная загрузка страниц
+    - navigation.tracking     # Отслеживание URL
+    - navigation.tabs         # Вкладки навигации
+    - navigation.sections     # Секции в навигации
+    - navigation.expand       # Автоматическое раскрытие
+    - navigation.top          # Кнопка "наверх"
+    - search.suggest          # Подсказки при поиске
+    - search.highlight        # Подсветка результатов
+    - content.code.copy       # Копирование кода
+    - content.code.annotate   # Аннотации в коде
+
+  icon:
+    repo: fontawesome/brands/github
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+# Plugins
+plugins:
+  - search:
+      lang:
+        - ru
+        - en
+  - minify:
+      minify_html: true
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Navigation Structure
+nav:
+  - Главная: index.md
+
+  - Начало работы:
+    - Быстрый старт: guides/quickstart.md
+    - Установка: guides/installation.md
+    - Конфигурация: guides/configuration.md
+
+  - Миграция v2.0:
+    - Обзор миграции: migration/overview.md
+    - Быстрый старт: migration/quickstart.md
+    - Полный план: migration/full-plan.md
+    - Troubleshooting: migration/troubleshooting.md
+
+  - Архитектура:
+    - Обзор системы: architecture/overview.md
+    - Микросервисы: architecture/microservices.md
+    - Базы данных: architecture/databases.md
+    - RAG Workflow: architecture/rag-workflow.md
+
+  - API Reference:
+    - Embeddings Server: api/embeddings-server.md
+    - OpenAI Client: api/openai-client.md
+    - Vector Store: api/vector-store.md
+    - Search API: api/search.md
+
+  - Разработка:
+    - Contribution Guide: development/contributing.md
+    - Code Style: development/code-style.md
+    - Testing: development/testing.md
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/DinoZawrik/Gov_wiki
+  version:
+    provider: mike
+    default: latest
+
+# Custom CSS
+extra_css:
+  - stylesheets/extra.css
+
+# Google Analytics (опционально)
+# extra:
+#   analytics:
+#     provider: google
+#     property: G-XXXXXXXXXX

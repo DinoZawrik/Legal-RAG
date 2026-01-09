@@ -1,0 +1,416 @@
+
+# Global logging configuration anchor
+x-logging: &default-logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "50m"      # Максимальный размер одного лог файла
+      max-file: "3"        # Количество файлов для ротации  
+      compress: "true"     # Сжатие старых логов
+
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:16
+    container_name: legal_rag_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-legal_rag_db}
+      POSTGRES_USER: ${POSTGRES_USER:-legal_rag_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_env}
+      # Create superuser for admin operations
+      POSTGRES_INITDB_ARGS: "--auth-host=md5"
+      # Production optimizations
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: pg_stat_statements
+      POSTGRES_MAX_CONNECTIONS: 100
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"  # Bind only to localhost for security
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legal_rag_user -d legal_rag_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    container_name: legal_rag_redis
+    ports:
+      - "127.0.0.1:6379:6379"  # Bind only to localhost for security
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: legal_rag_chromadb
+    ports:
+      - "127.0.0.1:8000:8000"  # Bind only to localhost for security
+    volumes:
+      - chromadb_data:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/api/v2/auth/identity', timeout=3)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  # Neo4j Graph Database (Day 2-3: Graph-Enhanced Search)
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: legal_rag_neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-change_me_in_env}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_dbms_memory_heap_initial__size=512M
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_dbms_connector_bolt_listen__address=0.0.0.0:7687
+      - NEO4J_dbms_connector_http_listen__address=0.0.0.0:7474
+    ports:
+      - "127.0.0.1:7474:7474"  # HTTP Browser interface
+      - "127.0.0.1:7687:7687"  # Bolt protocol
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    healthcheck:
+      test: ["CMD", "neo4j", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - legal_rag_network
+    restart: unless-stopped
+    <<: *default-logging
+
+  # LegalRAG Microservices
+  legal_rag_api:
+    build:
+      context: .
+      dockerfile: Dockerfile.microservices
+    container_name: legal_rag_api
+    depends_on:
+      - postgres
+      - redis
+      - chromadb
+      - neo4j
+    env_file:
+      - .env
+    command: python start_microservices.py --host 0.0.0.0 --port 8080
+    environment:
+      # Database Configuration (Docker containers)
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-legal_rag_db}
+      - POSTGRES_USER=${POSTGRES_USER:-legal_rag_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_env}
+      
+      # Redis Configuration
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      
+      # ChromaDB Configuration
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - CHROMA_USE_HTTP=true
+      - CHROMA_SSL=false
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
+      - CHROMADB_COLLECTION=documents
+      
+      # Исправления для работы с документами
+      - SEARCH_USE_DOCUMENTS=true
+      - ENABLE_SELF_RAG=true
+
+      # Neo4j Configuration (Graph Database)
+      - NEO4J_URI=bolt://legal_rag_neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-change_me_in_env}
+      
+      # Gateway Configuration
+      - GATEWAY_HOST=0.0.0.0
+      - GATEWAY_PORT=8080
+      
+      # Production Configuration
+      - USE_OPTIMAL_RAG=true
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      
+      # Locale Configuration
+      - LANG=ru_RU.UTF-8
+      - LC_ALL=ru_RU.UTF-8
+      - LANGUAGE=ru_RU:ru:en
+      - PYTHONIOENCODING=utf-8
+      - STARTUP_TIMEOUT=60
+      - HEALTH_CHECK_INTERVAL=30
+      - ENVIRONMENT=production
+      - MONITORING_ENABLED=true
+      
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/all || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  # Admin Panel v2.0 (с базой данных для управления пользователями)
+  legal_rag_admin:
+    build:
+      context: .
+      dockerfile: admin_panel/Dockerfile.admin
+    container_name: legal_rag_admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      legal_rag_api:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # API Gateway connection (internal Docker network)
+      - API_GATEWAY_URL=http://legal_rag_api:8080
+      
+      # Database Configuration (PostgreSQL для user management)
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-legal_rag_db}
+      - POSTGRES_USER=${POSTGRES_USER:-legal_rag_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_env}
+      - POSTGRES_MIN_POOL_SIZE=2
+      - POSTGRES_MAX_POOL_SIZE=10
+      
+      # Redis Configuration (кэширование прав)
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      
+      # Admin Panel Configuration
+      - ADMIN_PANEL_PASSWORD=${ADMIN_PANEL_PASSWORD:-change_me_in_env}
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET:-change-jwt-secret-in-production}
+      
+      # Telegram Integration
+      - TELEGRAM_ADMIN_IDS=${TELEGRAM_ADMIN_IDS:-[]}
+      
+      # Locale Configuration
+      - LANG=ru_RU.UTF-8
+      - LC_ALL=ru_RU.UTF-8
+      - LANGUAGE=ru_RU:ru:en
+      - PYTHONIOENCODING=utf-8
+      
+    ports:
+      - "8090:8501"  # Streamlit default port
+    volumes:
+      - ./logs:/app/logs:ro
+      - ./data:/app/data
+      - ./admin_panel:/app/admin_panel  # Mount admin panel code for live updates
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8501/_stcore/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s  # Увеличенное время для миграций БД
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  # Telegram Bot
+  legal_rag_bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.microservices
+    container_name: legal_rag_bot
+    depends_on:
+      - legal_rag_api
+    env_file:
+      - .env
+    environment:
+      # API Gateway connection (internal Docker network)
+      - API_GATEWAY_URL=http://legal_rag_api:8080
+      
+      # Database Configuration
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-legal_rag_db}
+      - POSTGRES_USER=${POSTGRES_USER:-legal_rag_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_env}
+      
+      # Redis Configuration
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      
+      # ChromaDB Configuration
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      
+      # Locale Configuration
+      - LANG=ru_RU.UTF-8
+      - LC_ALL=ru_RU.UTF-8
+      - LANGUAGE=ru_RU:ru:en
+      - PYTHONIOENCODING=utf-8
+      
+    command: python -m bot.telegram_bot
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  # Document Worker для Task Queue
+  legal_rag_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.microservices
+    container_name: legal_rag_worker
+    depends_on:
+      - postgres
+      - redis
+      - chromadb
+      - legal_rag_api
+    env_file:
+      - .env
+    environment:
+      # Database Configuration
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-legal_rag_db}
+      - POSTGRES_USER=${POSTGRES_USER:-legal_rag_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_env}
+      
+      # Redis Configuration (Task Queue)
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_URL=redis://redis:6379
+      
+      # ChromaDB Configuration
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      
+      # Worker Configuration
+      - WORKER_ID=main-document-worker
+      - ENVIRONMENT=production
+      
+      # Locale Configuration
+      - LANG=ru_RU.UTF-8
+      - LC_ALL=ru_RU.UTF-8
+      - LANGUAGE=ru_RU:ru:en
+      - PYTHONIOENCODING=utf-8
+      
+    command: python start_document_worker.py
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import redis; r=redis.from_url(\"redis://redis:6379\"); r.ping()' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  # Monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: legal_rag_prometheus
+    ports:
+      - "127.0.0.1:9090:9090"  # Bind only to localhost for security
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: legal_rag_grafana
+    ports:
+      - "127.0.0.1:3000:3000"  # Bind only to localhost for security
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-change_me_in_env}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+    profiles:
+      - monitoring
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  chromadb_data:
+    driver: local
+  neo4j_data:
+    driver: local
+  neo4j_logs:
+    driver: local
+  neo4j_import:
+    driver: local
+  neo4j_plugins:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  legal_rag_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

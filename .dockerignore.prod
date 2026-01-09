@@ -1,0 +1,113 @@
+# =============================================================================
+# Alpha AI Assistant - Docker Ignore File
+# =============================================================================
+
+# Development files
+.git/
+.gitignore
+.env*
+!.env.production
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.tox/
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+*.out
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+
+# Testing
+tests/
+test_*.py
+*_test.py
+coverage.xml
+.coverage.*
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Database files (shouldn't be in container)
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.bak
+backups/
+
+# Data files (should be mounted as volumes)
+data/
+*.csv
+*.json
+!requirements.txt
+!package.json
+
+# Docker files (except production ones)
+Dockerfile
+docker-compose.yml
+!Dockerfile.prod
+!docker-compose.prod.yml
+
+# Deployment scripts (will be added separately)
+deploy.sh
+*.sh
+
+# Configuration files with secrets
+config.ini
+config.yaml
+secrets/
+
+# Monitoring and logs
+monitoring/
+grafana/
+prometheus/
+
+# Project-specific temporary artifacts (exclude from Docker context)
+test_contextual_fix.py
+Особенности_привлечения_банковского_финансирования_в_проекты_ГЧП.pdf

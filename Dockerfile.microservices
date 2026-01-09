@@ -1,0 +1,86 @@
+# Multi-stage build для LegalRAG Microservices
+FROM python:3.11-slim as builder
+
+# Установка системных зависимостей для сборки Python пакетов
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Создание пользователя приложения
+RUN useradd --create-home --shell /bin/bash legalrag
+
+# Установка рабочей директории
+WORKDIR /app
+
+# Копирование requirements
+COPY requirements.txt .
+
+# Установка Python зависимостей
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Production stage
+FROM python:3.11-slim
+
+# Установка runtime зависимостей и локали
+RUN apt-get update && apt-get install -y \
+    curl \
+    locales \
+    && echo "ru_RU.UTF-8 UTF-8" >> /etc/locale.gen \
+    && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+    && locale-gen \
+    && rm -rf /var/lib/apt/lists/*
+
+# Устанавливаем unrar в production stage
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    wget \
+    make \
+    && rm -rf /var/lib/apt/lists/* \
+    && wget -O /tmp/unrar.tar.gz https://www.rarlab.com/rar/unrarsrc-7.0.7.tar.gz \
+    && cd /tmp && tar xzf unrar.tar.gz \
+    && cd unrar && make && make install \
+    && rm -rf /tmp/unrar* \
+    && apt-get remove -y gcc g++ wget make \
+    && apt-get autoremove -y \
+    && apt-get clean
+
+# Создание пользователя приложения
+RUN useradd --create-home --shell /bin/bash legalrag
+
+# Копирование Python зависимостей из builder stage
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Установка рабочей директории
+WORKDIR /app
+
+# Копирование кода приложения
+COPY --chown=legalrag:legalrag . .
+
+# Создание необходимых директорий
+RUN mkdir -p logs data && \
+    chown -R legalrag:legalrag /app
+
+# Переключение на пользователя приложения
+USER legalrag
+
+# Установка переменных окружения
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONIOENCODING=utf-8
+ENV LANG=ru_RU.UTF-8
+ENV LC_ALL=ru_RU.UTF-8
+ENV LANGUAGE=ru_RU:ru:en
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8085/health/all || exit 1
+
+# Expose порт API Gateway
+EXPOSE 8085
+
+# Команда запуска
+CMD ["python", "start_microservices.py", "--host", "0.0.0.0", "--port", "8085"]

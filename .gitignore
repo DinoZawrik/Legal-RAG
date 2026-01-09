@@ -1,0 +1,141 @@
+# Файлы данных (DEPRECATED: используется PostgreSQL в Docker)
+# data/database.db* - больше не используется
+data/*.log
+data/temp/
+data/archives/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# pytest и тестирование
+.pytest_cache/
+.coverage
+*.coverage
+.tox/
+.cache
+.coverage.*
+
+# Кэш и временные файлы
+**/__pycache__/
+**/.*cache/
+
+# Виртуальные окружения
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Логи
+*.log
+logs/
+
+# Временные файлы
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Конфигурационные файлы с секретами
+.env
+.env.local
+.env.production
+.env.backup
+config.local.py
+
+# ChromaDB
+/chroma_db_v2
+
+# MCP Settings
+/mcp_settings.json
+
+# LangGraph
+/langgraph-main
+
+# pytest cache
+.pytest_cache/
+
+# Context Portal
+/context_portal
+/.roo
+/.roomodes
+
+# Test artifacts
+tests/data/temp/
+test_results/
+*.test.log
+
+# Documentation builds  
+docs/_build/
+docs/site/
+
+# Legacy cleanup
+core_backup/
+*.backup
+nul
+
+# Performance and coverage reports
+htmlcov/
+.coverage.*
+*.coverage
+
+# Legacy (cleaned up)
+/data_extraction_test_questions.md
+/docs_for_test
+tests/conftest.py
+tests/README.md
+tests/data/sample_documents/Постановление Правительства РФ от 22.10.2012 N 1075 (ред. от.pdf
+tests/data/sample_documents/Федеральный закон от 27.07.2010 N 190-ФЗ (ред. от 08.08.2024.pdf
+tests/integration/test_complex_questions.py
+tests/integration/test_microservices_integration.py
+tests/integration/test_telegram_integration.py
+tests/integration/test_with_infrastructure.py
+tests/performance/load_test_docs.py
+tests/performance/test_rag_optimization.py
+tests/unit/test_chromadb_direct.py
+clear_chromadb.py
+/.claude*.log
+
+# Claude AI documentation and cache
+.claude/
+/ADMIN_PANEL_PLAN.md
+/task.txt
+/.qoder
+
+# Project-specific temporary artifacts (keep in repo but ignore in VCS)
+test_contextual_fix.py
+Особенности_привлечения_банковского_финансирования_в_проекты_ГЧП.pdf
+/files
+/файлы_для_теста
+/вопросы_для_теста.txt
+/.playwright-mcp
+/.context7
+/.vscode
+/files_for_test
+/logs
+/nginx
+/CLAUDE.md
+/venv_docs

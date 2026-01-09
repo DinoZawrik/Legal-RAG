@@ -1,0 +1,87 @@
+# Development files
+.git/
+.vscode/
+
+# Documentation (not needed in production)
+docs/
+*.md
+*_REPORT.md
+*_PLAN.md
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+*.DS_Store
+desktop.ini
+$RECYCLE.BIN/
+
+# Editor files
+.idea/
+*.swp
+*.swo
+*.tmp
+*~
+.vscode/
+*.sublime-*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+docker-compose*.yaml
+.dockerignore
+
+# Temporary directories
+tmp/
+temp/
+.cache/
+.temp/
+*.tmp/
+
+# Log files
+*.log
+logs/
+
+# Local data
+uploaded_documents/
+data/
+chroma_db_v2/
+
+# Tests (not needed in production containers)
+tests/
+conftest.py
+test_*.py
+*test*.py
+
+# Legacy backup
+core_backup/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Project-specific temporary artifacts (exclude from Docker context)
+test_contextual_fix.py
+Особенности_привлечения_банковского_финансирования_в_проекты_ГЧП.pdf

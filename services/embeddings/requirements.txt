@@ -1,0 +1,15 @@
+# Requirements для Giga-Embeddings Local Server
+# Минимальный набор зависимостей для embeddings inference
+
+# Web framework
+fastapi>=0.115,<0.116
+uvicorn[standard]>=0.30,<0.31
+pydantic>=2.7,<3
+
+# ML frameworks
+torch>=2.0.0,<3.0.0
+transformers>=4.30.0,<5.0.0
+sentence-transformers>=2.2.0,<3.0.0
+
+# Utilities
+numpy>=1.24.0,<2.0.0

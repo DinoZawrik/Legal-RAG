@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""
+DEPRECATED: Backward Compatibility Wrapper
+==========================================
+
+This file provides backward compatibility for code that imports from:
+    from core.universal_smart_search import UniversalSmartSearch
+
+NEW LOCATION: Please update your imports to:
+    from core.search import UniversalSmartSearch
+
+This wrapper will be removed in a future version.
+
+Author: GCHPRO Cleanup Team  
+Date: 2025-10-02
+"""
+
+# Check if search module exists, fallback to smart_search
+try:
+    from .search import UniversalSmartSearch
+except ImportError:
+    # Fallback to smart_search directory if search doesn't exist
+    try:
+        from .smart_search import UniversalSmartSearch
+    except ImportError:
+        raise ImportError(
+            "Cannot import UniversalSmartSearch from either core.search or core.smart_search. "
+            "Please check modular structure."
+        )
+
+# Legacy compatibility functions
+def create_smart_search(*args, **kwargs):
+    """DEPRECATED: Use UniversalSmartSearch() directly."""
+    return UniversalSmartSearch(*args, **kwargs)
+
+def get_universal_smart_search(*args, **kwargs):
+    """DEPRECATED: Use UniversalSmartSearch() directly."""
+    return UniversalSmartSearch(*args, **kwargs)
+
+__all__ = ["UniversalSmartSearch", "create_smart_search", "get_universal_smart_search"]

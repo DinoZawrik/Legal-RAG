@@ -1,0 +1,104 @@
+# LegalRAG - Минимальные зависимости для разработки
+# Без фиксированных версий для автоматического разрешения конфликтов
+
+# Core async libraries
+aiofiles
+aiohttp
+aioredis
+aiosignal
+aiosqlite
+anyio
+
+# JWT for admin panel API
+PyJWT
+async-timeout
+asyncpg
+psycopg2-binary
+
+# Web framework
+fastapi[standard]>=0.115,<0.116
+uvicorn
+starlette
+
+# Database and storage
+psutil
+redis>=5,<6
+chromadb>=0.5,<0.6  # LEGACY: ChromaDB поддержка для обратной совместимости
+SQLAlchemy
+alembic
+pgvector  # PostgreSQL pgvector extension для векторного поиска
+
+# Graph database
+neo4j
+
+# Search algorithms (Day 1-3: Hybrid BM25 + Graph RAG)
+rank-bm25>=0.2,<0.3
+
+# AI Providers (МИГРАЦИЯ v3.0 - 02.11.2025)
+google-generativeai>=0.3.0,<1.0.0
+langchain-google-genai>=2.0.0,<3.0.0
+
+# LEGACY: OpenAI для обратной совместимости
+openai>=1.0.0,<2.0.0
+
+# Reranking (BGE Reranker v2-m3)
+sentence-transformers>=2.2.0
+
+# Text processing
+PyMuPDF
+python-multipart
+beautifulsoup4
+crawl4ai
+
+# Utilities
+pydantic>=2.7,<3
+pydantic-settings>=2.4,<3
+python-dotenv
+structlog
+rich
+click
+
+# Development tools
+pytest
+pytest-asyncio
+
+# LangChain для AI inference (МИГРАЦИЯ v2.0)
+langchain
+langchain-core
+langchain-community
+langchain-openai>=0.1.0,<1.0.0
+langgraph
+tiktoken
+
+# Telegram bot
+aiogram>=3.0,<4.0
+
+# Document processing
+python-docx
+rarfile
+patool
+
+# Enhanced archive and document format support
+py7zr  # 7-Zip archive support
+docx2txt  # Legacy .doc file support  
+striprtf  # RTF format support
+olefile  # OLE2 file format support
+textract  # Fallback text extraction
+chardet  # Character encoding detection
+
+# Core scientific (минимум)
+numpy
+pandas
+
+# Streamlit for admin panel
+streamlit
+
+# Excel and spreadsheet processing (enhanced support)
+xlrd  # Legacy .xls support
+xlwt  # Writing .xls files (optional)
+openpyxl  # Modern .xlsx support (already in dependencies indirectly)
+
+# Testing and automation
+playwright
+pytest-playwright
+pytest-xvfb

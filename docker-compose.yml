@@ -1,0 +1,79 @@
+# Global logging configuration anchor
+x-logging: &default-logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "50m"      # Максимальный размер одного лог файла
+      max-file: "3"        # Количество файлов для ротации  
+      compress: "true"     # Сжатие старых логов
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: legal_rag_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: legal_rag_db
+      POSTGRES_USER: legal_rag_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_env}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legal_rag_user -d legal_rag_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  redis:
+    image: redis:7
+    container_name: legal_rag_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+  chromadb:
+    image: chromadb/chroma:1.0.13
+    container_name: legal_rag_chromadb
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "TRUE"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo -e 'GET /api/v2/heartbeat HTTP/1.1\r\nHost: localhost:8000\r\nConnection: close\r\n\r\n' | timeout 5 bash -c 'exec 3<>/dev/tcp/localhost/8000; cat >&3; cat <&3' | grep -q 'nanosecond heartbeat'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - legal_rag_network
+    <<: *default-logging
+
+volumes:
+  postgres_data:
+  redis_data:
+  chroma_data:
+
+networks:
+  legal_rag_network:
+    driver: bridge

@@ -1,0 +1,400 @@
+/* 
+🎨 GCHPRO Admin Panel Styles
+Custom CSS для Streamlit админ-панели
+*/
+
+/* Глобальные переменные */
+:root {
+    --primary-color: #1f4e79;
+    --secondary-color: #2e8bc0;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --light-gray: #f8f9fa;
+    --dark-gray: #6c757d;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Основные стили */
+.main-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    color: white;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: var(--box-shadow);
+}
+
+.main-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.main-header p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+/* Карточки метрик */
+.metric-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+    margin: 0.5rem 0;
+    box-shadow: var(--box-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.metric-card h4 {
+    margin: 0 0 1rem 0;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.metric-card p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+/* Статусы */
+.status-online {
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+.status-offline {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+.status-warning {
+    color: var(--warning-color);
+    font-weight: bold;
+}
+
+.status-info {
+    color: var(--info-color);
+    font-weight: bold;
+}
+
+/* Кнопки */
+.stButton > button {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--border-radius) !important;
+    padding: 0.6rem 1.2rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(31, 78, 121, 0.3) !important;
+}
+
+.stButton > button:active {
+    transform: translateY(0) !important;
+}
+
+/* Сайдбар */
+.css-1d391kg {
+    background: linear-gradient(180deg, var(--primary-color), var(--secondary-color)) !important;
+}
+
+.css-1d391kg .css-17eq0hr {
+    color: white !important;
+}
+
+/* Формы */
+.stTextInput > div > div > input {
+    border-radius: var(--border-radius) !important;
+    border: 2px solid #e0e0e0 !important;
+    transition: border-color 0.3s ease !important;
+}
+
+.stTextInput > div > div > input:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 2px rgba(31, 78, 121, 0.2) !important;
+}
+
+.stSelectbox > div > div {
+    border-radius: var(--border-radius) !important;
+}
+
+/* Таблицы */
+.stDataFrame {
+    border-radius: var(--border-radius) !important;
+    overflow: hidden !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+/* Метрики Streamlit */
+.css-1r6slb0 {
+    background: white !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: var(--border-radius) !important;
+    padding: 1rem !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+/* Прогресс-бары */
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)) !important;
+}
+
+/* Алерты */
+.stAlert {
+    border-radius: var(--border-radius) !important;
+    border: none !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+/* Файл-загрузчик */
+.stFileUploader > div {
+    border: 2px dashed var(--primary-color) !important;
+    border-radius: var(--border-radius) !important;
+    background: var(--light-gray) !important;
+    padding: 2rem !important;
+    text-align: center !important;
+}
+
+.stFileUploader > div:hover {
+    border-color: var(--secondary-color) !important;
+    background: #f0f8ff !important;
+}
+
+/* Экспандеры */
+.streamlit-expanderHeader {
+    background: var(--light-gray) !important;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+.streamlit-expanderContent {
+    border: 1px solid #e0e0e0 !important;
+    border-top: none !important;
+    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
+}
+
+/* Вкладки */
+.stTabs [data-baseweb="tab-list"] {
+    background: var(--light-gray) !important;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    padding: 1rem 1.5rem !important;
+    font-weight: 600 !important;
+}
+
+.stTabs [aria-selected="true"] {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Чекбоксы */
+.stCheckbox > label {
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+}
+
+/* Слайдеры */
+.stSlider > div > div > div {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)) !important;
+}
+
+/* События и логи */
+.event-card {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+    background: white;
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--info-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+    transform: translateX(4px);
+}
+
+.event-time {
+    font-weight: bold;
+    margin-right: 1rem;
+    min-width: 60px;
+}
+
+.event-message {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+/* Статистические карточки */
+.stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.stats-label {
+    font-size: 1rem;
+    color: var(--dark-gray);
+    margin: 0.5rem 0 0 0;
+}
+
+/* Загрузка файлов - drag and drop зона */
+.upload-zone {
+    border: 3px dashed var(--primary-color);
+    border-radius: var(--border-radius);
+    padding: 3rem;
+    text-align: center;
+    background: linear-gradient(135deg, #f8fbff, #e3f2fd);
+    margin: 2rem 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-zone:hover {
+    border-color: var(--secondary-color);
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    transform: scale(1.02);
+}
+
+.upload-zone h3 {
+    color: var(--primary-color);
+    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
+}
+
+.upload-zone p {
+    color: var(--dark-gray);
+    margin: 0.5rem 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .main-header h1 {
+        font-size: 2rem;
+    }
+    
+    .metric-card {
+        margin: 0.5rem 0;
+    }
+    
+    .upload-zone {
+        padding: 2rem;
+    }
+    
+    .upload-zone h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Темная тема (опционально) */
+@media (prefers-color-scheme: dark) {
+    .metric-card {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .stats-card {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .event-card {
+        background: #2d3748;
+        color: white;
+    }
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Прелоадер */
+.loader {
+    border: 4px solid var(--light-gray);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Утилиты */
+.text-center {
+    text-align: center !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.mb-1 { margin-bottom: 0.5rem !important; }
+.mb-2 { margin-bottom: 1rem !important; }
+.mb-3 { margin-bottom: 1.5rem !important; }
+.mb-4 { margin-bottom: 2rem !important; }
+
+.mt-1 { margin-top: 0.5rem !important; }
+.mt-2 { margin-top: 1rem !important; }
+.mt-3 { margin-top: 1.5rem !important; }
+.mt-4 { margin-top: 2rem !important; }
+
+.p-1 { padding: 0.5rem !important; }
+.p-2 { padding: 1rem !important; }
+.p-3 { padding: 1.5rem !important; }
+.p-4 { padding: 2rem !important; }

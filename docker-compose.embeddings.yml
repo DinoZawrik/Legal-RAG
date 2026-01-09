@@ -1,0 +1,62 @@
+# Docker Compose для Giga-Embeddings Local Server
+# Отдельный файл для embeddings сервиса (можно запускать независимо)
+
+version: '3.8'
+
+services:
+  giga-embeddings:
+    build:
+      context: ./services/embeddings
+      dockerfile: Dockerfile
+    container_name: legalrag_embeddings
+    restart: unless-stopped
+    ports:
+      - "8001:8001"  # HTTP API endpoint
+    environment:
+      # HuggingFace settings
+      - TRANSFORMERS_CACHE=/app/.cache/huggingface
+      - HF_HOME=/app/.cache/huggingface
+      - TOKENIZERS_PARALLELISM=false
+
+      # Model configuration (можно переопределить)
+      - MODEL_NAME=ai-forever/sbert_large_nlu_ru
+      - EMBEDDING_DIMENSION=1024
+      - DEVICE=cpu
+    volumes:
+      # Кеш моделей (чтобы не скачивать каждый раз)
+      - embeddings_cache:/app/.cache/huggingface
+
+      # Логи (опционально)
+      - ./logs/embeddings:/app/logs
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'      # Максимум 4 CPU cores
+          memory: 6G       # Максимум 6GB RAM
+        reservations:
+          cpus: '2.0'      # Минимум 2 CPU cores
+          memory: 4G       # Минимум 4GB RAM
+    networks:
+      - legalrag_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s  # Даём 60 секунд на загрузку модели
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  embeddings_cache:
+    driver: local
+
+networks:
+  legalrag_network:
+    # Используем существующую сеть из основного docker-compose.yml
+    # Если её ещё нет - создаётся автоматически
+    name: legalrag_network
+    driver: bridge

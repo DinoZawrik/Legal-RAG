@@ -159,19 +159,13 @@ class AdminPanelApp:
     def run(self):
         """Главная функция запуска админ-панели"""
         
-        # Временно отключаем аутентификацию для тестирования
-        # if not st.session_state.authenticated:
-        #     self.show_login_page()
-        #     return
-        
-        # Автоматически устанавливаем аутентификацию для тестирования
-        st.session_state.authenticated = True
-        st.session_state.username = 'admin'
+        if not st.session_state.authenticated:
+            self.show_login_page()
+            return
         
         # Создаем JWT токен для аутентифицированного пользователя
         if 'auth_token' not in st.session_state:
-            # Используем встроенный метод создания токена
-            st.session_state.auth_token = self.auth._create_jwt_token('admin')
+            st.session_state.auth_token = self.auth._create_jwt_token(st.session_state.username)
         
         # Главная страница после входа
         self.show_main_page()
@@ -214,9 +208,8 @@ class AdminPanelApp:
         self.show_sidebar()
         
         # Основной контент - переключение страниц с поддержкой URL параметров
-        # В Streamlit 1.28+ используется st.experimental_get_query_params()
-        query_params = st.experimental_get_query_params()
-        url_page = query_params.get('page', [None])[0] if query_params else None
+        query_params = st.query_params
+        url_page = query_params.get('page', None)
 
         if not hasattr(st.session_state, 'current_page'):
             # Если есть параметр в URL, используем его, иначе по умолчанию 'files'
@@ -282,7 +275,7 @@ class AdminPanelApp:
                         key="btn-files",
                         help="Загрузка документов, ZIP/RAR/7z архивов, управление файлами"):
                 st.session_state.current_page = 'files'
-                st.experimental_set_query_params(page='files')
+                st.query_params['page'] = 'files'
                 st.rerun()
 
             if st.button("Пользователи",
@@ -290,7 +283,7 @@ class AdminPanelApp:
                         key="btn-users",
                         help="Управление пользователями и правами доступа"):
                 st.session_state.current_page = 'users'
-                st.experimental_set_query_params(page='users')
+                st.query_params['page'] = 'users'
                 st.rerun()
 
             if st.button("📊 Мониторинг задач",
@@ -298,7 +291,7 @@ class AdminPanelApp:
                         key="btn-tasks",
                         help="Отслеживание прогресса обработки документов"):
                 st.session_state.current_page = 'tasks'
-                st.experimental_set_query_params(page='tasks')
+                st.query_params['page'] = 'tasks'
                 st.rerun()
             
             st.markdown("</div>", unsafe_allow_html=True)  # Закрываем nav-buttons div

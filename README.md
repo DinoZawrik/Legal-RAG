@@ -1,4 +1,4 @@
-# 🏛️ LegalRAG — Legal Document Analysis System
+# LegalRAG — Legal Document Analysis System
 
 <p align="center">
   <strong>🇬🇧 English</strong> |
@@ -10,10 +10,17 @@
 [![Docker](https://img.shields.io/badge/docker-compose-blue.svg)](https://docker.com/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-agentic-purple.svg)](https://langchain-ai.github.io/langgraph/)
+[![Accuracy](https://img.shields.io/badge/Accuracy-97.5%25-brightgreen)]()
 
 > Production-ready RAG system for legal document analysis with hybrid search, graph knowledge base, and agentic workflows.
 
-## ✨ Key Features
+## Screenshots
+
+| Admin Panel — Login | Admin Panel — File Management | Admin Panel — Users |
+|:---:|:---:|:---:|
+| ![Login](screenshot/admin_login.png) | ![Dashboard](screenshot/admin_dashboard.png) | ![Users](screenshot/admin_users.png) |
+
+## Key Features
 
 - **Hybrid BM25 + Semantic Search** - 60/40 weighted combination for optimal retrieval on legal terminology
 - **LangGraph Agentic Workflow** - 5-node CRAG-inspired architecture with self-critique and automatic fallback
@@ -23,7 +30,7 @@
 - **Microservices Architecture** - 5 independent services with health monitoring and graceful shutdown
 - **Telegram Bot + Admin Panel** - Full-featured user interface with JWT authentication
 
-## 🏗️ Architecture
+## Architecture
 
 ```
                     +------------------+
@@ -57,7 +64,7 @@ retrieve_initial -> grade_documents -> repair_retrieve -> generate_answer -> cri
    + Graph Lookup    Assessment       + Web Search        Generation        Validation
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category | Technology |
 |----------|------------|
@@ -70,7 +77,7 @@ retrieve_initial -> grade_documents -> repair_retrieve -> generate_answer -> cri
 | **Framework** | FastAPI + LangGraph + Aiogram |
 | **Reranker** | BGE Reranker v2-m3 (sentence-transformers) |
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.11+
@@ -133,7 +140,7 @@ curl -X POST http://localhost:8080/api/query \
   -d '{"query": "What is a concession agreement?", "max_results": 5}'
 ```
 
-## 📊 Performance
+## Performance
 
 | Metric | Value |
 |--------|-------|
@@ -142,7 +149,7 @@ curl -X POST http://localhost:8080/api/query \
 | API throughput | 1500 RPD (with key rotation) |
 | Cache hit rate | 67% on similar queries |
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 legal-rag-system/
@@ -162,7 +169,7 @@ legal-rag-system/
 └── start_microservices.py   # Entry point
 ```
 
-## 💡 Key Innovations
+## Key Innovations
 
 ### 1. Hybrid Search for Legal Text
 BM25 keyword matching (60%) combined with semantic embeddings (40%) solves the problem of poor embedding quality on Russian legal terminology.
@@ -176,7 +183,7 @@ Built-in rotation across multiple API keys enables higher throughput on free API
 ### 4. Natural Answer Generation
 Answers are generated in the style of a professional legal consultant, not structured reports.
 
-## 📡 API Endpoints
+## API Endpoints
 
 ```bash
 # Standard search
@@ -191,7 +198,7 @@ POST /api/hybrid_search
 GET /health/all
 ```
 
-## 🔧 Development
+## Development
 
 ```bash
 # Run tests
@@ -205,11 +212,11 @@ ruff check .
 mypy core/
 ```
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [LangGraph](https://langchain-ai.github.io/langgraph/) for agentic workflow framework
 - [ChromaDB](https://www.trychroma.com/) for vector storage

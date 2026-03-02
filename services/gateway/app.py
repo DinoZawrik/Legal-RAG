@@ -128,10 +128,17 @@ class APIGateway(BaseService):
     async def _get_current_admin_user(
         self, credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False))
     ) -> Dict[str, str]:
-        return {"username": "admin", "role": "admin"}
+        if not credentials:
+            raise HTTPException(status_code=401, detail="Authentication required")
+        payload = self._verify_admin_token(credentials.credentials)
+        if not payload:
+            raise HTTPException(status_code=401, detail="Invalid or expired token")
+        return {"username": payload.get("sub", "unknown"), "role": payload.get("role", "viewer")}
 
     def _check_admin_permission(self, user_data: Dict[str, Any], required_permission: str) -> bool:
-        return True
+        role = user_data.get("role", "viewer")
+        admin_permissions = {"admin": True}  # extend with RBAC matrix as needed
+        return admin_permissions.get(role, False)
 
     async def _additional_health_checks(self) -> Dict[str, bool]:
         services = self.registry.get_all_services()

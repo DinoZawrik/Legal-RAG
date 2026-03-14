@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🗄️ Redis Cache Manager
+Redis Cache Manager
 Модуль для работы с Redis кэшированием и очередью задач.
 
 Включает функциональность:
@@ -41,10 +41,19 @@ class RedisManager:
     async def initialize(self) -> bool:
         """Инициализация подключения к Redis."""
         try:
+            # Build URL with optional password
+            redis_password = getattr(SETTINGS, 'REDIS_PASSWORD', '') or ''
+            if redis_password:
+                redis_url = f"redis://:{redis_password}@{SETTINGS.REDIS_HOST}:{SETTINGS.REDIS_PORT}/{SETTINGS.REDIS_DB}"
+            else:
+                redis_url = f"redis://{SETTINGS.REDIS_HOST}:{SETTINGS.REDIS_PORT}/{SETTINGS.REDIS_DB}"
+
             # Async клиент
             self.client = aioredis.from_url(
-                f"redis://{SETTINGS.REDIS_HOST}:{SETTINGS.REDIS_PORT}/{SETTINGS.REDIS_DB}",
-                decode_responses=True
+                redis_url,
+                decode_responses=True,
+                socket_connect_timeout=5,
+                socket_timeout=5,
             )
 
             # Sync клиент для некоторых операций
@@ -52,17 +61,20 @@ class RedisManager:
                 host=SETTINGS.REDIS_HOST,
                 port=SETTINGS.REDIS_PORT,
                 db=SETTINGS.REDIS_DB,
-                decode_responses=True
+                password=redis_password or None,
+                decode_responses=True,
+                socket_connect_timeout=5,
+                socket_timeout=5,
             )
 
             # Проверка соединения
             await self.client.ping()
 
-            logger.info("✅ Redis подключение инициализировано")
+            logger.info(" Redis подключение инициализировано")
             return True
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации Redis: {e}")
+            logger.error(f" Ошибка инициализации Redis: {e}")
             return False
 
     async def close(self):
@@ -71,7 +83,7 @@ class RedisManager:
             await self.client.close()
         if self.sync_client:
             self.sync_client.close()
-        logger.info("🔒 Redis соединения закрыты")
+        logger.info(" Redis соединения закрыты")
 
     async def set_cache(self, key: str, value: Any, expire: int = 3600) -> bool:
         """Установка значения в кэш."""
@@ -83,7 +95,7 @@ class RedisManager:
             return True
 
         except Exception as e:
-            logger.error(f"❌ Ошибка установки кэша {key}: {e}")
+            logger.error(f" Ошибка установки кэша {key}: {e}")
             return False
 
     async def get_cache(self, key: str) -> Optional[Any]:
@@ -98,7 +110,7 @@ class RedisManager:
             return None
 
         except Exception as e:
-            logger.error(f"❌ Ошибка получения кэша {key}: {e}")
+            logger.error(f" Ошибка получения кэша {key}: {e}")
             return None
 
     async def update_task_status(self, task_id: str, status: str,
@@ -122,7 +134,7 @@ class RedisManager:
             return True
 
         except Exception as e:
-            logger.error(f"❌ Ошибка обновления статуса задачи {task_id}: {e}")
+            logger.error(f" Ошибка обновления статуса задачи {task_id}: {e}")
             return False
 
     async def get_task_status(self, task_id: str) -> Optional[Dict]:
@@ -136,7 +148,7 @@ class RedisManager:
             return None
 
         except Exception as e:
-            logger.error(f"❌ Ошибка получения статуса задачи {task_id}: {e}")
+            logger.error(f" Ошибка получения статуса задачи {task_id}: {e}")
             return None
 
     async def delete_cache(self, key: str) -> bool:
@@ -145,7 +157,7 @@ class RedisManager:
             await self.client.delete(key)
             return True
         except Exception as e:
-            logger.error(f"❌ Ошибка удаления кэша {key}: {e}")
+            logger.error(f" Ошибка удаления кэша {key}: {e}")
             return False
 
     async def exists(self, key: str) -> bool:
@@ -154,7 +166,7 @@ class RedisManager:
             result = await self.client.exists(key)
             return bool(result)
         except Exception as e:
-            logger.error(f"❌ Ошибка проверки существования кэша {key}: {e}")
+            logger.error(f" Ошибка проверки существования кэша {key}: {e}")
             return False
 
     async def increment(self, key: str) -> int:
@@ -162,7 +174,7 @@ class RedisManager:
         try:
             return await self.client.incr(key)
         except Exception as e:
-            logger.error(f"❌ Ошибка инкремента кэша {key}: {e}")
+            logger.error(f" Ошибка инкремента кэша {key}: {e}")
             return 0
 
     async def get_all_task_statuses(self) -> Dict[str, Dict]:
@@ -179,7 +191,7 @@ class RedisManager:
 
             return statuses
         except Exception as e:
-            logger.error(f"❌ Ошибка получения всех статусов задач: {e}")
+            logger.error(f" Ошибка получения всех статусов задач: {e}")
             return {}
 
 
@@ -191,14 +203,18 @@ def create_redis_manager() -> RedisManager:
 def get_redis_client() -> Optional[redis.Redis]:
     """Utility function для получения синхронного Redis клиента."""
     try:
+        redis_password = getattr(SETTINGS, 'REDIS_PASSWORD', '') or ''
         return redis.Redis(
             host=SETTINGS.REDIS_HOST,
             port=SETTINGS.REDIS_PORT,
             db=SETTINGS.REDIS_DB,
-            decode_responses=True
+            password=redis_password or None,
+            decode_responses=True,
+            socket_connect_timeout=5,
+            socket_timeout=5,
         )
     except Exception as e:
-        logger.error(f"❌ Ошибка создания Redis клиента: {e}")
+        logger.error(f" Ошибка создания Redis клиента: {e}")
         return None
 
 

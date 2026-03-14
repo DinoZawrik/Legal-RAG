@@ -22,7 +22,7 @@ class PermissionsCacheManager:
     
     def __init__(self):
         self.redis_client = None
-        self.cache_ttl = 3600  # 1 час кэширования
+        self.cache_ttl = 3600 # 1 час кэширования
         self.key_prefix = "legalrag:permissions:"
         self.stats_key = "legalrag:cache_stats:permissions"
         
@@ -30,10 +30,12 @@ class PermissionsCacheManager:
         """Получение клиента Redis"""
         if self.redis_client is None:
             try:
+                redis_password = getattr(SETTINGS, 'REDIS_PASSWORD', '') or ''
                 self.redis_client = redis.Redis(
                     host=SETTINGS.REDIS_HOST,
                     port=SETTINGS.REDIS_PORT,
                     db=SETTINGS.REDIS_DB,
+                    password=redis_password or None,
                     decode_responses=True,
                     socket_connect_timeout=5,
                     socket_timeout=5
@@ -41,10 +43,10 @@ class PermissionsCacheManager:
                 
                 # Проверяем подключение
                 await self.redis_client.ping()
-                logger.info("✅ Connected to Redis for permissions cache")
+                logger.info(" Connected to Redis for permissions cache")
                 
             except Exception as e:
-                logger.error(f"❌ Failed to connect to Redis: {e}")
+                logger.error(f" Failed to connect to Redis: {e}")
                 self.redis_client = None
                 raise
         
@@ -54,7 +56,7 @@ class PermissionsCacheManager:
         """Закрытие соединения с Redis"""
         if self.redis_client:
             await self.redis_client.close()
-            logger.info("🔒 Closed Redis connection")
+            logger.info(" Closed Redis connection")
     
     def _get_user_permissions_key(self, telegram_id: int) -> str:
         """Генерация ключа для прав пользователя"""
@@ -89,11 +91,11 @@ class PermissionsCacheManager:
                 json.dumps(cache_data)
             )
             
-            logger.debug(f"✅ Cached permissions for user {telegram_id}: {permissions}")
+            logger.debug(f" Cached permissions for user {telegram_id}: {permissions}")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error caching permissions for user {telegram_id}: {e}")
+            logger.error(f" Error caching permissions for user {telegram_id}: {e}")
             return False
     
     async def get_cached_user_permissions(self, telegram_id: int) -> Optional[List[str]]:
@@ -111,16 +113,16 @@ class PermissionsCacheManager:
                 # Обновляем статистику попаданий в кэш
                 await self._update_cache_stats('hit')
                 
-                logger.debug(f"✅ Cache hit for user {telegram_id}: {permissions}")
+                logger.debug(f" Cache hit for user {telegram_id}: {permissions}")
                 return permissions
             else:
                 # Промах кэша
                 await self._update_cache_stats('miss')
-                logger.debug(f"❌ Cache miss for user {telegram_id}")
+                logger.debug(f" Cache miss for user {telegram_id}")
                 return None
                 
         except Exception as e:
-            logger.error(f"❌ Error getting cached permissions for user {telegram_id}: {e}")
+            logger.error(f" Error getting cached permissions for user {telegram_id}: {e}")
             return None
     
     async def check_cached_permission(self, telegram_id: int, permission: str) -> Optional[bool]:
@@ -134,7 +136,7 @@ class PermissionsCacheManager:
             return None
             
         except Exception as e:
-            logger.error(f"❌ Error checking cached permission {permission} for user {telegram_id}: {e}")
+            logger.error(f" Error checking cached permission {permission} for user {telegram_id}: {e}")
             return None
     
     async def invalidate_user_permissions(self, telegram_id: int) -> bool:
@@ -146,12 +148,12 @@ class PermissionsCacheManager:
             deleted = await redis_client.delete(key)
             
             if deleted:
-                logger.info(f"✅ Invalidated permissions cache for user {telegram_id}")
+                logger.info(f" Invalidated permissions cache for user {telegram_id}")
             
             return deleted > 0
             
         except Exception as e:
-            logger.error(f"❌ Error invalidating permissions cache for user {telegram_id}: {e}")
+            logger.error(f" Error invalidating permissions cache for user {telegram_id}: {e}")
             return False
     
     # ============================================================================
@@ -177,11 +179,11 @@ class PermissionsCacheManager:
                 json.dumps(cache_data)
             )
             
-            logger.info(f"✅ Cached {len(user_ids)} upload users")
+            logger.info(f" Cached {len(user_ids)} upload users")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error caching upload users: {e}")
+            logger.error(f" Error caching upload users: {e}")
             return False
     
     async def get_cached_upload_users(self) -> Optional[List[int]]:
@@ -197,15 +199,15 @@ class PermissionsCacheManager:
                 user_ids = data.get('user_ids', [])
                 
                 await self._update_cache_stats('hit')
-                logger.debug(f"✅ Cache hit for upload users: {len(user_ids)} users")
+                logger.debug(f" Cache hit for upload users: {len(user_ids)} users")
                 return user_ids
             else:
                 await self._update_cache_stats('miss')
-                logger.debug("❌ Cache miss for upload users")
+                logger.debug(" Cache miss for upload users")
                 return None
                 
         except Exception as e:
-            logger.error(f"❌ Error getting cached upload users: {e}")
+            logger.error(f" Error getting cached upload users: {e}")
             return None
     
     async def invalidate_upload_users_cache(self) -> bool:
@@ -217,12 +219,12 @@ class PermissionsCacheManager:
             deleted = await redis_client.delete(key)
             
             if deleted:
-                logger.info("✅ Invalidated upload users cache")
+                logger.info(" Invalidated upload users cache")
             
             return deleted > 0
             
         except Exception as e:
-            logger.error(f"❌ Error invalidating upload users cache: {e}")
+            logger.error(f" Error invalidating upload users cache: {e}")
             return False
     
     # ============================================================================
@@ -243,14 +245,14 @@ class PermissionsCacheManager:
             
             if keys:
                 deleted = await redis_client.delete(*keys)
-                logger.info(f"✅ Invalidated {deleted} permission cache entries")
+                logger.info(f" Invalidated {deleted} permission cache entries")
                 return True
             else:
-                logger.info("✅ No permission cache entries to invalidate")
+                logger.info(" No permission cache entries to invalidate")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Error invalidating all permissions cache: {e}")
+            logger.error(f" Error invalidating all permissions cache: {e}")
             return False
     
     async def refresh_user_permissions_cache(self, telegram_id: int, from_db_func) -> Optional[List[str]]:
@@ -270,7 +272,7 @@ class PermissionsCacheManager:
             return []
             
         except Exception as e:
-            logger.error(f"❌ Error refreshing permissions cache for user {telegram_id}: {e}")
+            logger.error(f" Error refreshing permissions cache for user {telegram_id}: {e}")
             return None
     
     # ============================================================================
@@ -289,7 +291,7 @@ class PermissionsCacheManager:
             await redis_client.expire(self.stats_key, 86400)
             
         except Exception as e:
-            logger.error(f"❌ Error updating cache stats: {e}")
+            logger.error(f" Error updating cache stats: {e}")
     
     async def get_cache_statistics(self) -> Dict[str, Any]:
         """Получение статистики кэширования"""
@@ -313,7 +315,7 @@ class PermissionsCacheManager:
             }
             
         except Exception as e:
-            logger.error(f"❌ Error getting cache statistics: {e}")
+            logger.error(f" Error getting cache statistics: {e}")
             return {
                 'hits': 0,
                 'misses': 0,
@@ -335,15 +337,15 @@ class PermissionsCacheManager:
             # Redis автоматически удаляет записи с истекшим TTL
             # Здесь можем добавить дополнительную логику при необходимости
             
-            logger.info("✅ Cache cleanup completed")
+            logger.info(" Cache cleanup completed")
             
         except Exception as e:
-            logger.error(f"❌ Error during cache cleanup: {e}")
+            logger.error(f" Error during cache cleanup: {e}")
     
     async def warm_up_cache(self, user_manager):
         """Предварительное наполнение кэша актуальными данными"""
         try:
-            logger.info("🔥 Starting cache warm-up...")
+            logger.info(" Starting cache warm-up...")
             
             # Получаем всех пользователей с правами загрузки
             upload_users = await user_manager.get_users_with_upload_permission()
@@ -353,15 +355,15 @@ class PermissionsCacheManager:
                 await self.cache_upload_users(upload_users)
                 
                 # Предварительно кэшируем права для активных пользователей
-                for user_id in upload_users[:50]:  # Ограничиваем до 50 пользователей
+                for user_id in upload_users[:50]: # Ограничиваем до 50 пользователей
                     user = await user_manager.get_user_by_telegram_id(user_id)
                     if user and user.permissions:
                         await self.cache_user_permissions(user_id, user.permissions)
             
-            logger.info(f"✅ Cache warm-up completed for {len(upload_users)} users")
+            logger.info(f" Cache warm-up completed for {len(upload_users)} users")
             
         except Exception as e:
-            logger.error(f"❌ Error during cache warm-up: {e}")
+            logger.error(f" Error during cache warm-up: {e}")
 
 
 # Глобальный экземпляр менеджера кэширования

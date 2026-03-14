@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🏗️ Infrastructure Data Models
+Infrastructure Data Models
 Модели данных для инфраструктуры системы.
 
 Включает функциональность:
@@ -21,15 +21,15 @@ from typing import Dict, List, Optional, Any, Union, TypedDict
 
 try:
     from pydantic import BaseModel, Field
-except ImportError as exc:  # pragma: no cover - minimal fallback
+except ImportError as exc: # pragma: no cover - minimal fallback
     import logging
     logging.warning(f"Pydantic unavailable for infrastructure data models: {exc}")
 
-    class BaseModel:  # type: ignore
+    class BaseModel: # type: ignore
         def __init__(self, **_kwargs: Any) -> None:
             pass
 
-    def Field(default: Any = None, **_kwargs: Any) -> Any:  # type: ignore
+    def Field(default: Any = None, **_kwargs: Any) -> Any: # type: ignore
         return default
 
 

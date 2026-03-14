@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🏗️ Core Infrastructure Suite (Compatibility Wrapper)
+Core Infrastructure Suite (Compatibility Wrapper)
 Обратная совместимость для модулярной архитектуры Core Infrastructure Suite.
 
 УСТАРЕЛ: Этот файл является wrapper для новых модулей:
@@ -151,8 +151,8 @@ __all__ = [
 ]
 
 # Compatibility notice for developers
-logger.info("📦 Loading modular Infrastructure Suite architecture (compatibility wrapper)")
-logger.debug(f"✅ Imported {len(__all__)} components from modular Infrastructure suite")
+logger.info(" Loading modular Infrastructure Suite architecture (compatibility wrapper)")
+logger.debug(f" Imported {len(__all__)} components from modular Infrastructure suite")
 
 # Architecture transition guide for developers
 def _show_migration_guide():
@@ -176,9 +176,9 @@ def _show_migration_guide():
         }
     }
 
-    logger.debug("🔄 Infrastructure Suite Architecture Migration Guide:")
+    logger.debug(" Infrastructure Suite Architecture Migration Guide:")
     for operation, examples in migration_examples.items():
-        logger.debug(f"  {operation}: {examples['old']} → {examples['new']}")
+        logger.debug(f" {operation}: {examples['old']} {examples['new']}")
 
 # Show migration guide in debug mode
 if logger.isEnabledFor(logging.DEBUG):
@@ -193,45 +193,45 @@ migrations = get_migrations()
 
 # Developer migration notes
 """
-📋 MIGRATION GUIDE: From Monolithic to Modular Architecture
+MIGRATION GUIDE: From Monolithic to Modular Architecture
 
-🗂️ Old Structure (v1.0):
-   └── core/infrastructure_suite.py (915 lines)
-       ├── CoreApplication class
-       ├── SystemUtilities class
-       ├── DatabaseMigrations class
-       ├── All data models and enums
-       └── Convenience functions
+Old Structure (v1.0):
+   core/infrastructure_suite.py (915 lines)
+       CoreApplication class
+       SystemUtilities class
+       DatabaseMigrations class
+       All data models and enums
+       Convenience functions
 
-🎯 New Structure (v2.0):
-   ├── core/infrastructure_core.py (~320 lines)
-   │   ├── CoreApplication class
-   │   ├── Document processing for database
-   │   ├── System compliance verification
-   │   └── Application lifecycle management
-   │
-   ├── core/infrastructure_models.py (~330 lines)
-   │   ├── DocumentType, ProcessingStatus enums
-   │   ├── Pydantic models for validation
-   │   ├── Dataclass models for documents
-   │   └── LangGraph workflow states
-   │
-   ├── core/infrastructure_utilities.py (~280 lines)
-   │   ├── SystemUtilities class
-   │   ├── PDF text extraction
-   │   ├── File validation and hashing
-   │   └── LLM client management
-   │
-   ├── core/infrastructure_database.py (~280 lines)
-   │   ├── DatabaseMigrations class
-   │   ├── Table schema definitions
-   │   ├── Migration management
-   │   └── Database verification
-   │
-   └── core/infrastructure_suite.py (~150 lines, this file)
-       └── Compatibility wrapper
+New Structure (v2.0):
+   core/infrastructure_core.py (~320 lines)
+   CoreApplication class
+   Document processing for database
+   System compliance verification
+   Application lifecycle management
+   
+   core/infrastructure_models.py (~330 lines)
+   DocumentType, ProcessingStatus enums
+   Pydantic models for validation
+   Dataclass models for documents
+   LangGraph workflow states
+   
+   core/infrastructure_utilities.py (~280 lines)
+   SystemUtilities class
+   PDF text extraction
+   File validation and hashing
+   LLM client management
+   
+   core/infrastructure_database.py (~280 lines)
+   DatabaseMigrations class
+   Table schema definitions
+   Migration management
+   Database verification
+   
+   core/infrastructure_suite.py (~150 lines, this file)
+       Compatibility wrapper
 
-🔄 Migration Steps:
+Migration Steps:
 1. Replace imports:
    OLD: from core.infrastructure_suite import CoreApplication
    NEW: from core.infrastructure_core import CoreApplication
@@ -244,18 +244,18 @@ migrations = get_migrations()
    OLD: from core.infrastructure_suite import Document, DocumentType
    NEW: from core.infrastructure_models import Document, DocumentType
 
-📈 Benefits:
-- 84% code reduction per file (915 → ~150-330 lines each)
+Benefits:
+- 84% code reduction per file (915 ~150-330 lines each)
 - Clear separation of concerns
 - Improved testability
 - Better maintainability
 - Enhanced code organization
 - CRITICAL: Emphasis on database-only document processing (complex_task.txt requirement)
 
-⚠️ Breaking Changes: None
+Breaking Changes: None
 This wrapper maintains 100% backward compatibility.
 
-🚨 ВАЖНОЕ ТРЕБОВАНИЕ из complex_task.txt:
+ВАЖНОЕ ТРЕБОВАНИЕ из complex_task.txt:
 Система должна использовать ТОЛЬКО документы из БД, а НЕ собственные знания модели!
 Все компоненты подчеркивают это требование через логирование и метаданные.
 """
@@ -269,23 +269,23 @@ if __name__ == "__main__":
 
     async def test_modular_infrastructure():
         """Тестирование модульной инфраструктуры."""
-        logger.info("🧪 Тестирование модульной Infrastructure Suite...")
+        logger.info(" Тестирование модульной Infrastructure Suite...")
 
         try:
             # Создание системы
             app = await initialize_core_system()
             status = app.get_status()
 
-            logger.info(f"✅ Система инициализирована: {status['initialized']}")
-            logger.info(f"🔧 Компонентов: {len(status['components'])}")
-            logger.info(f"⚙️ Настройки: Debug={status['settings']['debug']}")
+            logger.info(f" Система инициализирована: {status['initialized']}")
+            logger.info(f" Компонентов: {len(status['components'])}")
+            logger.info(f" Настройки: Debug={status['settings']['debug']}")
 
             # Проверка соответствия требованиям
             compliance = await verify_system_compliance()
-            logger.info(f"📋 Соответствие БД требованиям: {compliance['database_documents_only']}")
-            logger.info("✨ Модульная инфраструктура работает корректно!")
+            logger.info(f" Соответствие БД требованиям: {compliance['database_documents_only']}")
+            logger.info(" Модульная инфраструктура работает корректно!")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка тестирования: {e}")
+            logger.error(f" Ошибка тестирования: {e}")
 
     asyncio.run(test_modular_infrastructure())

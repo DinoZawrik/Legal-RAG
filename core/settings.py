@@ -157,10 +157,10 @@ class Settings(BaseSettings):
 
     REGULATORY_DOCS_DIR: Path = Field(None, env="REGULATORY_DOCS_DIR")
 
-    SUMMARY_MODEL_NAME: str = Field("gemini-2.5-flash", env="SUMMARY_MODEL_NAME")
-    QA_MODEL_NAME: str = Field("gemini-2.5-flash", env="QA_MODEL_NAME")
-    EXTRACTOR_MODEL_NAME: str = Field("gemini-2.5-flash", env="EXTRACTOR_MODEL_NAME")
-    AGENT_MODEL_NAME: str = Field("gemini-2.5-flash", env="AGENT_MODEL_NAME")
+    SUMMARY_MODEL_NAME: str = Field("gemini-3-flash-preview", env="SUMMARY_MODEL_NAME")
+    QA_MODEL_NAME: str = Field("gemini-3-flash-preview", env="QA_MODEL_NAME")
+    EXTRACTOR_MODEL_NAME: str = Field("gemini-3-flash-preview", env="EXTRACTOR_MODEL_NAME")
+    AGENT_MODEL_NAME: str = Field("gemini-3-flash-preview", env="AGENT_MODEL_NAME")
 
     google_api_key_agent: Optional[SecretStr] = Field(None, env="GOOGLE_API_KEY")
     redis_host: str = Field("localhost", env="REDIS_HOST")
@@ -198,11 +198,14 @@ class SimpleSettings:
         self.POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
         self.POSTGRES_DB = os.getenv("POSTGRES_DB", "legal_rag_db")
         self.POSTGRES_USER = os.getenv("POSTGRES_USER", "legal_rag_user")
-        self.POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "change_me_in_env")
+        self.POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
+        if not self.POSTGRES_PASSWORD:
+            logging.warning("POSTGRES_PASSWORD is not set — database connections may fail")
 
         self.REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
         self.REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
         self.REDIS_DB = int(os.getenv("REDIS_DB", "0"))
+        self.REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 
         self.CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
         self.CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
@@ -216,10 +219,10 @@ class SimpleSettings:
 
         self.EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "models/text-embedding-004")
         self.EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "models/text-embedding-004")
-        self.AGENT_MODEL_NAME = os.getenv("AGENT_MODEL_NAME", "gemini-1.5-flash")
-        self.EXTRACTION_MODEL_NAME = os.getenv("EXTRACTION_MODEL_NAME", "gemini-1.5-flash")
-        self.SUMMARY_MODEL_NAME = os.getenv("SUMMARY_MODEL_NAME", "gemini-1.5-flash")
-        self.QA_MODEL_NAME = os.getenv("QA_MODEL_NAME", "gemini-1.5-flash")
+        self.AGENT_MODEL_NAME = os.getenv("AGENT_MODEL_NAME", "gemini-3-flash-preview")
+        self.EXTRACTION_MODEL_NAME = os.getenv("EXTRACTION_MODEL_NAME", "gemini-3-flash-preview")
+        self.SUMMARY_MODEL_NAME = os.getenv("SUMMARY_MODEL_NAME", "gemini-3-flash-preview")
+        self.QA_MODEL_NAME = os.getenv("QA_MODEL_NAME", "gemini-3-flash-preview")
 
         self.DEBUG = os.getenv("DEBUG", "false").lower() == "true"
         self.LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
@@ -241,7 +244,9 @@ class SimpleSettings:
         self.NEO4J_HOST = os.getenv("NEO4J_HOST", "localhost")
         self.NEO4J_PORT = int(os.getenv("NEO4J_PORT", "7687"))
         self.NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-        self.NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "change_me_in_env")
+        self.NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "")
+        if not self.NEO4J_PASSWORD:
+            logging.warning("NEO4J_PASSWORD is not set — graph database connections may fail")
 
     @staticmethod
     def _parse_int_list(value: str) -> List[int]:

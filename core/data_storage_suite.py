@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📦 Storage Suite Compatibility Layer
+Storage Suite Compatibility Layer
 
 Этот модуль сохраняет обратную совместимость для старых импортов,
 перенаправляя их на новый `StorageCoordinator`.
@@ -89,8 +89,8 @@ def get_redis_client():
         if not manager.sync_client:
             raise RuntimeError("RedisManager не инициализирован")
         return manager.sync_client
-    except Exception as exc:  # pragma: no cover - окружение может отсутствовать
-        logger.error("❌ Ошибка создания Redis клиента: %s", exc)
+    except Exception as exc: # pragma: no cover - окружение может отсутствовать
+        logger.error(" Ошибка создания Redis клиента: %s", exc)
         return None
 
 
@@ -106,7 +106,7 @@ async def update_task_status(task_id: str, status: str, message: str = "", progr
 
         return await redis_manager.update_task_status(task_id, status, message, progress)
     except Exception as exc:
-        logger.error("❌ Ошибка обновления статуса задачи %s: %s", task_id, exc)
+        logger.error(" Ошибка обновления статуса задачи %s: %s", task_id, exc)
         return False
 
 

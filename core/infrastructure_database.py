@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🗄️ Infrastructure Database Management
+Infrastructure Database Management
 Управление базой данных и миграциями для инфраструктуры.
 
 Включает функциональность:
@@ -24,22 +24,22 @@ logger = logging.getLogger(__name__)
 try:
     from sqlalchemy import Column, String, DateTime, Text, Integer, MetaData, Table
     SQLALCHEMY_AVAILABLE = True
-except ImportError:  # pragma: no cover - optional dependency
+except ImportError: # pragma: no cover - optional dependency
     SQLALCHEMY_AVAILABLE = False
 
-    class MetaData:  # type: ignore
+    class MetaData: # type: ignore
         def __init__(self) -> None:
             self.tables = {}
 
-    class Table:  # type: ignore
+    class Table: # type: ignore
         def __init__(self, *_args: Any, **_kwargs: Any) -> None:
             pass
 
-    class Column:  # type: ignore
+    class Column: # type: ignore
         def __init__(self, *_args: Any, **_kwargs: Any) -> None:
             pass
 
-    String = Text = Integer = DateTime = None  # type: ignore
+    String = Text = Integer = DateTime = None # type: ignore
 
 
 class DatabaseMigrations:
@@ -55,7 +55,7 @@ class DatabaseMigrations:
             from sqlalchemy import MetaData
             self.metadata = MetaData()
             self._setup_tables()
-            logger.info("🗄️ DatabaseMigrations инициализирован для БД документов")
+            logger.info(" DatabaseMigrations инициализирован для БД документов")
         except ImportError:
             # Если SQLAlchemy недоступен, создаем заглушку
             self.metadata = None
@@ -83,7 +83,7 @@ class DatabaseMigrations:
                 Column('processing_status', String),
                 Column('created_at', DateTime),
                 Column('processed_at', DateTime),
-                Column('metadata', Text),  # JSON metadata for documents
+                Column('metadata', Text), # JSON metadata for documents
                 extend_existing=True
             )
 
@@ -96,7 +96,7 @@ class DatabaseMigrations:
                 Column('chunk_index', Integer),
                 Column('text', Text),
                 Column('chunk_type', String),
-                Column('metadata', Text),  # JSON metadata for chunks
+                Column('metadata', Text), # JSON metadata for chunks
                 Column('created_at', DateTime),
                 extend_existing=True
             )
@@ -113,7 +113,7 @@ class DatabaseMigrations:
                 Column('issuing_authority', String),
                 Column('summary', Text),
                 Column('scope', Text),
-                Column('extracted_data', Text),  # JSON extracted legal data
+                Column('extracted_data', Text), # JSON extracted legal data
                 Column('created_at', DateTime),
                 extend_existing=True
             )
@@ -130,7 +130,7 @@ class DatabaseMigrations:
                 Column('completed_at', DateTime),
                 Column('progress', Integer),
                 Column('message', Text),
-                Column('result', Text),  # JSON processing results
+                Column('result', Text), # JSON processing results
                 Column('error', Text),
                 extend_existing=True
             )
@@ -148,7 +148,7 @@ class DatabaseMigrations:
                 extend_existing=True
             )
 
-            logger.info("📋 Схема таблиц БД для документов определена")
+            logger.info(" Схема таблиц БД для документов определена")
 
         except ImportError:
             # Если SQLAlchemy недоступен, пропускаем создание таблиц
@@ -163,17 +163,17 @@ class DatabaseMigrations:
         """
         try:
             if not self.metadata:
-                logger.error("❌ Metadata не инициализирован, невозможно создать таблицы")
+                logger.error(" Metadata не инициализирован, невозможно создать таблицы")
                 return
 
             async with engine.begin() as conn:
                 await conn.run_sync(self.metadata.create_all)
 
-            logger.info("✅ Таблицы базы данных созданы для хранения документов")
-            logger.info("📊 Система готова использовать документы БД для ответов")
+            logger.info(" Таблицы базы данных созданы для хранения документов")
+            logger.info(" Система готова использовать документы БД для ответов")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка создания таблиц БД: {e}")
+            logger.error(f" Ошибка создания таблиц БД: {e}")
             raise
 
     async def drop_tables(self, engine):
@@ -184,16 +184,16 @@ class DatabaseMigrations:
         """
         try:
             if not self.metadata:
-                logger.error("❌ Metadata не инициализирован, невозможно удалить таблицы")
+                logger.error(" Metadata не инициализирован, невозможно удалить таблицы")
                 return
 
             async with engine.begin() as conn:
                 await conn.run_sync(self.metadata.drop_all)
 
-            logger.warning("🗑️ Таблицы базы данных удалены (включая все документы)")
+            logger.warning(" Таблицы базы данных удалены (включая все документы)")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка удаления таблиц БД: {e}")
+            logger.error(f" Ошибка удаления таблиц БД: {e}")
             raise
 
     async def verify_tables(self, engine):
@@ -204,7 +204,7 @@ class DatabaseMigrations:
         """
         try:
             if not self.metadata:
-                logger.error("❌ Metadata не инициализирован")
+                logger.error(" Metadata не инициализирован")
                 return False
 
             async with engine.begin() as conn:
@@ -220,15 +220,15 @@ class DatabaseMigrations:
                         existing_tables.append(table_name)
 
                 if len(existing_tables) == len(required_tables):
-                    logger.info("✅ Все необходимые таблицы БД существуют")
+                    logger.info(" Все необходимые таблицы БД существуют")
                     return True
                 else:
                     missing_tables = set(required_tables) - set(existing_tables)
-                    logger.warning(f"❌ Отсутствуют таблицы БД: {missing_tables}")
+                    logger.warning(f" Отсутствуют таблицы БД: {missing_tables}")
                     return False
 
         except Exception as e:
-            logger.error(f"❌ Ошибка проверки таблиц БД: {e}")
+            logger.error(f" Ошибка проверки таблиц БД: {e}")
             return False
 
     def get_migration_info(self) -> Dict[str, Any]:
@@ -309,10 +309,10 @@ class DatabaseMigrations:
                          entry['description'], entry['created_at'], entry['updated_at'])
                     )
 
-            logger.info("✅ Системные метаданные БД инициализированы")
+            logger.info(" Системные метаданные БД инициализированы")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации метаданных БД: {e}")
+            logger.error(f" Ошибка инициализации метаданных БД: {e}")
 
     def get_table_schemas(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -374,7 +374,7 @@ async def setup_database_schema(engine):
     await migrations.create_tables(engine)
     await migrations.initialize_system_metadata(engine)
 
-    logger.info("🗄️ Схема БД настроена для работы с документами согласно complex_task.txt")
+    logger.info(" Схема БД настроена для работы с документами согласно complex_task.txt")
 
 
 async def verify_database_requirements(engine) -> bool:
@@ -387,8 +387,8 @@ async def verify_database_requirements(engine) -> bool:
     tables_exist = await migrations.verify_tables(engine)
 
     if tables_exist:
-        logger.info("✅ БД соответствует требованиям complex_task.txt")
+        logger.info(" БД соответствует требованиям complex_task.txt")
         return True
     else:
-        logger.error("❌ БД НЕ соответствует требованиям complex_task.txt")
+        logger.error(" БД НЕ соответствует требованиям complex_task.txt")
         return False

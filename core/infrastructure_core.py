@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🚀 Infrastructure Core Application
+Infrastructure Core Application
 Основное приложение и координация инфраструктуры.
 
 Включает функциональность:
@@ -46,7 +46,7 @@ class CoreApplication:
         self.initialized = False
         self.components = {}
 
-        logger.info("🚀 CoreApplication инициализируется для работы с документами БД")
+        logger.info(" CoreApplication инициализируется для работы с документами БД")
 
     async def initialize(self):
         """
@@ -58,7 +58,7 @@ class CoreApplication:
         try:
             # Настройка логирования
             self.utilities.setup_logging()
-            logger.info("📝 Логирование настроено для отслеживания работы с БД")
+            logger.info(" Логирование настроено для отслеживания работы с БД")
 
             # Проверка необходимых директорий
             self._ensure_directories()
@@ -70,10 +70,10 @@ class CoreApplication:
             await self._initialize_components()
 
             self.initialized = True
-            logger.info("✅ Core Application инициализировано для работы с документами БД")
+            logger.info(" Core Application инициализировано для работы с документами БД")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации Core Application: {e}")
+            logger.error(f" Ошибка инициализации Core Application: {e}")
             raise
 
     def _ensure_directories(self):
@@ -85,7 +85,7 @@ class CoreApplication:
         # Директории теперь создаются автоматически при инициализации
         # объекта Settings благодаря валидаторам Pydantic.
         # Этот метод оставлен для обратной совместимости или будущих нужд.
-        logger.info("📁 Проверка директорий завершена (управляется валидаторами Settings)")
+        logger.info(" Проверка директорий завершена (управляется валидаторами Settings)")
 
     def _verify_system_requirements(self):
         """
@@ -95,12 +95,12 @@ class CoreApplication:
         для использования ТОЛЬКО документов БД
         """
         requirements_status = {
-            "database_documents_only": True,  # Система должна использовать только документы БД
-            "gemini_model": "gemini-2.5-flash",  # Модель из complex_task.txt
-            "docker_ready": True,  # Должно работать в Docker
-            "graph_rag_support": False,  # Graph RAG поддержка
-            "self_rag_support": False,  # Self-RAG поддержка
-            "irac_system": False  # IRAC система
+            "database_documents_only": True, # Система должна использовать только документы БД
+            "gemini_model": "gemini-2.5-flash", # Модель из complex_task.txt
+            "docker_ready": True, # Должно работать в Docker
+            "graph_rag_support": False, # Graph RAG поддержка
+            "self_rag_support": False, # Self-RAG поддержка
+            "irac_system": False # IRAC система
         }
 
         # Проверка модели
@@ -108,23 +108,23 @@ class CoreApplication:
             llm_client = self.utilities.get_llm_client("gemini-2.5-flash")
             if llm_client:
                 requirements_status["gemini_model_available"] = True
-                logger.info("✅ Gemini 2.5 Flash доступен для анализа документов БД")
+                logger.info(" Gemini 2.5 Flash доступен для анализа документов БД")
             else:
                 requirements_status["gemini_model_available"] = False
-                logger.warning("⚠️ Gemini 2.5 Flash недоступен")
+                logger.warning(" Gemini 2.5 Flash недоступен")
         except Exception as e:
             requirements_status["gemini_model_error"] = str(e)
-            logger.error(f"❌ Ошибка проверки Gemini 2.5 Flash: {e}")
+            logger.error(f" Ошибка проверки Gemini 2.5 Flash: {e}")
 
         # Сохраняем статус требований
         self.components["requirements_status"] = requirements_status
 
         # Логируем критические требования
-        logger.info("🎯 Проверка требований complex_task.txt:")
-        logger.info("   ✅ Система использует ТОЛЬКО документы БД")
-        logger.info("   ✅ Модель: Gemini 2.5 Flash для анализа БД")
-        logger.info("   ✅ Развертывание: Docker")
-        logger.info("   ⏳ Graph RAG, Self-RAG, IRAC: в разработке")
+        logger.info(" Проверка требований complex_task.txt:")
+        logger.info(" Система использует ТОЛЬКО документы БД")
+        logger.info(" Модель: Gemini 2.5 Flash для анализа БД")
+        logger.info(" Развертывание: Docker")
+        logger.info(" Graph RAG, Self-RAG, IRAC: в разработке")
 
     async def _initialize_components(self):
         """Инициализация компонентов системы."""
@@ -133,7 +133,7 @@ class CoreApplication:
             migration_info = self.migrations.get_migration_info()
             self.components["database_migrations"] = self.migrations
 
-            logger.info(f"🗄️ Миграции БД: {migration_info['status']}")
+            logger.info(f" Миграции БД: {migration_info['status']}")
 
             # Инициализация системных утилит
             self.components["system_utilities"] = self.utilities
@@ -146,10 +146,10 @@ class CoreApplication:
                 "database_operations": 0
             }
 
-            logger.info("🔧 Компоненты системы инициализированы")
+            logger.info(" Компоненты системы инициализированы")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации компонентов: {e}")
+            logger.error(f" Ошибка инициализации компонентов: {e}")
             raise
 
     def register_component(self, name: str, component: Any):
@@ -159,7 +159,7 @@ class CoreApplication:
         ВАЖНО: Регистрирует компоненты для работы с документами БД
         """
         self.components[name] = component
-        logger.info(f"🔧 Компонент {name} зарегистрирован для работы с БД")
+        logger.info(f" Компонент {name} зарегистрирован для работы с БД")
 
     def get_component(self, name: str) -> Any:
         """Получение компонента системы."""
@@ -197,12 +197,12 @@ class CoreApplication:
         будет использовать для ответов (требование complex_task.txt)
         """
         try:
-            logger.info(f"📄 Начинаем обработку документа для БД: {Path(file_path).name}")
+            logger.info(f" Начинаем обработку документа для БД: {Path(file_path).name}")
 
             # Валидация документа
             validation_result = self.utilities.validate_document_for_db(file_path)
             if not validation_result["valid"]:
-                logger.error(f"❌ Документ не прошел валидацию: {validation_result['errors']}")
+                logger.error(f" Документ не прошел валидацию: {validation_result['errors']}")
                 return {
                     "success": False,
                     "error": "Документ не прошел валидацию",
@@ -235,7 +235,7 @@ class CoreApplication:
                 self.components["system_stats"]["documents_processed"] += 1
                 self.components["system_stats"]["database_operations"] += 1
 
-            logger.info(f"✅ Документ обработан для БД: {document.file_name}")
+            logger.info(f" Документ обработан для БД: {document.file_name}")
 
             return {
                 "success": True,
@@ -247,7 +247,7 @@ class CoreApplication:
             }
 
         except Exception as e:
-            logger.error(f"❌ Ошибка обработки документа для БД: {e}")
+            logger.error(f" Ошибка обработки документа для БД: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -264,21 +264,21 @@ class CoreApplication:
             # Логирование финальной статистики
             if "system_stats" in self.components:
                 stats = self.components["system_stats"]
-                logger.info(f"📊 Финальная статистика:")
-                logger.info(f"   - Документов обработано: {stats['documents_processed']}")
-                logger.info(f"   - Операций с БД: {stats['database_operations']}")
+                logger.info(f" Финальная статистика:")
+                logger.info(f" - Документов обработано: {stats['documents_processed']}")
+                logger.info(f" - Операций с БД: {stats['database_operations']}")
 
             # Закрытие компонентов
             for name, component in self.components.items():
                 if hasattr(component, 'close'):
                     await component.close()
-                    logger.info(f"🔒 Компонент {name} закрыт")
+                    logger.info(f" Компонент {name} закрыт")
 
             self.initialized = False
-            logger.info("✅ Core Application корректно завершено с сохранением БД")
+            logger.info(" Core Application корректно завершено с сохранением БД")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка завершения Core Application: {e}")
+            logger.error(f" Ошибка завершения Core Application: {e}")
 
 
 # ==================== GLOBAL INSTANCES ====================
@@ -327,7 +327,7 @@ async def initialize_core_system():
     согласно требованиям complex_task.txt
     """
     await core_app.initialize()
-    logger.info("🚀 Основная система инициализирована для работы с документами БД")
+    logger.info(" Основная система инициализирована для работы с документами БД")
     return core_app
 
 
@@ -358,7 +358,7 @@ def create_document(file_path: str, document_type: DocumentType = DocumentType.G
         "usage_purpose": "System responses based on database content"
     })
 
-    logger.debug(f"📄 Создан документ для БД: {document.file_name}")
+    logger.debug(f" Создан документ для БД: {document.file_name}")
     return document
 
 
@@ -374,7 +374,7 @@ def create_processing_task(task_type: str) -> ProcessingTask:
         status=ProcessingStatus.PENDING
     )
 
-    logger.debug(f"⚙️ Создана задача обработки БД: {task_type}")
+    logger.debug(f" Создана задача обработки БД: {task_type}")
     return task
 
 
@@ -405,7 +405,7 @@ def create_contextual_chunk_for_database(
         "created_at": datetime.now().isoformat()
     })
 
-    logger.debug(f"🧩 Создан контекстный чанк для БД: слайд {slide_number}")
+    logger.debug(f" Создан контекстный чанк для БД: слайд {slide_number}")
     return chunk
 
 
@@ -420,14 +420,14 @@ async def verify_system_compliance() -> Dict[str, Any]:
     compliance_check = {
         "database_documents_only": True,
         "gemini_2_5_flash": "gemini-2.5-flash" in str(utilities.get_llm_client()),
-        "docker_deployment": True,  # Предполагаем готовность к Docker
-        "graph_rag_available": False,  # Требует дальнейшей разработки
-        "self_rag_available": False,  # Требует дальнейшей разработки
-        "irac_system_available": False,  # Требует дальнейшей разработки
+        "docker_deployment": True, # Предполагаем готовность к Docker
+        "graph_rag_available": False, # Требует дальнейшей разработки
+        "self_rag_available": False, # Требует дальнейшей разработки
+        "irac_system_available": False, # Требует дальнейшей разработки
         "overall_compliance": True,
         "requirements_source": "complex_task.txt",
         "critical_requirement": "System MUST use ONLY database documents, NOT model knowledge"
     }
 
-    logger.info("✅ Система соответствует критическим требованиям complex_task.txt")
+    logger.info(" Система соответствует критическим требованиям complex_task.txt")
     return compliance_check

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔧 Infrastructure System Utilities
+Infrastructure System Utilities
 Системные утилиты для инфраструктуры.
 
 Включает функциональность:
@@ -73,7 +73,7 @@ class SystemUtilities:
             if not api_key:
                 logger.warning("Google API ключ не найден. LLM клиент может не работать.")
 
-            logger.info(f"🤖 Инициализация {model_name} для анализа документов БД")
+            logger.info(f" Инициализация {model_name} для анализа документов БД")
             return ChatGoogleGenerativeAI(
                 model=model_name,
                 google_api_key=api_key,
@@ -108,10 +108,10 @@ class SystemUtilities:
         УЛУЧШЕНИЕ: Добавлена нормализация текста для удаления переносов в терминах
         """
         try:
-            import fitz  # PyMuPDF
+            import fitz # PyMuPDF
             from core.text_normalization import normalize_legal_text
 
-            logger.info(f"📄 Начинаем извлечение текста из PDF для загрузки в БД: {file_path}")
+            logger.info(f" Начинаем извлечение текста из PDF для загрузки в БД: {file_path}")
 
             # Простое и надежное открытие файла как в v1.0
             doc = fitz.open(file_path)
@@ -123,28 +123,28 @@ class SystemUtilities:
                 raw_text = page.get_text()
 
                 # КРИТИЧНО: Нормализуем текст для удаления переносов в юридических терминах
-                # Решает проблему: "плата \nконцедента" → "плата концедента"
+                # Решает проблему: "плата \nконцедента" "плата концедента"
                 normalized_text = normalize_legal_text(raw_text)
 
                 # Получаем дополнительную информацию о странице
                 page_info = {
                     "page_number": page_num + 1,
                     "total_pages": total_pages,
-                    "text": normalized_text,  # ИСПОЛЬЗУЕМ НОРМАЛИЗОВАННЫЙ ТЕКСТ
+                    "text": normalized_text, # ИСПОЛЬЗУЕМ НОРМАЛИЗОВАННЫЙ ТЕКСТ
                     "text_length": len(normalized_text.strip()),
                     "has_content": bool(normalized_text.strip()),
                     "metadata": {
                         "page_size": page.rect,
                         "rotation": page.rotation,
                         "mediabox": page.mediabox,
-                        "source": "database_document",  # Указываем что это для БД
-                        "text_normalized": True  # Флаг что текст нормализован
+                        "source": "database_document", # Указываем что это для БД
+                        "text_normalized": True # Флаг что текст нормализован
                     }
                 }
                 pages.append(page_info)
 
             doc.close()
-            logger.info(f"📄 Извлечено и нормализовано {total_pages} страниц из {Path(file_path).name} для БД")
+            logger.info(f" Извлечено и нормализовано {total_pages} страниц из {Path(file_path).name} для БД")
             return pages
 
         except ImportError:
@@ -173,7 +173,7 @@ class SystemUtilities:
         """
         try:
             file_size = os.path.getsize(file_path)
-            max_size = SETTINGS.MAX_FILE_SIZE_MB * 1024 * 1024  # Конвертация в байты
+            max_size = SETTINGS.MAX_FILE_SIZE_MB * 1024 * 1024 # Конвертация в байты
             return file_size <= max_size
         except Exception:
             return False
@@ -216,7 +216,7 @@ class SystemUtilities:
                 ]
             )
 
-        logger.info(f"📝 Логирование настроено на уровень {log_level}")
+        logger.info(f" Логирование настроено на уровень {log_level}")
 
     @staticmethod
     def get_system_info() -> Dict[str, Any]:
@@ -297,9 +297,9 @@ class SystemUtilities:
             validation_result["valid"] = len(validation_result["errors"]) == 0
 
             if validation_result["valid"]:
-                logger.info(f"✅ Файл {Path(file_path).name} готов для загрузки в БД")
+                logger.info(f" Файл {Path(file_path).name} готов для загрузки в БД")
             else:
-                logger.warning(f"❌ Файл {Path(file_path).name} не прошел валидацию для БД")
+                logger.warning(f" Файл {Path(file_path).name} не прошел валидацию для БД")
 
         except Exception as e:
             validation_result["errors"].append(f"Ошибка валидации: {str(e)}")
@@ -357,7 +357,7 @@ class SystemUtilities:
                 except Exception as e:
                     metadata["pdf_extraction_error"] = str(e)
 
-            logger.debug(f"📋 Извлечены метаданные для БД: {file_path_obj.name}")
+            logger.debug(f" Извлечены метаданные для БД: {file_path_obj.name}")
 
         except Exception as e:
             metadata["extraction_error"] = str(e)
@@ -395,9 +395,9 @@ def extract_pdf_content_for_database(file_path: str) -> str:
     content = utilities.extract_text_from_pdf(file_path)
 
     if content:
-        logger.info(f"📄 Извлечено {len(content)} символов из PDF для БД")
+        logger.info(f" Извлечено {len(content)} символов из PDF для БД")
     else:
-        logger.warning(f"❌ Не удалось извлечь содержимое из PDF: {file_path}")
+        logger.warning(f" Не удалось извлечь содержимое из PDF: {file_path}")
 
     return content
 

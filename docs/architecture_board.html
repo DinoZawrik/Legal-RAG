@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legal-RAG — Architecture Board</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --card: #0f3460;
+    --accent: #e94560;
+    --accent2: #533483;
+    --green: #00b894;
+    --blue: #0984e3;
+    --yellow: #fdcb6e;
+    --orange: #e17055;
+    --text: #dfe6e9;
+    --text-dim: #b2bec3;
+    --line: #636e7260;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Top bar */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 24px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .topbar h1 {
+    font-size: 18px; font-weight: 600;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .topbar .nav-btn {
+    background: var(--card); border: 1px solid var(--line);
+    color: var(--text); padding: 6px 16px; border-radius: 6px;
+    cursor: pointer; font-size: 13px; transition: all 0.2s;
+  }
+  .topbar .nav-btn:hover, .topbar .nav-btn.active {
+    background: var(--accent); border-color: var(--accent);
+  }
+  .topbar .zoom-info {
+    margin-left: auto; font-size: 12px; color: var(--text-dim);
+  }
+
+  /* Canvas */
+  .canvas-wrap {
+    position: fixed; top: 48px; left: 0; right: 0; bottom: 0;
+    overflow: hidden; cursor: grab;
+  }
+  .canvas-wrap:active { cursor: grabbing; }
+  .canvas {
+    position: absolute;
+    transform-origin: 0 0;
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Slides */
+  .slide { display: none; }
+  .slide.active { display: block; }
+
+  /* Card styles */
+  .card {
+    position: absolute;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 200px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: default;
+  }
+  .card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    border-color: var(--accent);
+    z-index: 10;
+  }
+  .card h3 {
+    font-size: 14px; font-weight: 700;
+    margin-bottom: 6px; letter-spacing: 0.5px;
+  }
+  .card p, .card li {
+    font-size: 12px; color: var(--text-dim); line-height: 1.5;
+  }
+  .card ul { padding-left: 14px; }
+  .card .badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 4px; font-size: 10px; font-weight: 700;
+    margin-right: 4px; margin-bottom: 4px;
+  }
+
+  /* Color variants */
+  .card.red    { border-color: var(--accent); }
+  .card.red h3 { color: var(--accent); }
+  .card.green  { border-color: var(--green); }
+  .card.green h3 { color: var(--green); }
+  .card.blue   { border-color: var(--blue); }
+  .card.blue h3 { color: var(--blue); }
+  .card.yellow { border-color: var(--yellow); }
+  .card.yellow h3 { color: var(--yellow); }
+  .card.orange { border-color: var(--orange); }
+  .card.orange h3 { color: var(--orange); }
+  .card.purple { border-color: var(--accent2); }
+  .card.purple h3 { color: #a29bfe; }
+
+  .badge.bg-red    { background: var(--accent); color: #fff; }
+  .badge.bg-green  { background: var(--green); color: #fff; }
+  .badge.bg-blue   { background: var(--blue); color: #fff; }
+  .badge.bg-yellow { background: var(--yellow); color: #222; }
+  .badge.bg-orange { background: var(--orange); color: #fff; }
+  .badge.bg-purple { background: var(--accent2); color: #fff; }
+
+  /* SVG arrows */
+  svg.arrows {
+    position: absolute; top: 0; left: 0;
+    width: 3000px; height: 2000px;
+    pointer-events: none;
+  }
+  svg.arrows line, svg.arrows path {
+    stroke: var(--text-dim); stroke-width: 2;
+    fill: none; opacity: 0.4;
+    marker-end: url(#arrowhead);
+  }
+  svg.arrows .highlight { stroke: var(--accent); opacity: 0.7; stroke-width: 2.5; }
+
+  /* Section labels */
+  .section-label {
+    position: absolute;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px;
+    color: var(--text-dim); opacity: 0.5;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 4px;
+  }
+
+  /* Metric box */
+  .metric {
+    position: absolute;
+    background: linear-gradient(135deg, var(--card), var(--surface));
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 140px;
+  }
+  .metric .value {
+    font-size: 28px; font-weight: 800;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .metric .label {
+    font-size: 11px; color: var(--text-dim); margin-top: 2px;
+  }
+
+  /* Animated pulse for active nodes */
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(233,69,96,0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(233,69,96,0); }
+  }
+  .card.pulse { animation: pulse 2s infinite; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>⚖️ Legal-RAG Architecture Board</h1>
+  <button class="nav-btn active" onclick="showSlide(0)">1. Обзор</button>
+  <button class="nav-btn" onclick="showSlide(1)">2. Микросервисы</button>
+  <button class="nav-btn" onclick="showSlide(2)">3. RAG Pipeline</button>
+  <button class="nav-btn" onclick="showSlide(3)">4. Данные</button>
+  <button class="nav-btn" onclick="showSlide(4)">5. Метрики</button>
+  <span class="zoom-info">Scroll = зум · Drag = перемещение · Кнопки = слайды</span>
+</div>
+
+<div class="canvas-wrap" id="canvasWrap">
+<div class="canvas" id="canvas">
+
+<!-- ==================== SLIDE 0: OVERVIEW ==================== -->
+<div class="slide active" id="slide-0">
+  <svg class="arrows">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#b2bec3" opacity="0.6"/>
+      </marker>
+    </defs>
+    <!-- User → Gateway -->
+    <line x1="260" y1="190" x2="470" y2="190"/>
+    <!-- Gateway → Search -->
+    <line x1="710" y1="150" x2="900" y2="100"/>
+    <!-- Gateway → Inference -->
+    <line x1="710" y1="190" x2="900" y2="190"/>
+    <!-- Gateway → Storage -->
+    <line x1="710" y1="230" x2="900" y2="280"/>
+    <!-- Search → ChromaDB -->
+    <line x1="1120" y1="100" x2="1300" y2="60"/>
+    <!-- Search → Neo4j -->
+    <line x1="1120" y1="100" x2="1300" y2="140"/>
+    <!-- Inference → Gemini -->
+    <line x1="1120" y1="190" x2="1300" y2="190"/>
+    <!-- Storage → PostgreSQL -->
+    <line x1="1120" y1="280" x2="1300" y2="260"/>
+    <!-- Storage → Redis -->
+    <line x1="1120" y1="300" x2="1300" y2="330"/>
+    <!-- Chainlit → Gateway -->
+    <line x1="260" y1="320" x2="470" y2="220"/>
+    <!-- Admin → Gateway -->
+    <line x1="260" y1="450" x2="470" y2="230"/>
+    <!-- Embeddings from search -->
+    <line x1="1000" y1="120" x2="1000" y2="400"/>
+  </svg>
+
+  <div class="section-label" style="left:60px; top:30px; width:200px;">КЛИЕНТЫ</div>
+  <div class="section-label" style="left:480px; top:30px; width:200px;">API GATEWAY</div>
+  <div class="section-label" style="left:900px; top:30px; width:200px;">СЕРВИСЫ</div>
+  <div class="section-label" style="left:1300px; top:30px; width:200px;">ХРАНИЛИЩА</div>
+
+  <!-- User -->
+  <div class="card red" style="left:60px; top:150px; width:190px;">
+    <h3>👤 Пользователь</h3>
+    <p>Задаёт юридический вопрос на естественном языке</p>
+  </div>
+
+  <!-- Chainlit -->
+  <div class="card blue" style="left:60px; top:280px; width:190px;">
+    <h3>💬 Chainlit Chat</h3>
+    <p>Web UI с real-time шагами</p>
+    <span class="badge bg-blue">:8501</span>
+  </div>
+
+  <!-- Telegram -->
+  <div class="card blue" style="left:60px; top:390px; width:190px;">
+    <h3>🤖 Telegram Bot</h3>
+    <p>Aiogram 3.x + FSM</p>
+  </div>
+
+  <!-- Admin -->
+  <div class="card blue" style="left:60px; top:490px; width:190px;">
+    <h3>📊 Admin Panel</h3>
+    <p>Streamlit — управление документами</p>
+    <span class="badge bg-blue">:8090</span>
+  </div>
+
+  <!-- Gateway -->
+  <div class="card red pulse" style="left:480px; top:120px; width:220px;">
+    <h3>🚀 API Gateway</h3>
+    <p>FastAPI — центральный узел</p>
+    <span class="badge bg-red">:8080</span>
+    <span class="badge bg-orange">JWT</span>
+    <span class="badge bg-yellow">Rate Limit</span>
+    <ul>
+      <li>/api/query</li>
+      <li>/api/upload</li>
+      <li>/admin/*</li>
+      <li>/health/all</li>
+    </ul>
+  </div>
+
+  <!-- Search -->
+  <div class="card green" style="left:900px; top:50px; width:210px;">
+    <h3>🔍 Search Service</h3>
+    <p>Гибридный поиск</p>
+    <span class="badge bg-green">BM25 60%</span>
+    <span class="badge bg-blue">Semantic 40%</span>
+    <ul>
+      <li>BGE Reranker</li>
+      <li>5 поисковых профилей</li>
+    </ul>
+  </div>
+
+  <!-- Inference -->
+  <div class="card purple" style="left:900px; top:160px; width:210px;">
+    <h3>🧠 Inference Service</h3>
+    <p>Генерация ответов</p>
+    <span class="badge bg-purple">Gemini 2.5 Flash</span>
+    <ul>
+      <li>Self-RAG + CRAG</li>
+      <li>Верификация фактов</li>
+      <li>IRAC формат</li>
+    </ul>
+  </div>
+
+  <!-- Storage -->
+  <div class="card yellow" style="left:900px; top:265px; width:210px;">
+    <h3>💾 Storage Service</h3>
+    <p>Управление данными</p>
+    <ul>
+      <li>Connection pooling</li>
+      <li>Health monitoring</li>
+    </ul>
+  </div>
+
+  <!-- Embeddings -->
+  <div class="card orange" style="left:900px; top:390px; width:210px;">
+    <h3>📐 Embeddings</h3>
+    <p>sbert_large_nlu_ru (Сбер)</p>
+    <span class="badge bg-orange">1024D</span>
+    <span class="badge bg-yellow">:8001</span>
+    <ul>
+      <li>OpenAI-compatible API</li>
+      <li>CPU, ~5 GB RAM</li>
+    </ul>
+  </div>
+
+  <!-- ChromaDB -->
+  <div class="card green" style="left:1300px; top:30px; width:190px;">
+    <h3>🟢 ChromaDB</h3>
+    <p>Векторное хранилище</p>
+    <span class="badge bg-green">3033 чанка</span>
+    <span class="badge bg-blue">:8000</span>
+  </div>
+
+  <!-- Neo4j -->
+  <div class="card green" style="left:1300px; top:120px; width:190px;">
+    <h3>🕸️ Neo4j</h3>
+    <p>Графовая БД — связи статей</p>
+    <span class="badge bg-purple">95+ определений</span>
+  </div>
+
+  <!-- Gemini -->
+  <div class="card purple" style="left:1300px; top:210px; width:190px;">
+    <h3>✨ Google Gemini</h3>
+    <p>LLM: генерация + верификация</p>
+    <span class="badge bg-purple">temp 0.1</span>
+  </div>
+
+  <!-- PostgreSQL -->
+  <div class="card yellow" style="left:1300px; top:300px; width:190px;">
+    <h3>🐘 PostgreSQL 16</h3>
+    <p>Метаданные, пользователи, логи</p>
+    <span class="badge bg-yellow">:5432</span>
+  </div>
+
+  <!-- Redis -->
+  <div class="card orange" style="left:1300px; top:390px; width:190px;">
+    <h3>⚡ Redis 7</h3>
+    <p>Кэш запросов (TTL 5 мин)</p>
+    <span class="badge bg-orange">67% hit rate</span>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 1: MICROSERVICES ==================== -->
+<div class="slide" id="slide-1">
+  <div class="section-label" style="left:60px; top:30px; width:400px;">ПОРЯДОК ЗАПУСКА (ОРКЕСТРАТОР)</div>
+
+  <svg class="arrows">
+    <defs><marker id="arrowhead2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#b2bec3" opacity="0.6"/>
+    </marker></defs>
+    <line x1="300" y1="190" x2="300" y2="270" class="highlight" marker-end="url(#arrowhead2)"/>
+    <line x1="300" y1="370" x2="300" y2="450" class="highlight" marker-end="url(#arrowhead2)"/>
+    <line x1="300" y1="550" x2="300" y2="630" class="highlight" marker-end="url(#arrowhead2)"/>
+  </svg>
+
+  <!-- Phase 1 -->
+  <div class="card yellow" style="left:120px; top:80px; width:360px;">
+    <h3>ФАЗА 1 — Инфраструктура</h3>
+    <span class="badge bg-yellow">Storage Service</span>
+    <span class="badge bg-orange">Cache Service (Redis)</span>
+    <p style="margin-top:8px;">Сначала поднимаются базы данных и кэш. Health-check ждёт готовности.</p>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="card green" style="left:120px; top:260px; width:360px;">
+    <h3>ФАЗА 2 — Бизнес-логика</h3>
+    <span class="badge bg-green">Search Service</span>
+    <span class="badge bg-purple">Inference Service</span>
+    <p style="margin-top:8px;">Поиск и генерация запускаются после готовности хранилищ.</p>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="card red" style="left:120px; top:440px; width:360px;">
+    <h3>ФАЗА 3 — API Gateway</h3>
+    <span class="badge bg-red">FastAPI :8080</span>
+    <span class="badge bg-blue">CORS</span>
+    <span class="badge bg-orange">JWT Auth</span>
+    <p style="margin-top:8px;">Gateway запускается последним, когда все сервисы здоровы.</p>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="card blue" style="left:120px; top:620px; width:360px;">
+    <h3>ФАЗА 4 — Health Monitoring</h3>
+    <span class="badge bg-blue">Watchdog Loop</span>
+    <p style="margin-top:8px;">Непрерывный мониторинг всех сервисов. Автоперезапуск при сбое.</p>
+  </div>
+
+  <!-- Docker -->
+  <div class="card purple" style="left:600px; top:80px; width:350px;">
+    <h3>🐳 Docker Compose</h3>
+    <p>4 контейнера инфраструктуры:</p>
+    <ul>
+      <li><span class="badge bg-yellow">PostgreSQL 16</span> — метаданные</li>
+      <li><span class="badge bg-green">ChromaDB</span> — векторы</li>
+      <li><span class="badge bg-orange">Redis 7</span> — кэш</li>
+      <li><span class="badge bg-purple">Neo4j 5.15</span> — граф</li>
+    </ul>
+    <p style="margin-top: 8px;">+ Embeddings Server (Python/uvicorn)</p>
+  </div>
+
+  <!-- Auth -->
+  <div class="card orange" style="left:600px; top:310px; width:350px;">
+    <h3>🔐 Безопасность</h3>
+    <ul>
+      <li><b>JWT</b> — аутентификация админ-панели</li>
+      <li><b>Rate Limiting</b> — 100 req/60 sec</li>
+      <li><b>CORS</b> — whitelist origins</li>
+      <li><b>Input Sanitization</b> — prompt injection защита</li>
+    </ul>
+  </div>
+
+  <!-- Endpoints -->
+  <div class="card blue" style="left:600px; top:510px; width:350px;">
+    <h3>📡 API Endpoints</h3>
+    <ul>
+      <li><b>POST /api/query</b> — задать вопрос</li>
+      <li><b>POST /api/upload</b> — загрузить документ</li>
+      <li><b>POST /admin/auth/login</b> — авторизация</li>
+      <li><b>GET /health/all</b> — статус всех сервисов</li>
+      <li><b>GET /api/documents</b> — список документов</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: RAG PIPELINE ==================== -->
+<div class="slide" id="slide-2">
+  <div class="section-label" style="left:60px; top:20px; width:600px;">RAG PIPELINE — LangGraph CRAG Workflow</div>
+
+  <svg class="arrows">
+    <defs><marker id="arrowhead3" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#b2bec3" opacity="0.6"/>
+    </marker></defs>
+    <!-- Flow arrows -->
+    <line x1="250" y1="170" x2="250" y2="240" class="highlight" marker-end="url(#arrowhead3)"/>
+    <line x1="250" y1="360" x2="250" y2="430" class="highlight" marker-end="url(#arrowhead3)"/>
+    <line x1="250" y1="560" x2="250" y2="630" class="highlight" marker-end="url(#arrowhead3)"/>
+    <line x1="250" y1="750" x2="250" y2="820" class="highlight" marker-end="url(#arrowhead3)"/>
+    <line x1="250" y1="950" x2="250" y2="1020" class="highlight" marker-end="url(#arrowhead3)"/>
+    <line x1="250" y1="1140" x2="250" y2="1210" class="highlight" marker-end="url(#arrowhead3)"/>
+    <!-- CRAG loop back -->
+    <path d="M 370 520 Q 520 520 520 350 Q 520 200 370 200" stroke="#e94560" stroke-width="2" stroke-dasharray="8,4" opacity="0.5" marker-end="url(#arrowhead3)"/>
+  </svg>
+
+  <!-- Step 1 -->
+  <div class="card blue" style="left:80px; top:60px; width:340px;">
+    <h3>1️⃣ АНАЛИЗ ЗАПРОСА</h3>
+    <p>Классификация: определение / процедура / сравнение / числовой</p>
+    <p>Извлечение юридических терминов, определение кодекса-фильтра</p>
+    <span class="badge bg-blue">SmartQueryClassifier</span>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card green" style="left:80px; top:240px; width:340px;">
+    <h3>2️⃣ ГИБРИДНЫЙ ПОИСК</h3>
+    <p><b>BM25</b> (точные термины) — вес 60%</p>
+    <p><b>Semantic</b> (по смыслу через векторы) — вес 40%</p>
+    <p>+ <b>Neo4j</b> графовое расширение связанных статей</p>
+    <span class="badge bg-green">TOP-K = 10-15</span>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card yellow" style="left:80px; top:430px; width:340px;">
+    <h3>3️⃣ ОЦЕНКА КАЧЕСТВА</h3>
+    <p>LLM оценивает релевантность найденных документов.</p>
+    <p>Если покрытие низкое → <b>CRAG: переформулировка</b> и повторный поиск</p>
+    <span class="badge bg-orange">CRAG Pattern</span>
+  </div>
+
+  <!-- CRAG label -->
+  <div style="position:absolute; left:480px; top:340px; font-size:11px; color:var(--accent); font-weight:700; opacity:0.7;">
+    ↩ CRAG Loop<br>(переформулировка)
+  </div>
+
+  <!-- Step 4 -->
+  <div class="card purple" style="left:80px; top:630px; width:340px;">
+    <h3>4️⃣ ГЕНЕРАЦИЯ ОТВЕТА</h3>
+    <p>Google Gemini 2.5 Flash формирует ответ</p>
+    <p>Формат <b>IRAC</b>: Issue → Rule → Application → Conclusion</p>
+    <span class="badge bg-purple">temp=0.1</span>
+    <span class="badge bg-blue">max_tokens=2048</span>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="card orange" style="left:80px; top:820px; width:340px;">
+    <h3>5️⃣ ВЕРИФИКАЦИЯ ФАКТОВ</h3>
+    <p><b>LegalFactVerifier</b> проверяет каждое утверждение</p>
+    <p>Детекция: <span class="badge bg-red">галлюцинации</span> <span class="badge bg-orange">противоречия</span></p>
+    <p>Все факты сверяются с исходными документами</p>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="card red" style="left:80px; top:1020px; width:340px;">
+    <h3>6️⃣ SELF-RAG CRITIQUE</h3>
+    <p>Система оценивает себя: достаточно ли покрыт вопрос?</p>
+    <p>Если нет → повторная генерация с дополненным контекстом</p>
+    <span class="badge bg-red">Self-Assessment</span>
+  </div>
+
+  <!-- Step 7 -->
+  <div class="card green" style="left:80px; top:1210px; width:340px;">
+    <h3>7️⃣ ФИНАЛЬНЫЙ ОТВЕТ</h3>
+    <p>Текст + ссылки на статьи + источники + confidence score</p>
+    <span class="badge bg-green">Confidence 0-100%</span>
+  </div>
+
+  <!-- Why this approach -->
+  <div class="card purple" style="left:550px; top:60px; width:380px;">
+    <h3>💡 ПОЧЕМУ ИМЕННО ТАК?</h3>
+    <ul>
+      <li><b>Не просто ChatGPT</b> — LLM галлюцинирует. RAG + верификация обязательны</li>
+      <li><b>Не только семантика</b> — путает «исковую давность» и «срок давности по УК»</li>
+      <li><b>Не без графа</b> — ст. 21 ГК → ст. 27 ГК — граф знает связи</li>
+    </ul>
+  </div>
+
+  <div class="card yellow" style="left:550px; top:280px; width:380px;">
+    <h3>🔄 АЛЬТЕРНАТИВЫ (отклонены)</h3>
+    <ul>
+      <li><s>LangChain линейный</s> — нет self-correction</li>
+      <li><s>Только full-text</s> — теряет смысл</li>
+      <li><s>Только semantic</s> — теряет точные термины</li>
+      <li>✅ <b>LangGraph + Hybrid</b> = 97.5% точность</li>
+    </ul>
+  </div>
+
+  <div class="card blue" style="left:550px; top:500px; width:380px;">
+    <h3>📊 ПОИСКОВЫЕ ПРОФИЛИ</h3>
+    <table style="font-size:11px; color:var(--text-dim); width:100%; border-collapse:collapse;">
+      <tr style="border-bottom:1px solid var(--line);"><td><b>Conservative</b></td><td>5 чанков</td><td>порог 0.7</td><td>без rerank</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td><b>Balanced</b></td><td>7 чанков</td><td>порог 0.65</td><td>с rerank</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td><b>Aggressive</b></td><td>10 чанков</td><td>порог 0.6</td><td>с rerank</td></tr>
+      <tr style="border-bottom:1px solid var(--line);"><td><b>Adaptive</b></td><td>8 чанков</td><td>динамич.</td><td>с rerank</td></tr>
+      <tr><td><b>Optimal</b></td><td>15 чанков</td><td>порог 0.6</td><td>с rerank</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 3: DATA ==================== -->
+<div class="slide" id="slide-3">
+  <div class="section-label" style="left:60px; top:20px; width:500px;">ЗАГРУЖЕННЫЕ ДОКУМЕНТЫ И ОБРАБОТКА</div>
+
+  <!-- Documents -->
+  <div class="card yellow" style="left:60px; top:60px; width:340px;">
+    <h3>📜 Гражданский кодекс РФ</h3>
+    <span class="badge bg-yellow">2748 чанков</span>
+    <span class="badge bg-orange">3930 КБ</span>
+    <p>Полный текст — собственность, обязательства, сделки</p>
+  </div>
+
+  <div class="card green" style="left:60px; top:190px; width:340px;">
+    <h3>👨‍👩‍👧 Семейный кодекс РФ</h3>
+    <span class="badge bg-green">244 чанка</span>
+    <span class="badge bg-orange">345 КБ</span>
+    <p>Полный текст — брак, дети, алименты, собственность</p>
+  </div>
+
+  <div class="card blue" style="left:60px; top:320px; width:340px;">
+    <h3>🏠 Жилищный кодекс РФ</h3>
+    <span class="badge bg-blue">13 чанков</span>
+    <span class="badge bg-orange">18 КБ</span>
+    <p>Выдержка — жилищные права, управление МКД</p>
+  </div>
+
+  <div class="card purple" style="left:60px; top:440px; width:340px;">
+    <h3>💼 Трудовой кодекс РФ</h3>
+    <span class="badge bg-purple">15 чанков</span>
+    <span class="badge bg-orange">18 КБ</span>
+    <p>Часть III — трудовой договор</p>
+  </div>
+
+  <div class="card orange" style="left:60px; top:560px; width:340px;">
+    <h3>🛒 Закон о защите прав потребителей</h3>
+    <span class="badge bg-orange">13 чанков</span>
+    <span class="badge bg-orange">15 КБ</span>
+    <p>Полный текст — качество, возврат, гарантии</p>
+  </div>
+
+  <!-- Processing pipeline -->
+  <div class="card red" style="left:520px; top:60px; width:420px;">
+    <h3>⚙️ PIPELINE ОБРАБОТКИ ДОКУМЕНТОВ</h3>
+    <ol style="font-size:12px; color:var(--text-dim); padding-left:16px; line-height:2;">
+      <li><b>Upload</b> — принимает PDF, TXT, DOCX, PPTX, XLSX</li>
+      <li><b>Chunking</b> — 800-1200 символов, overlap 200-300</li>
+      <li><b>Metadata</b> — извлечение: номер статьи, название закона, тип</li>
+      <li><b>Embedding</b> — sbert_large_nlu_ru → 1024D вектор</li>
+      <li><b>BM25 Index</b> — полнотекстовый индекс для точного поиска</li>
+      <li><b>Neo4j</b> — создание связей и определений</li>
+      <li><b>PostgreSQL</b> — метаданные + текст чанков</li>
+    </ol>
+  </div>
+
+  <!-- Chunking detail -->
+  <div class="card green" style="left:520px; top:360px; width:420px;">
+    <h3>🔪 LEGAL-AWARE CHUNKING</h3>
+    <p>Русскоязычный legal chunker учитывает:</p>
+    <ul>
+      <li>Границы статей и пунктов</li>
+      <li>Нумерацию «Статья 21.», «п. 3»</li>
+      <li>Перекрёстные ссылки между нормами</li>
+      <li>Определения юридических терминов</li>
+    </ul>
+    <p style="margin-top:8px;">Overlap сохраняет контекст на стыках.</p>
+  </div>
+
+  <!-- Total -->
+  <div class="metric" style="left:520px; top:570px;">
+    <div class="value">3033</div>
+    <div class="label">чанков в ChromaDB</div>
+  </div>
+
+  <div class="metric" style="left:700px; top:570px;">
+    <div class="value">5</div>
+    <div class="label">документов</div>
+  </div>
+
+  <div class="metric" style="left:850px; top:570px;">
+    <div class="value">1024D</div>
+    <div class="label">размерность эмбеддингов</div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 4: METRICS ==================== -->
+<div class="slide" id="slide-4">
+  <div class="section-label" style="left:60px; top:20px; width:500px;">МЕТРИКИ И БИЗНЕС-РЕЗУЛЬТАТ</div>
+
+  <div class="metric" style="left:60px; top:70px; width:200px;">
+    <div class="value">97.5%</div>
+    <div class="label">Точность (40 вопросов)</div>
+  </div>
+
+  <div class="metric" style="left:300px; top:70px; width:200px;">
+    <div class="value">8/10</div>
+    <div class="label">Тестовых вопросов</div>
+  </div>
+
+  <div class="metric" style="left:540px; top:70px; width:200px;">
+    <div class="value">~30с</div>
+    <div class="label">Среднее время ответа</div>
+  </div>
+
+  <div class="metric" style="left:780px; top:70px; width:200px;">
+    <div class="value">67%</div>
+    <div class="label">Cache Hit Rate</div>
+  </div>
+
+  <!-- Business value -->
+  <div class="card green" style="left:60px; top:200px; width:450px;">
+    <h3>💰 БИЗНЕС-ЦЕННОСТЬ</h3>
+    <ul style="line-height: 2;">
+      <li>Юрист тратит <b>15-30 мин</b> на поиск статьи → с Legal-RAG <b>30 секунд</b></li>
+      <li>10 юристов × 20 поисков/день = <b>~50 человеко-часов/мес</b> экономии</li>
+      <li>Снижение риска <b>пропустить связанную норму</b> (граф знаний)</li>
+      <li>Исключение <b>галлюцинаций</b> — верификация фактов</li>
+    </ul>
+  </div>
+
+  <div class="card blue" style="left:60px; top:430px; width:450px;">
+    <h3>📈 МАСШТАБИРОВАНИЕ</h3>
+    <ul style="line-height: 2;">
+      <li>Добавление нового кодекса: <b>2 минуты</b> через админ-панель</li>
+      <li>Не требует изменений кода — plug & play</li>
+      <li>Docker Compose → <b>деплой одной командой</b></li>
+      <li>Горизонтальное масштабирование: API Gateway + load balancer</li>
+    </ul>
+  </div>
+
+  <!-- Tech stack -->
+  <div class="card purple" style="left:560px; top:200px; width:400px;">
+    <h3>🛠️ ТЕХНОЛОГИЧЕСКИЙ СТЕК</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
+      <span class="badge bg-blue">Python 3.11</span>
+      <span class="badge bg-red">FastAPI</span>
+      <span class="badge bg-green">LangGraph</span>
+      <span class="badge bg-purple">Gemini 2.5 Flash</span>
+      <span class="badge bg-yellow">PostgreSQL 16</span>
+      <span class="badge bg-green">ChromaDB</span>
+      <span class="badge bg-orange">Redis 7</span>
+      <span class="badge bg-purple">Neo4j 5.15</span>
+      <span class="badge bg-blue">Chainlit</span>
+      <span class="badge bg-red">Streamlit</span>
+      <span class="badge bg-green">Aiogram 3</span>
+      <span class="badge bg-orange">Docker</span>
+      <span class="badge bg-blue">sbert_large_nlu_ru</span>
+      <span class="badge bg-purple">BGE Reranker</span>
+    </div>
+  </div>
+
+  <div class="card red" style="left:560px; top:430px; width:400px;">
+    <h3>✅ ДЕМО-ВОПРОСЫ (рекомендованные)</h3>
+    <ol style="font-size:12px; line-height:2; padding-left:16px; color:var(--text-dim);">
+      <li>Что такое исковая давность?</li>
+      <li>Что является совместной собственностью супругов?</li>
+      <li>Какие права у потребителя при недостатках товара?</li>
+      <li>В каком возрасте наступает полная дееспособность?</li>
+      <li>Как расторгнуть брак при наличии детей?</li>
+    </ol>
+  </div>
+</div>
+
+</div><!-- /canvas -->
+</div><!-- /canvas-wrap -->
+
+<script>
+// Slide navigation
+const slides = document.querySelectorAll('.slide');
+const btns = document.querySelectorAll('.nav-btn');
+let currentSlide = 0;
+
+function showSlide(idx) {
+  slides.forEach(s => s.classList.remove('active'));
+  btns.forEach(b => b.classList.remove('active'));
+  slides[idx].classList.add('active');
+  btns[idx].classList.add('active');
+  currentSlide = idx;
+  // Reset pan
+  panX = 0; panY = 0; scale = 1;
+  updateTransform();
+}
+
+// Pan and Zoom
+let scale = 1, panX = 0, panY = 0;
+let isDragging = false, startX, startY;
+const canvas = document.getElementById('canvas');
+const wrap = document.getElementById('canvasWrap');
+
+function updateTransform() {
+  canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+}
+
+wrap.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.08 : 0.08;
+  scale = Math.max(0.3, Math.min(2.5, scale + delta));
+  updateTransform();
+}, { passive: false });
+
+wrap.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  startX = e.clientX - panX;
+  startY = e.clientY - panY;
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  panX = e.clientX - startX;
+  panY = e.clientY - startY;
+  canvas.style.transition = 'none';
+  updateTransform();
+});
+
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  canvas.style.transition = 'transform 0.1s ease-out';
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    showSlide(Math.min(currentSlide + 1, slides.length - 1));
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    showSlide(Math.max(currentSlide - 1, 0));
+  }
+});
+</script>
+</body>
+</html>

@@ -16,19 +16,19 @@ logger = logging.getLogger(__name__)
 
 class NumericalConstraintType(Enum):
     """Типы численных ограничений в правовых документах"""
-    PERCENTAGE = "percentage"  # 80%, пятьдесят процентов
-    MONETARY = "monetary"      # 1000000 рублей, миллион рублей
-    TEMPORAL = "temporal"      # 3 года, не менее трех лет
-    QUANTITY = "quantity"      # не более 50 участников
-    RATIO = "ratio"           # в размере 1/3, одна треть
-    THRESHOLD = "threshold"    # свыше 100 миллионов
+    PERCENTAGE = "percentage" # 80%, пятьдесят процентов
+    MONETARY = "monetary" # 1000000 рублей, миллион рублей
+    TEMPORAL = "temporal" # 3 года, не менее трех лет
+    QUANTITY = "quantity" # не более 50 участников
+    RATIO = "ratio" # в размере 1/3, одна треть
+    THRESHOLD = "threshold" # свыше 100 миллионов
 
 
 class ModalityType(Enum):
     """Модальности в правовых текстах"""
-    MANDATORY = "mandatory"    # должен, обязан
-    PROHIBITED = "prohibited"  # не может, запрещается
-    PERMITTED = "permitted"    # может, имеет право
+    MANDATORY = "mandatory" # должен, обязан
+    PROHIBITED = "prohibited" # не может, запрещается
+    PERMITTED = "permitted" # может, имеет право
     CONDITIONAL = "conditional" # при условии, если
 
 
@@ -213,11 +213,11 @@ class SpecializedLegalNER:
             # 115-ФЗ, 224-ФЗ
             r'(\d+)-ФЗ',
 
-            # Федеральный закон от ... № 115-ФЗ
-            r'(?:Федеральный закон|ФЗ).*?№\s*(\d+)-ФЗ',
+            # Федеральный закон от ... 115-ФЗ
+            r'(?:Федеральный закон|ФЗ).*?\s*(\d+)-ФЗ',
 
-            # Закон № 115-ФЗ "О концессионных соглашениях"
-            r'(?:Закон|ФЗ)\s*№?\s*(\d+)-ФЗ\s*["\«]([^"»]+)["\»]',
+            # Закон 115-ФЗ "О концессионных соглашениях"
+            r'(?:Закон|ФЗ)\s*?\s*(\d+)-ФЗ\s*["\«]([^"»]+)["\»]',
         ]
         return [re.compile(p, re.IGNORECASE) for p in patterns]
 
@@ -476,7 +476,7 @@ class SpecializedLegalNER:
                 if pattern.search(context):
                     return modality
 
-        return ModalityType.MANDATORY  # По умолчанию
+        return ModalityType.MANDATORY # По умолчанию
 
     def _normalize_percentage(self, value_str: str) -> float:
         """Нормализация процентов"""
@@ -582,7 +582,7 @@ if __name__ == "__main__":
     процентов валовой выручки концессионера за определенный период.
 
     2. Размер платы концедента не может превышать 1000000 рублей в год при условии
-    соблюдения требований статьи 15 Федерального закона № 115-ФЗ.
+    соблюдения требований статьи 15 Федерального закона 115-ФЗ.
 
     3. Срок действия концессионного соглашения не может быть менее трех лет.
     """

@@ -25,7 +25,7 @@ class StorageCoordinator:
         postgres: Optional[PostgresManager] = None,
         redis: Optional[RedisManager] = None,
         vector_store: Optional[VectorStoreManager] = None,
-        use_pgvector: bool = False,  # Новая опция для переключения на pgvector
+        use_pgvector: bool = False, # Новая опция для переключения на pgvector
     ) -> None:
         self.postgres = postgres or PostgresManager()
         self.redis = redis or RedisManager()
@@ -33,7 +33,7 @@ class StorageCoordinator:
         
         if use_pgvector:
             # Используем pgvector как векторное хранилище
-            self.vector_store = None  # PgVectorManager использует postgres internally
+            self.vector_store = None # PgVectorManager использует postgres internally
             self.pgvector_manager = PgVectorManager() if vector_store is None else vector_store
         else:
             # Используем ChromaDB (legacy)
@@ -45,7 +45,7 @@ class StorageCoordinator:
     async def initialize(self) -> Dict[str, bool]:
         """Initialize all storage backends."""
 
-        logger.info(f"🔌 Initializing storage coordinator components (pgvector: {self.use_pgvector})...")
+        logger.info(f" Initializing storage coordinator components (pgvector: {self.use_pgvector})...")
 
         results = {
             "postgres": False,
@@ -68,8 +68,8 @@ class StorageCoordinator:
             results["vector_store"] = await self.vector_store.initialize()
 
         success_count = sum(1 for ok in results.values() if ok)
-        logger.info(f"📦 Storage init summary: {success_count}/4 components ready")
-        logger.info(f"💾 Vector storage: {'pgvector' if self.use_pgvector else 'ChromaDB'}")
+        logger.info(f" Storage init summary: {success_count}/4 components ready")
+        logger.info(f" Vector storage: {'pgvector' if self.use_pgvector else 'ChromaDB'}")
 
         self._initialized = all(results.values())
         return results
@@ -81,11 +81,11 @@ class StorageCoordinator:
     async def close_all(self) -> None:
         """Close all connections."""
 
-        logger.info("🔒 Closing storage coordinator components...")
+        logger.info(" Closing storage coordinator components...")
         await self.postgres.close()
         await self.redis.close()
         # Vector store does not expose explicit close method yet
-        logger.info("✅ Storage coordinator components closed")
+        logger.info(" Storage coordinator components closed")
 
     async def store_document_complete(
         self,
@@ -107,8 +107,8 @@ class StorageCoordinator:
                 content = file_path_obj.read_bytes()
                 file_hash = hashlib.sha256(content).hexdigest()
                 file_size = len(content)
-            except Exception as exc:  # pragma: no cover - filesystem issues
-                logger.warning("⚠️ Не удалось вычислить хеш файла %s: %s", file_path_obj, exc)
+            except Exception as exc: # pragma: no cover - filesystem issues
+                logger.warning(" Не удалось вычислить хеш файла %s: %s", file_path_obj, exc)
 
         original_filename = (
             metadata.get("original_filename")
@@ -137,7 +137,7 @@ class StorageCoordinator:
             else:
                 doc_id, is_duplicate = await self.postgres.insert_document(document_data)
         except Exception as exc:
-            logger.error("❌ Ошибка сохранения документа в PostgreSQL: %s", exc)
+            logger.error(" Ошибка сохранения документа в PostgreSQL: %s", exc)
             return {
                 "success": False,
                 "document_id": doc_id,
@@ -146,7 +146,7 @@ class StorageCoordinator:
             }
 
         if is_duplicate:
-            logger.info("⏭️ Пропускаем обработку дубликата: %s", original_filename)
+            logger.info(" Пропускаем обработку дубликата: %s", original_filename)
             return {
                 "success": True,
                 "document_id": doc_id,
@@ -161,7 +161,7 @@ class StorageCoordinator:
                 await self.postgres.insert_chunks(chunks, doc_id)
                 chunks_stored = len(chunks)
             except Exception as exc:
-                logger.error("❌ Ошибка сохранения чанков в PostgreSQL: %s", exc)
+                logger.error(" Ошибка сохранения чанков в PostgreSQL: %s", exc)
 
             try:
                 if self.use_pgvector:
@@ -172,12 +172,12 @@ class StorageCoordinator:
                     storage_name = "ChromaDB"
                     
                 if not added:
-                    logger.warning("⚠️ Vector store не подтвердил сохранение чанков для %s", doc_id)
+                    logger.warning(" Vector store не подтвердил сохранение чанков для %s", doc_id)
             except Exception as exc:
                 if self.use_pgvector:
-                    logger.error("❌ Ошибка сохранения чанков в pgvector: %s", exc)
+                    logger.error(" Ошибка сохранения чанков в pgvector: %s", exc)
                 else:
-                    logger.error("❌ Ошибка сохранения чанков в ChromaDB: %s", exc)
+                    logger.error(" Ошибка сохранения чанков в ChromaDB: %s", exc)
 
         cache_payload = {
             "id": doc_id,
@@ -191,7 +191,7 @@ class StorageCoordinator:
         try:
             await self.redis.set_cache(f"document:{doc_id}", cache_payload, expire=86400)
         except Exception as exc:
-            logger.warning("⚠️ Не удалось сохранить данные документа в Redis: %s", exc)
+            logger.warning(" Не удалось сохранить данные документа в Redis: %s", exc)
 
         return {
             "success": True,
@@ -219,7 +219,7 @@ class StorageCoordinator:
             cache_key = f"search:{query}:{effective_limit}"
             cached = await self.redis.get_cache(cache_key)
             if cached:
-                logger.debug("🎯 StorageCoordinator cache hit for %s", cache_key)
+                logger.debug(" StorageCoordinator cache hit for %s", cache_key)
                 return cached
 
         if self.use_pgvector:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-⚖️ Legal Ontology Module
+Legal Ontology Module
 Модуль правовой онтологии для понимания структуры российского права.
 
 Обеспечивает:
@@ -102,7 +102,7 @@ class LegalOntology:
             "конституция", "конституционный"
         ],
         DocumentType.FEDERAL_LAW: [
-            "федеральный закон", "фз", "n.*фз", "№.*фз",
+            "федеральный закон", "фз", "n.*фз", ".*фз",
             "закон российской федерации"
         ],
         DocumentType.CODE: [
@@ -201,7 +201,7 @@ class LegalOntology:
         """Инициализация правовой онтологии."""
         self.document_cache = {}
         self.reference_cache = {}
-        logger.info("✅ Legal Ontology инициализирована")
+        logger.info(" Legal Ontology инициализирована")
 
     def get_document_hierarchy_level(self, document_type: DocumentType) -> int:
         """Получение уровня иерархии документа."""
@@ -254,7 +254,7 @@ class LegalOntology:
         """
         references = []
         text_lower = text.lower()
-        found_spans = set()  # Для избежания дублирования
+        found_spans = set() # Для избежания дублирования
 
         # Поиск ссылок на статьи
         for pattern in self.ARTICLE_PATTERNS:
@@ -332,7 +332,7 @@ class LegalOntology:
                     expanded_query = query_lower.replace(abbr, expansion)
                     expanded_queries.append(expanded_query)
 
-        return list(set(expanded_queries))  # Удаляем дубликаты
+        return list(set(expanded_queries)) # Удаляем дубликаты
 
     def get_legal_domain(self, text: str) -> Tuple[LegalDomain, float]:
         """
@@ -488,9 +488,9 @@ class LegalOntology:
                 score += 1.0
 
         # Нормализация
-        normalized_score = min(score / 5.0, 1.0)  # Максимум 5 индикаторов для 100%
+        normalized_score = min(score / 5.0, 1.0) # Максимум 5 индикаторов для 100%
 
-        is_legal = normalized_score > 0.2  # Порог 20%
+        is_legal = normalized_score > 0.2 # Порог 20%
 
         return is_legal, normalized_score
 
@@ -508,7 +508,7 @@ def get_legal_ontology() -> LegalOntology:
 
 if __name__ == "__main__":
     # Демонстрация возможностей модуля
-    print("⚖️ Legal Ontology - Демонстрация")
+    print(" Legal Ontology - Демонстрация")
     print("=" * 50)
 
     ontology = LegalOntology()
@@ -522,24 +522,24 @@ if __name__ == "__main__":
     ]
 
     for query in test_queries:
-        print(f"\n🔍 Запрос: {query}")
+        print(f"\n Запрос: {query}")
 
         # Классификация правового содержания
         is_legal, confidence = ontology.is_legal_query(query)
-        print(f"   Правовой запрос: {'Да' if is_legal else 'Нет'} (уверенность: {confidence:.2f})")
+        print(f" Правовой запрос: {'Да' if is_legal else 'Нет'} (уверенность: {confidence:.2f})")
 
         # Определение отрасли права
         domain, domain_conf = ontology.get_legal_domain(query)
-        print(f"   Отрасль права: {domain.value} (уверенность: {domain_conf:.2f})")
+        print(f" Отрасль права: {domain.value} (уверенность: {domain_conf:.2f})")
 
         # Извлечение ссылок
         references = ontology.extract_legal_references(query)
         if references:
-            print(f"   Найдено ссылок: {len(references)}")
-            for ref in references[:2]:  # Показываем первые 2
-                print(f"     - {ref.document_type.value}, статья {ref.article}")
+            print(f" Найдено ссылок: {len(references)}")
+            for ref in references[:2]: # Показываем первые 2
+                print(f" - {ref.document_type.value}, статья {ref.article}")
 
         # Расширение синонимами
         expanded = ontology.expand_synonyms(query)
         if len(expanded) > 1:
-            print(f"   Синонимы найдены: {len(expanded) - 1}")
+            print(f" Синонимы найдены: {len(expanded) - 1}")

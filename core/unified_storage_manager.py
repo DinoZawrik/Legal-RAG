@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🗄️ Unified Storage Manager
+Unified Storage Manager
 Модуль для координации всех типов хранилищ.
 
 Включает функциональность:
@@ -56,21 +56,21 @@ class UnifiedStorageManager:
             total_count = len(results)
 
             if success_count == total_count:
-                logger.info("✅ Все хранилища инициализированы успешно")
+                logger.info(" Все хранилища инициализированы успешно")
             else:
-                logger.warning(f"⚠️ Инициализировано {success_count}/{total_count} хранилищ")
+                logger.warning(f" Инициализировано {success_count}/{total_count} хранилищ")
 
             return results
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации хранилищ: {e}")
+            logger.error(f" Ошибка инициализации хранилищ: {e}")
             return results
 
     async def close_all(self):
         """Закрытие всех соединений."""
         await self.postgres.close()
         await self.redis.close()
-        logger.info("🔒 Все соединения хранилищ закрыты")
+        logger.info(" Все соединения хранилищ закрыты")
 
     async def store_document_complete(self, file_path: str, chunks: List[TextChunk],
                                    metadata: Dict = None) -> Dict[str, Any]:
@@ -114,14 +114,14 @@ class UnifiedStorageManager:
             # Сохранение в PostgreSQL (получаем реальный ID из базы)
             # При force_reprocess пропускаем проверку дубликатов
             if force_reprocess:
-                logger.info(f"🔄 Принудительная переобработка: пропускаем проверку дубликатов для {original_filename}")
+                logger.info(f" Принудительная переобработка: пропускаем проверку дубликатов для {original_filename}")
                 doc_id, is_duplicate = await self.postgres.insert_document(document_data, skip_duplicates=True)
             else:
                 doc_id, is_duplicate = await self.postgres.insert_document(document_data)
 
             # Если документ - дубликат, не обрабатываем чанки повторно
             if is_duplicate:
-                logger.info(f"⏭️ Пропускаем обработку чанков для дубликата: {original_filename}")
+                logger.info(f" Пропускаем обработку чанков для дубликата: {original_filename}")
                 return {
                     "success": True,
                     "document_id": doc_id,
@@ -140,9 +140,9 @@ class UnifiedStorageManager:
 
             try:
                 cache_key = f"document:{doc_id}"
-                await self.redis.set_cache(cache_key, cache_data, expire=86400)  # 24 часа
+                await self.redis.set_cache(cache_key, cache_data, expire=86400) # 24 часа
             except Exception as e:
-                logger.warning(f"❌ Ошибка установки кэша {cache_key}: {e}")
+                logger.warning(f" Ошибка установки кэша {cache_key}: {e}")
 
             result = {
                 'success': True,
@@ -153,11 +153,11 @@ class UnifiedStorageManager:
                 'storage_locations': ['vector_store', 'redis_cache']
             }
 
-            logger.info(f"✅ Документ {doc_id} полностью сохранен")
+            logger.info(f" Документ {doc_id} полностью сохранен")
             return result
 
         except Exception as e:
-            logger.error(f"❌ Ошибка полного сохранения документа: {e}")
+            logger.error(f" Ошибка полного сохранения документа: {e}")
             return {
                 'success': False,
                 'error': str(e),
@@ -188,10 +188,10 @@ class UnifiedStorageManager:
                 try:
                     cached_results = await self.redis.get_cache(cache_key)
                 except Exception as cache_error:
-                    logger.warning(f"⚠️ Ошибка доступа к кэшу {cache_key}: {cache_error}")
+                    logger.warning(f" Ошибка доступа к кэшу {cache_key}: {cache_error}")
 
             if cached_results:
-                logger.info("🎯 Найдены кэшированные результаты для запроса")
+                logger.info(" Найдены кэшированные результаты для запроса")
                 return cached_results
 
             # Поиск в vector store
@@ -200,14 +200,14 @@ class UnifiedStorageManager:
             # Кэширование результатов
             if use_cache and results:
                 try:
-                    await self.redis.set_cache(cache_key, results, expire=1800)  # 30 минут
+                    await self.redis.set_cache(cache_key, results, expire=1800) # 30 минут
                 except Exception as cache_error:
-                    logger.warning(f"⚠️ Не удалось сохранить результаты в кэш {cache_key}: {cache_error}")
+                    logger.warning(f" Не удалось сохранить результаты в кэш {cache_key}: {cache_error}")
 
             return results
 
         except Exception as e:
-            logger.error(f"❌ Ошибка поиска документов: {e}")
+            logger.error(f" Ошибка поиска документов: {e}")
             return []
 
     def get_health_status(self) -> Dict[str, Any]:
@@ -260,21 +260,30 @@ def get_redis_client():
     """Получение синхронного Redis клиента для использования в боте."""
     global redis_manager
 
+    try:
+        redis_manager
+    except NameError:
+        redis_manager = None
+
     if redis_manager and redis_manager.sync_client:
         return redis_manager.sync_client
 
     # Если менеджер не инициализирован, создаем простой клиент
     try:
         import redis
+        redis_password = getattr(SETTINGS, 'REDIS_PASSWORD', '') or ''
         client = redis.Redis(
             host=SETTINGS.REDIS_HOST,
             port=SETTINGS.REDIS_PORT,
             db=SETTINGS.REDIS_DB,
-            decode_responses=True
+            password=redis_password or None,
+            decode_responses=True,
+            socket_connect_timeout=5,
+            socket_timeout=5,
         )
         return client
     except Exception as e:
-        logger.error(f"❌ Ошибка создания Redis клиента: {e}")
+        logger.error(f" Ошибка создания Redis клиента: {e}")
         return None
 
 
@@ -286,7 +295,7 @@ async def add_documents_to_vector_store(vector_store, chunks):
     if hasattr(vector_store, 'add_documents'):
         return await vector_store.add_documents(chunks)
     else:
-        logger.error("❌ Vector store не поддерживает add_documents")
+        logger.error(" Vector store не поддерживает add_documents")
         return False
 
 
@@ -305,5 +314,5 @@ async def update_task_status(task_id: str, status: str, progress: int = None):
             redis_client.hset(f"task:{task_id}", mapping=task_data)
             return True
     except Exception as e:
-        logger.error(f"❌ Ошибка обновления статуса задачи {task_id}: {e}")
+        logger.error(f" Ошибка обновления статуса задачи {task_id}: {e}")
     return False

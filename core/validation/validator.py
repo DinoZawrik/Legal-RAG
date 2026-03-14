@@ -55,7 +55,7 @@ class QualityValidator:
                 'forbidden_elements': ['outdated_references', 'fictional_laws', 'unsupported_claims'],
                 'reference_patterns': [
                     r'статья\s+\d+',
-                    r'федеральный закон\s+№?\s*\d+',
+                    r'федеральный закон\s+?\s*\d+',
                     r'кодекс\s+\w+',
                     r'конституция\s+рф'
                 ]
@@ -197,8 +197,8 @@ class QualityValidator:
             report = ValidationReport(
                 response_id=response.response_id,
                 timestamp=datetime.now(),
-                overall_score=0.0,  # Будет пересчитано
-                quality_grade=ResponseQuality.POOR  # Будет пересчитано
+                overall_score=0.0, # Будет пересчитано
+                quality_grade=ResponseQuality.POOR # Будет пересчитано
             )
 
             # 1. Фактическая проверка
@@ -425,7 +425,7 @@ class QualityValidator:
             overlap = len(query_keywords & response_keywords)
             relevance_score = overlap / len(query_keywords) if query_keywords else 0
 
-            if relevance_score < 0.3:  # Менее 30% пересечения
+            if relevance_score < 0.3: # Менее 30% пересечения
                 issues.append(ValidationIssue(
                     issue_id="relevance_keywords",
                     category=ValidationCategory.RELEVANCE,

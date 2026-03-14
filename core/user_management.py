@@ -109,9 +109,9 @@ class UserManager:
                     max_size=10,
                     command_timeout=60
                 )
-                logger.info("✅ Created database connection pool")
+                logger.info(" Created database connection pool")
             except Exception as e:
-                logger.error(f"❌ Failed to create connection pool: {e}")
+                logger.error(f" Failed to create connection pool: {e}")
                 raise
         
         return self._connection_pool
@@ -120,7 +120,7 @@ class UserManager:
         """Закрытие пула подключений"""
         if self._connection_pool and not self._connection_pool.is_closing():
             await self._connection_pool.close()
-            logger.info("🔒 Closed database connection pool")
+            logger.info(" Closed database connection pool")
     
     # ============================================================================
     # CRUD операции для пользователей
@@ -171,7 +171,7 @@ class UserManager:
                 )
                 
             except Exception as e:
-                logger.error(f"❌ Error getting user by telegram_id {telegram_id}: {e}")
+                logger.error(f" Error getting user by telegram_id {telegram_id}: {e}")
                 return None
     
     async def create_user(self, user: TelegramUser, granted_by: str = "system") -> Optional[TelegramUser]:
@@ -210,14 +210,14 @@ class UserManager:
                                 conn, user.id, permission, granted_by
                             )
                     
-                    logger.info(f"✅ Created user {user.telegram_id} with {len(user.permissions)} permissions")
+                    logger.info(f" Created user {user.telegram_id} with {len(user.permissions)} permissions")
                     return user
                     
             except asyncpg.UniqueViolationError:
-                logger.warning(f"⚠️ User with telegram_id {user.telegram_id} already exists")
+                logger.warning(f" User with telegram_id {user.telegram_id} already exists")
                 return None
             except Exception as e:
-                logger.error(f"❌ Error creating user: {e}")
+                logger.error(f" Error creating user: {e}")
                 return None
     
     async def update_user(self, user: TelegramUser) -> bool:
@@ -244,11 +244,11 @@ class UserManager:
                     user.last_activity or datetime.utcnow()
                 )
                 
-                logger.info(f"✅ Updated user {user.telegram_id}")
+                logger.info(f" Updated user {user.telegram_id}")
                 return True
                 
             except Exception as e:
-                logger.error(f"❌ Error updating user {user.telegram_id}: {e}")
+                logger.error(f" Error updating user {user.telegram_id}: {e}")
                 return False
     
     async def delete_user(self, telegram_id: int) -> bool:
@@ -263,11 +263,11 @@ class UserManager:
                     telegram_id
                 )
                 
-                logger.info(f"✅ Deleted user {telegram_id}")
+                logger.info(f" Deleted user {telegram_id}")
                 return True
                 
             except Exception as e:
-                logger.error(f"❌ Error deleting user {telegram_id}: {e}")
+                logger.error(f" Error deleting user {telegram_id}: {e}")
                 return False
     
     async def get_all_users(self, limit: int = 100, offset: int = 0) -> List[TelegramUser]:
@@ -314,11 +314,11 @@ class UserManager:
                     )
                     users.append(user)
                 
-                logger.info(f"✅ Retrieved {len(users)} users")
+                logger.info(f" Retrieved {len(users)} users")
                 return users
                 
             except Exception as e:
-                logger.error(f"❌ Error getting all users: {e}")
+                logger.error(f" Error getting all users: {e}")
                 return []
     
     # ============================================================================
@@ -350,7 +350,7 @@ class UserManager:
                 )
                 
                 if not user_id_row:
-                    logger.warning(f"⚠️ User {telegram_id} not found for permission grant")
+                    logger.warning(f" User {telegram_id} not found for permission grant")
                     return False
                 
                 await self._grant_permission(conn, user_id_row['id'], permission_type, granted_by)
@@ -362,11 +362,11 @@ class UserManager:
                 if permission_type == PermissionType.UPLOAD_DOCUMENTS.value:
                     await permissions_cache.invalidate_upload_users_cache()
                 
-                logger.info(f"✅ Granted permission {permission_type} to user {telegram_id}")
+                logger.info(f" Granted permission {permission_type} to user {telegram_id}")
                 return True
                 
             except Exception as e:
-                logger.error(f"❌ Error granting permission {permission_type} to user {telegram_id}: {e}")
+                logger.error(f" Error granting permission {permission_type} to user {telegram_id}: {e}")
                 return False
     
     async def revoke_permission(self, telegram_id: int, permission_type: str) -> bool:
@@ -392,11 +392,11 @@ class UserManager:
                 if permission_type == PermissionType.UPLOAD_DOCUMENTS.value:
                     await permissions_cache.invalidate_upload_users_cache()
                 
-                logger.info(f"✅ Revoked permission {permission_type} from user {telegram_id}")
+                logger.info(f" Revoked permission {permission_type} from user {telegram_id}")
                 return True
                 
             except Exception as e:
-                logger.error(f"❌ Error revoking permission {permission_type} from user {telegram_id}: {e}")
+                logger.error(f" Error revoking permission {permission_type} from user {telegram_id}: {e}")
                 return False
     
     async def check_permission(self, telegram_id: int, permission_type: str) -> bool:
@@ -425,7 +425,7 @@ class UserManager:
                     if not user_exists:
                         # Пользователя нет в БД - очищаем его кэш
                         await permissions_cache.invalidate_user_permissions(telegram_id)
-                        logger.info(f"🧹 Cleared cache for non-existent user {telegram_id}")
+                        logger.info(f" Cleared cache for non-existent user {telegram_id}")
                 
                 # Обновляем кэш актуальными данными из БД
                 user = await self.get_user_by_telegram_id(telegram_id)
@@ -438,7 +438,7 @@ class UserManager:
                 return result
                 
         except Exception as e:
-            logger.error(f"❌ Error checking permission {permission_type} for user {telegram_id}: {e}")
+            logger.error(f" Error checking permission {permission_type} for user {telegram_id}: {e}")
             return False
     
     # ============================================================================
@@ -471,11 +471,11 @@ class UserManager:
                 # Кэшируем результат
                 await permissions_cache.cache_upload_users(telegram_ids)
                 
-                logger.info(f"✅ Found {len(telegram_ids)} users with upload permission")
+                logger.info(f" Found {len(telegram_ids)} users with upload permission")
                 return telegram_ids
                 
         except Exception as e:
-            logger.error(f"❌ Error getting users with upload permission: {e}")
+            logger.error(f" Error getting users with upload permission: {e}")
             return []
     
     async def sync_with_environment_variable(self) -> bool:
@@ -501,11 +501,11 @@ class UserManager:
                     
                     await self.create_user(user, "environment_sync")
             
-            logger.info("✅ Synchronized users with environment variable")
+            logger.info(" Synchronized users with environment variable")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error syncing with environment variable: {e}")
+            logger.error(f" Error syncing with environment variable: {e}")
             return False
     
     # ============================================================================
@@ -552,12 +552,12 @@ class UserManager:
                     'new_users_month': new_users_month,
                     'daily_active': daily_active,
                     'roles_distribution': roles_distribution,
-                    'daily_activity': {},  # Можно расширить при необходимости
-                    'top_active_users': []  # Можно расширить при необходимости
+                    'daily_activity': {}, # Можно расширить при необходимости
+                    'top_active_users': [] # Можно расширить при необходимости
                 }
                 
             except Exception as e:
-                logger.error(f"❌ Error getting user statistics: {e}")
+                logger.error(f" Error getting user statistics: {e}")
                 return {}
 
 

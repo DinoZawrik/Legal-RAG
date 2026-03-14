@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🗄️ Vector Store Manager
+Vector Store Manager
 Модуль для работы с векторным хранилищем ChromaDB.
 
 Включает функциональность:
@@ -10,10 +10,10 @@
 - Поддержка различных типов чанков
 
 МИГРАЦИЯ v2.0 (13.10.2025):
-- ❌ Удалена зависимость от Google Gemini API
-- ✅ Использует локальный HTTP сервер (localhost:8001)
-- ✅ Более быстрая генерация embeddings (без network latency)
-- ✅ Совместимость с ChromaDB (1024-dim vectors)
+- Удалена зависимость от Google Gemini API
+- Использует локальный HTTP сервер (localhost:8001)
+- Более быстрая генерация embeddings (без network latency)
+- Совместимость с ChromaDB (1024-dim vectors)
 """
 
 import json
@@ -58,7 +58,7 @@ class VectorStoreManager:
     """
 
     def __init__(self):
-        self.client = None  # ChromaDB client
+        self.client = None # ChromaDB client
         self.collection = None
         self.embedding_model = None
 
@@ -75,10 +75,10 @@ class VectorStoreManager:
             # HNSW parameters for Russian legal text (Context7 optimized)
             hnsw_metadata = {
                 "description": "Document embeddings with HNSW optimization",
-                "hnsw:space": "cosine",  # Cosine similarity for embeddings
-                "hnsw:construction_ef": 200,  # Build accuracy (good for ~250 chunks)
-                "hnsw:search_ef": 100,  # Query accuracy (optimal for 5-10 results)
-                "hnsw:M": 16  # Graph connectivity (standard)
+                "hnsw:space": "cosine", # Cosine similarity for embeddings
+                "hnsw:construction_ef": 200, # Build accuracy (good for ~250 chunks)
+                "hnsw:search_ef": 100, # Query accuracy (optimal for 5-10 results)
+                "hnsw:M": 16 # Graph connectivity (standard)
             }
 
             # Создание или получение коллекции
@@ -103,25 +103,25 @@ class VectorStoreManager:
             # Health check локального сервера
             try:
                 health = await self.embeddings_client.health_check()
-                logger.info(f"✅ Embeddings сервер доступен: {health}")
+                logger.info(f" Embeddings сервер доступен: {health}")
 
                 # Получаем информацию о модели
                 info = await self.embeddings_client.get_model_info()
                 self.embedding_model = info.get('model_name', 'giga-embeddings-instruct')
                 self.embedding_dimension = info.get('embedding_dimension', 1024)
 
-                logger.info(f"📊 Модель: {self.embedding_model}, Размерность: {self.embedding_dimension}")
+                logger.info(f" Модель: {self.embedding_model}, Размерность: {self.embedding_dimension}")
 
             except Exception as e:
-                logger.error(f"❌ Не удалось подключиться к embeddings серверу на {embeddings_url}: {e}")
-                logger.error("   Убедитесь что сервер запущен: docker-compose -f docker-compose.embeddings.yml up -d")
+                logger.error(f" Не удалось подключиться к embeddings серверу на {embeddings_url}: {e}")
+                logger.error(" Убедитесь что сервер запущен: docker-compose -f docker-compose.embeddings.yml up -d")
                 raise
 
-            logger.info(f"✅ Vector store инициализирован с локальным Giga-Embeddings сервером ({embeddings_url})")
+            logger.info(f" Vector store инициализирован с локальным Giga-Embeddings сервером ({embeddings_url})")
             return True
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации vector store: {e}")
+            logger.error(f" Ошибка инициализации vector store: {e}")
             return False
 
     async def create_embeddings(self, texts: List[str]) -> List[List[float]]:
@@ -129,17 +129,17 @@ class VectorStoreManager:
         МИГРАЦИЯ v2.0: Создание эмбеддингов через локальный Giga-Embeddings сервер.
 
         Улучшения по сравнению с Gemini API:
-        - ✅ Более быстрая генерация (без network latency к external API)
-        - ✅ Не требует API ключей и ротации
-        - ✅ Батчинг обрабатывается на стороне сервера
-        - ✅ Надёжнее (нет rate limits)
+        - Более быстрая генерация (без network latency к external API)
+        - Не требует API ключей и ротации
+        - Батчинг обрабатывается на стороне сервера
+        - Надёжнее (нет rate limits)
         """
         try:
             if not texts:
-                logger.warning("⚠️ Пустой список текстов для генерации embeddings")
+                logger.warning(" Пустой список текстов для генерации embeddings")
                 return []
 
-            logger.info(f"🔄 Создание embeddings для {len(texts)} текстов через локальный сервер")
+            logger.info(f" Создание embeddings для {len(texts)} текстов через локальный сервер")
 
             # Вызов локального embeddings сервера (один запрос для всех текстов!)
             embeddings = await self.embeddings_client.generate_embeddings(texts)
@@ -149,18 +149,18 @@ class VectorStoreManager:
                 actual_dim = len(embeddings[0])
                 expected_dim = getattr(self, 'embedding_dimension', 1024)
 
-                logger.info(f"✅ Получено {len(embeddings)} embedding(s), размерность: {actual_dim}")
+                logger.info(f" Получено {len(embeddings)} embedding(s), размерность: {actual_dim}")
 
                 if actual_dim != expected_dim:
-                    logger.warning(f"⚠️ Размерность не совпадает: ожидали {expected_dim}, получили {actual_dim}")
+                    logger.warning(f" Размерность не совпадает: ожидали {expected_dim}, получили {actual_dim}")
                     # Обновляем ожидаемую размерность
                     self.embedding_dimension = actual_dim
 
             return embeddings
 
         except Exception as e:
-            logger.error(f"❌ Ошибка создания embeddings через локальный сервер: {e}")
-            logger.error(f"   Проверьте что embeddings сервер запущен: docker-compose -f docker-compose.embeddings.yml up -d")
+            logger.error(f" Ошибка создания embeddings через локальный сервер: {e}")
+            logger.error(f" Проверьте что embeddings сервер запущен: docker-compose -f docker-compose.embeddings.yml up -d")
             return []
 
     async def add_documents(self, chunks: List) -> bool:
@@ -179,7 +179,7 @@ class VectorStoreManager:
             for chunk in chunks:
                 # Извлекаем текст в зависимости от типа чанка
                 text_content = self._extract_text_from_chunk(chunk)
-                if text_content:  # Только если есть текстовое содержимое
+                if text_content: # Только если есть текстовое содержимое
                     texts.append(text_content)
 
                     # Безопасное получение ID чанка
@@ -205,7 +205,7 @@ class VectorStoreManager:
                             if candidate not in batch_ids:
                                 chunk_id = candidate
                                 logger.debug(
-                                    "🔁 Обнаружен дубликат chunk_id %s, переименован в %s",
+                                    " Обнаружен дубликат chunk_id %s, переименован в %s",
                                     base_id,
                                     chunk_id,
                                 )
@@ -233,9 +233,9 @@ class VectorStoreManager:
                             'relationships': getattr(chunk, 'relationships', []),
                             'key_insights': getattr(chunk, 'key_insights', []),
                             'context_summary': getattr(chunk, 'context_summary', None),
-                            'contextual_extraction': True  # Флаг что это контекстуальный чанк
+                            'contextual_extraction': True # Флаг что это контекстуальный чанк
                         })
-                        logger.info(f"📊 Добавлены контекстуальные метаданные: {len(chunk.elements)} элементов, {len(chunk.relationships)} связей")
+                        logger.info(f" Добавлены контекстуальные метаданные: {len(chunk.elements)} элементов, {len(chunk.relationships)} связей")
                     # Альтернативная проверка для чанков где контекстуальные данные в content
                     elif hasattr(chunk, 'content') and hasattr(chunk.content, 'slide_number'):
                         contextual_content = chunk.content
@@ -248,14 +248,14 @@ class VectorStoreManager:
                             'relationships': getattr(contextual_content, 'relationships', []),
                             'key_insights': getattr(contextual_content, 'key_insights', []),
                             'context_summary': getattr(contextual_content, 'context_summary', None),
-                            'contextual_extraction': True  # Флаг что это контекстуальный чанк
+                            'contextual_extraction': True # Флаг что это контекстуальный чанк
                         })
-                        logger.info(f"📊 Добавлены контекстуальные метаданные из content: {len(contextual_content.elements)} элементов, {len(contextual_content.relationships)} связей")
+                        logger.info(f" Добавлены контекстуальные метаданные из content: {len(contextual_content.elements)} элементов, {len(contextual_content.relationships)} связей")
 
                     metadatas.append(chunk_metadata)
 
             if not texts:
-                logger.warning("⚠️ Нет текстового содержимого для сохранения в vector store")
+                logger.warning(" Нет текстового содержимого для сохранения в vector store")
                 return True
 
             # Создание эмбеддингов
@@ -266,20 +266,20 @@ class VectorStoreManager:
 
             # Проверка размеров массивов перед добавлением
             if len(embeddings) != len(texts):
-                logger.error(f"❌ Несоответствие размеров: embeddings={len(embeddings)}, texts={len(texts)}")
+                logger.error(f" Несоответствие размеров: embeddings={len(embeddings)}, texts={len(texts)}")
                 # Обрезаем эмбеддинги до нужного размера
                 embeddings = embeddings[:len(texts)]
-                logger.warning(f"⚠️ Обрезали embeddings до {len(embeddings)} элементов")
+                logger.warning(f" Обрезали embeddings до {len(embeddings)} элементов")
 
             if len(metadatas) != len(texts):
-                logger.error(f"❌ Несоответствие размеров: metadatas={len(metadatas)}, texts={len(texts)}")
+                logger.error(f" Несоответствие размеров: metadatas={len(metadatas)}, texts={len(texts)}")
                 metadatas = metadatas[:len(texts)]
 
             if len(ids) != len(texts):
-                logger.error(f"❌ Несоответствие размеров: ids={len(ids)}, texts={len(texts)}")
+                logger.error(f" Несоответствие размеров: ids={len(ids)}, texts={len(texts)}")
                 ids = ids[:len(texts)]
 
-            logger.info(f"📊 Проверка размеров: texts={len(texts)}, embeddings={len(embeddings)}, metadatas={len(metadatas)}, ids={len(ids)}")
+            logger.info(f" Проверка размеров: texts={len(texts)}, embeddings={len(embeddings)}, metadatas={len(metadatas)}, ids={len(ids)}")
 
             # Context7 best practice: await async operations
             await self.collection.add(
@@ -293,7 +293,7 @@ class VectorStoreManager:
             return True
 
         except Exception as e:
-            logger.error(f"❌ Ошибка добавления документов в vector store: {e}")
+            logger.error(f" Ошибка добавления документов в vector store: {e}")
             return False
 
     def _extract_text_from_chunk(self, chunk) -> str:
@@ -301,7 +301,7 @@ class VectorStoreManager:
         try:
             # TextChunk - стандартный текстовый чанк
             if hasattr(chunk, 'text') and isinstance(chunk.text, str):
-                logger.debug(f"📝 Извлекаем text из TextChunk: {len(chunk.text)} символов")
+                logger.debug(f" Извлекаем text из TextChunk: {len(chunk.text)} символов")
                 return chunk.text
 
             # AnyChunk - универсальный чанк (проверяем первым, так как содержит разные типы)
@@ -309,59 +309,59 @@ class VectorStoreManager:
                 chunk_type = getattr(chunk, 'chunk_type', '')
                 content = chunk.content
 
-                logger.debug(f"📦 Обрабатываем AnyChunk с типом: '{chunk_type}', content type: {type(content).__name__}")
+                logger.debug(f" Обрабатываем AnyChunk с типом: '{chunk_type}', content type: {type(content).__name__}")
 
                 # Контекстуальный чанк из Universal Contextual Extraction v2.0
                 if chunk_type == 'contextual' and hasattr(content, 'searchable_text'):
                     text_length = len(content.searchable_text) if content.searchable_text else 0
-                    logger.debug(f"📊 Извлекаем searchable_text из ContextualChunk: {text_length} символов")
+                    logger.debug(f" Извлекаем searchable_text из ContextualChunk: {text_length} символов")
                     return content.searchable_text or ""
 
                 # TableChunk - табличные данные
                 elif chunk_type == 'table':
                     if hasattr(content, 'table_content') and isinstance(content.table_content, str):
-                        logger.debug(f"📋 Извлекаем table_content из TableChunk: {len(content.table_content)} символов")
+                        logger.debug(f" Извлекаем table_content из TableChunk: {len(content.table_content)} символов")
                         return content.table_content
                     elif hasattr(content, 'content') and isinstance(content.content, str):
-                        logger.debug(f"📋 Извлекаем content из TableChunk: {len(content.content)} символов")
+                        logger.debug(f" Извлекаем content из TableChunk: {len(content.content)} символов")
                         return content.content
                     elif hasattr(content, 'text') and isinstance(content.text, str):
-                        logger.debug(f"📋 Извлекаем text из TableChunk: {len(content.text)} символов")
+                        logger.debug(f" Извлекаем text из TableChunk: {len(content.text)} символов")
                         return content.text
 
                 # Чанк с графиком или диаграммой
                 elif chunk_type == 'chart' and isinstance(content, str):
-                    logger.debug(f"📊 Извлекаем content из chart chunk: {len(content)} символов")
+                    logger.debug(f" Извлекаем content из chart chunk: {len(content)} символов")
                     return content
 
                 # Чанк со связями
                 elif chunk_type == 'relationship' and isinstance(content, str):
-                    logger.debug(f"🔗 Извлекаем content из relationship chunk: {len(content)} символов")
+                    logger.debug(f" Извлекаем content из relationship chunk: {len(content)} символов")
                     return content
 
                 # Общий случай для AnyChunk - пробуем различные атрибуты content
                 if hasattr(content, 'text') and isinstance(content.text, str):
-                    logger.debug(f"📄 Извлекаем text из content: {len(content.text)} символов")
+                    logger.debug(f" Извлекаем text из content: {len(content.text)} символов")
                     return content.text
                 elif hasattr(content, 'content') and isinstance(content.content, str):
-                    logger.debug(f"📄 Извлекаем content.content: {len(content.content)} символов")
+                    logger.debug(f" Извлекаем content.content: {len(content.content)} символов")
                     return content.content
                 elif isinstance(content, str):
-                    logger.debug(f"📝 Content сам является строкой: {len(content)} символов")
+                    logger.debug(f" Content сам является строкой: {len(content)} символов")
                     return content
                 elif hasattr(content, '__str__'):
                     str_content = str(content)
-                    logger.debug(f"📝 Преобразовали content в строку: {len(str_content)} символов")
+                    logger.debug(f" Преобразовали content в строку: {len(str_content)} символов")
                     return str_content
 
             # TableChunk - отдельная проверка для совместимости
             elif hasattr(chunk, 'table_content') and isinstance(chunk.table_content, str):
-                logger.debug(f"📋 Извлекаем table_content напрямую: {len(chunk.table_content)} символов")
+                logger.debug(f" Извлекаем table_content напрямую: {len(chunk.table_content)} символов")
                 return chunk.table_content
 
             # Если chunk сам является строкой (edge case)
             elif isinstance(chunk, str):
-                logger.debug(f"📝 Chunk сам является строкой: {len(chunk)} символов")
+                logger.debug(f" Chunk сам является строкой: {len(chunk)} символов")
                 return chunk
 
             # Резервный вариант - ищем текстовые атрибуты
@@ -369,21 +369,21 @@ class VectorStoreManager:
                 if hasattr(chunk, attr):
                     value = getattr(chunk, attr)
                     if isinstance(value, str) and value.strip():
-                        logger.debug(f"📄 Найден текст в атрибуте '{attr}': {len(value)} символов")
+                        logger.debug(f" Найден текст в атрибуте '{attr}': {len(value)} символов")
                         return value
 
             # Последний fallback - преобразование к строке
             if hasattr(chunk, '__str__'):
                 str_chunk = str(chunk)
-                if len(str_chunk.strip()) > 0 and not str_chunk.startswith('<'):  # Избегаем объектных представлений
-                    logger.debug(f"📝 Преобразовали chunk в строку: {len(str_chunk)} символов")
+                if len(str_chunk.strip()) > 0 and not str_chunk.startswith('<'): # Избегаем объектных представлений
+                    logger.debug(f" Преобразовали chunk в строку: {len(str_chunk)} символов")
                     return str_chunk
 
-            logger.warning(f"⚠️ Не удалось извлечь текст из чанка типа {type(chunk).__name__}, атрибуты: {dir(chunk)}")
+            logger.warning(f" Не удалось извлечь текст из чанка типа {type(chunk).__name__}, атрибуты: {dir(chunk)}")
             return ""
 
         except Exception as e:
-            logger.error(f"❌ Ошибка извлечения текста из чанка: {e}")
+            logger.error(f" Ошибка извлечения текста из чанка: {e}")
             import traceback
             logger.debug(traceback.format_exc())
             return ""
@@ -410,17 +410,17 @@ class VectorStoreManager:
                 formatted_results.append({
                     'id': results['ids'][0][i],
                     'text': results['documents'][0][i],
-                    'document': results['documents'][0][i],  # Дублируем для совместимости
+                    'document': results['documents'][0][i], # Дублируем для совместимости
                     'metadata': results['metadatas'][0][i],
                     'distance': results['distances'][0][i],
-                    'similarity': 1 - results['distances'][0][i]  # Конвертация в similarity
+                    'similarity': 1 - results['distances'][0][i] # Конвертация в similarity
                 })
 
-            logger.info(f"🔍 Найдено {len(formatted_results)} похожих документов")
+            logger.info(f" Найдено {len(formatted_results)} похожих документов")
             return formatted_results
 
         except Exception as e:
-            logger.error(f"❌ Ошибка поиска похожих документов: {e}")
+            logger.error(f" Ошибка поиска похожих документов: {e}")
             return []
 
     async def get_collection_stats(self) -> Dict:
@@ -435,7 +435,7 @@ class VectorStoreManager:
             }
 
         except Exception as e:
-            logger.error(f"❌ Ошибка получения статистики: {e}")
+            logger.error(f" Ошибка получения статистики: {e}")
             return {}
 
 
@@ -453,6 +453,6 @@ async def add_documents_to_vector_store(vector_store, chunks):
     if hasattr(vector_store, 'add_documents'):
         return await vector_store.add_documents(chunks)
     else:
-        logger.error("❌ Vector store не поддерживает add_documents")
+        logger.error(" Vector store не поддерживает add_documents")
         return False
 

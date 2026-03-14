@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔄 Task Queue System
+Task Queue System
 Система управления фоновыми задачами на основе Redis
 """
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class TaskStatus(Enum):
     """Статусы задач."""
     PENDING = "pending"
-    PROCESSING = "processing"  
+    PROCESSING = "processing" 
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
@@ -42,14 +42,14 @@ class Task:
     task_id: str
     task_type: str
     data: Dict[str, Any]
-    status: Any = None  # Будет конвертирован в TaskStatus в __post_init__
-    priority: Any = None  # Будет конвертирован в TaskPriority в __post_init__
+    status: Any = None # Будет конвертирован в TaskStatus в __post_init__
+    priority: Any = None # Будет конвертирован в TaskPriority в __post_init__
     created_at: float = None
     started_at: Optional[float] = None
     completed_at: Optional[float] = None
     error_message: Optional[str] = None
     progress_messages: List[Dict[str, Any]] = None
-    progress: int = 0  # 0-100%
+    progress: int = 0 # 0-100%
     result: Optional[Dict[str, Any]] = None
     worker_id: Optional[str] = None
     retry_count: int = 0
@@ -74,7 +74,7 @@ class Task:
                 # Если это уже правильный формат
                 self.status = TaskStatus(self.status)
         
-        # Конвертируем priority в enum  
+        # Конвертируем priority в enum 
         if self.priority is None:
             self.priority = TaskPriority.NORMAL
         elif isinstance(self.priority, str):
@@ -122,23 +122,23 @@ class TaskQueue:
         # Обработчики задач
         self.handlers: Dict[str, Callable] = {}
         
-        logger.info(f"🔄 TaskQueue initialized with prefix: {queue_prefix}")
+        logger.info(f" TaskQueue initialized with prefix: {queue_prefix}")
     
     async def connect(self):
         """Подключение к Redis."""
         try:
             self.redis_client = redis.from_url(self.redis_url, decode_responses=True)
             await self.redis_client.ping()
-            logger.info("✅ Connected to Redis for TaskQueue")
+            logger.info(" Connected to Redis for TaskQueue")
         except Exception as e:
-            logger.error(f"❌ Failed to connect to Redis: {e}")
+            logger.error(f" Failed to connect to Redis: {e}")
             raise
     
     async def disconnect(self):
         """Отключение от Redis."""
         if self.redis_client:
             await self.redis_client.close()
-            logger.info("🔌 Disconnected from Redis")
+            logger.info(" Disconnected from Redis")
     
     async def add_task(
         self, 
@@ -186,7 +186,7 @@ class TaskQueue:
         # Обновляем статистику
         await self._update_stats("tasks_created", 1)
         
-        logger.info(f"📝 Task {task_id} ({task_type}) added to queue with priority {priority.name}")
+        logger.info(f" Task {task_id} ({task_type}) added to queue with priority {priority.name}")
         return task_id
     
     async def get_task_status(self, task_id: str) -> Optional[Dict[str, Any]]:
@@ -219,7 +219,7 @@ class TaskQueue:
         # Обновляем статус, если задача была в очереди
         if removed_from_queue:
             await self._update_task_status(task_id, TaskStatus.CANCELLED)
-            logger.info(f"❌ Task {task_id} cancelled")
+            logger.info(f" Task {task_id} cancelled")
             return True
         
         # Проверяем, не обрабатывается ли задача сейчас
@@ -227,7 +227,7 @@ class TaskQueue:
         if processing:
             # Помечаем как отмененную, worker должен проверять этот статус
             await self._update_task_status(task_id, TaskStatus.CANCELLED)
-            logger.info(f"⏹️ Task {task_id} marked for cancellation")
+            logger.info(f" Task {task_id} marked for cancellation")
             return True
         
         return False
@@ -266,7 +266,7 @@ class TaskQueue:
         
         await self._save_task(task)
         
-        logger.info(f"🔄 Task {task_id} assigned to worker {worker_id}")
+        logger.info(f" Task {task_id} assigned to worker {worker_id}")
         return task
     
     async def complete_task(self, task_id: str, result: Dict[str, Any]):
@@ -284,7 +284,7 @@ class TaskQueue:
         # Обновляем статистику
         await self._update_stats("tasks_completed", 1)
         
-        logger.info(f"✅ Task {task_id} completed")
+        logger.info(f" Task {task_id} completed")
     
     async def fail_task(self, task_id: str, error_message: str):
         """Помечание задачи как неудачной."""
@@ -306,7 +306,7 @@ class TaskQueue:
             task.completed_at = time.time()
             await self.redis_client.srem(self.processing_key, task_id)
             await self._update_stats("tasks_failed", 1)
-            logger.error(f"❌ Task {task_id} failed permanently: {error_message}")
+            logger.error(f" Task {task_id} failed permanently: {error_message}")
         else:
             # Возвращаем в очередь для повторной попытки
             task.status = TaskStatus.PENDING
@@ -316,7 +316,7 @@ class TaskQueue:
                 {task_id: priority_value}
             )
             await self.redis_client.srem(self.processing_key, task_id)
-            logger.warning(f"🔄 Task {task_id} failed, retry {task.retry_count}/{task.max_retries}: {error_message}")
+            logger.warning(f" Task {task_id} failed, retry {task.retry_count}/{task.max_retries}: {error_message}")
         
         await self._save_task(task)
     
@@ -343,7 +343,7 @@ class TaskQueue:
             json.dumps(task_dict, default=str)
         )
         
-        logger.debug(f"📊 Task {task_id} progress: {progress}%")
+        logger.debug(f" Task {task_id} progress: {progress}%")
     
     async def get_queue_stats(self) -> Dict[str, Any]:
         """Получение статистики очереди."""
@@ -383,7 +383,7 @@ class TaskQueue:
                 await self.redis_client.hdel(self.results_key, task_id)
                 cleaned_count += 1
         
-        logger.info(f"🧹 Cleaned up {cleaned_count} old tasks")
+        logger.info(f" Cleaned up {cleaned_count} old tasks")
         return cleaned_count
     
     # Внутренние методы
@@ -428,7 +428,7 @@ class TaskQueue:
     def register_handler(self, task_type: str, handler: Callable):
         """Регистрация обработчика для типа задач."""
         self.handlers[task_type] = handler
-        logger.info(f"📋 Handler registered for task type: {task_type}")
+        logger.info(f" Handler registered for task type: {task_type}")
     
     async def process_tasks(self, worker_id: str = None):
         """
@@ -438,7 +438,7 @@ class TaskQueue:
         if not worker_id:
             worker_id = f"worker-{uuid.uuid4().hex[:8]}"
         
-        logger.info(f"🔄 Worker {worker_id} started processing tasks")
+        logger.info(f" Worker {worker_id} started processing tasks")
         
         while True:
             try:
@@ -450,12 +450,12 @@ class TaskQueue:
                     await asyncio.sleep(1)
                     continue
                 
-                logger.info(f"📋 Processing task {task.task_id} ({task.task_type})")
+                logger.info(f" Processing task {task.task_id} ({task.task_type})")
                 # Проверяем, не отменена ли задача
                 current_status = await self.get_task_status(task.task_id)
-                print(f"🔍 DEBUG: Got current_status: {current_status}")
+                print(f" DEBUG: Got current_status: {current_status}")
                 if current_status and current_status["status"] == TaskStatus.CANCELLED.value:
-                    logger.info(f"⏹️ Task {task.task_id} was cancelled, skipping")
+                    logger.info(f" Task {task.task_id} was cancelled, skipping")
                     await self.redis_client.srem(self.processing_key, task.task_id)
                     continue
                 
@@ -467,16 +467,16 @@ class TaskQueue:
                 
                 # Обрабатываем задачу
                 try:
-                    logger.info(f"🔄 Processing task {task.task_id} ({task.task_type})")
+                    logger.info(f" Processing task {task.task_id} ({task.task_type})")
                     result = await handler(task)
                     await self.complete_task(task.task_id, result)
                     
                 except Exception as e:
-                    logger.error(f"❌ Task {task.task_id} failed: {e}")
+                    logger.error(f" Task {task.task_id} failed: {e}")
                     await self.fail_task(task.task_id, str(e))
             
             except Exception as e:
-                logger.error(f"❌ Worker {worker_id} error: {e}")
+                logger.error(f" Worker {worker_id} error: {e}")
                 await asyncio.sleep(5)
 
 

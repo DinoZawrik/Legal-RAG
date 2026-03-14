@@ -49,7 +49,7 @@ class BaseValidator:
                 'forbidden_elements': ['outdated_references', 'fictional_laws', 'unsupported_claims'],
                 'reference_patterns': [
                     r'статья\s+\d+',
-                    r'федеральный закон\s+№?\s*\d+',
+                    r'федеральный закон\s+?\s*\d+',
                     r'кодекс\s+\w+',
                     r'конституция\s+рф'
                 ]
@@ -182,13 +182,13 @@ class BaseValidator:
             matches = re.findall(pattern, response_text, re.IGNORECASE)
             references.extend(matches)
 
-        return list(set(references))  # Убираем дубликаты
+        return list(set(references)) # Убираем дубликаты
 
     def verify_legal_reference(self, reference: str,
                               search_results: List[Dict[str, Any]] = None) -> bool:
         """Проверяет существование правовой ссылки"""
         if not search_results:
-            return True  # Не можем проверить без исходных данных
+            return True # Не можем проверить без исходных данных
 
         # Поиск ссылки в исходных документах
         ref_lower = reference.lower()
@@ -239,7 +239,7 @@ class BaseValidator:
             matches = re.findall(pattern, response_text)
             for match in matches:
                 # Базовая проверка реалистичности дат
-                if '2025' in match or '2026' in match:  # Будущие годы
+                if '2025' in match or '2026' in match: # Будущие годы
                     issues.append(self.create_issue(
                         issue_id=f"date_future_{len(issues)}",
                         category=ValidationCategory.FACTUAL_ACCURACY,
@@ -273,7 +273,7 @@ class BaseValidator:
                     amount = int(match.replace(' ', ''))
 
                     # Проверка реалистичности сумм
-                    if amount > 10000000:  # Более 10 млн рублей
+                    if amount > 10000000: # Более 10 млн рублей
                         issues.append(self.create_issue(
                             issue_id=f"numeric_suspicious_{len(issues)}",
                             category=ValidationCategory.FACTUAL_ACCURACY,
@@ -284,7 +284,7 @@ class BaseValidator:
                             affected_elements=[f"{amount:,} рублей"]
                         ))
                 except ValueError:
-                    pass  # Игнорируем некорректные числа
+                    pass # Игнорируем некорректные числа
 
         return issues
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔄 Hybrid Storage Manager
+Hybrid Storage Manager
 Объединяет ChromaDB (семантика) + Neo4j (структура) + Graph Legal Intelligence
 
 Единый интерфейс для:
@@ -30,7 +30,7 @@ from core.graph_legal_engine import (
     GraphContext,
     GraphNode
 )
-# MIGRATED: core.universal_legal_ner (deprecated) → core.ner
+# MIGRATED: core.universal_legal_ner (deprecated) core.ner
 try:
     from core.ner.ner import LegalEntity
 except ImportError:
@@ -68,20 +68,20 @@ class HybridQueryConfig:
     """УЛЬТРА-ОПТИМИЗИРОВАННАЯ конфигурация гибридного запроса для 80%+ успешности"""
     # Семантический поиск (больше покрытие)
     semantic_limit: int = 15
-    semantic_threshold: float = 0.6  # Снижен для большего покрытия
+    semantic_threshold: float = 0.6 # Снижен для большего покрытия
 
     # Графовый поиск (усилен для точности)
     graph_enabled: bool = True
-    graph_depth: int = 3  # Увеличен для глубокого анализа
-    graph_boost_factor: float = 0.5  # Увеличен вес графа
+    graph_depth: int = 3 # Увеличен для глубокого анализа
+    graph_boost_factor: float = 0.5 # Увеличен вес графа
 
     # Гибридное ранжирование (сбалансировано)
     semantic_weight: float = 0.6
-    structural_weight: float = 0.4  # Увеличен вес структуры
+    structural_weight: float = 0.4 # Увеличен вес структуры
 
     # Фильтрация результатов (мягче для покрытия)
-    min_final_score: float = 0.4  # Снижен для большего покрытия
-    max_results: int = 10  # Увеличено для лучших ответов
+    min_final_score: float = 0.4 # Снижен для большего покрытия
+    max_results: int = 10 # Увеличено для лучших ответов
 
 
 class HybridStorageManager:
@@ -114,20 +114,20 @@ class HybridStorageManager:
     async def initialize(self) -> None:
         """Инициализация гибридного хранилища"""
         try:
-            self.logger.info("🔄 Initializing Hybrid Storage Manager...")
+            self.logger.info(" Initializing Hybrid Storage Manager...")
 
             # Инициализация семантического хранилища
-            self.logger.info("📚 Loading semantic storage (ChromaDB)...")
+            self.logger.info(" Loading semantic storage (ChromaDB)...")
             self.semantic_storage = await create_storage_coordinator()
 
             # Инициализация графового движка
-            self.logger.info("🕸️ Loading graph engine (Neo4j + Graph Intelligence)...")
+            self.logger.info(" Loading graph engine (Neo4j + Graph Intelligence)...")
             self.graph_engine = await get_graph_legal_engine()
 
-            self.logger.info("✅ Hybrid Storage Manager initialized successfully")
+            self.logger.info(" Hybrid Storage Manager initialized successfully")
 
         except Exception as e:
-            self.logger.error(f"❌ Failed to initialize Hybrid Storage Manager: {e}")
+            self.logger.error(f" Failed to initialize Hybrid Storage Manager: {e}")
             raise
 
     async def store_document(
@@ -155,9 +155,9 @@ class HybridStorageManager:
                         metadata=document.get("metadata", {}),
                     )
                     results["semantic_storage"] = storage_result
-                    self.logger.info("✅ Document stored in semantic storage")
+                    self.logger.info(" Document stored in semantic storage")
                 except Exception as e:
-                    self.logger.error(f"❌ Semantic storage failed: {e}")
+                    self.logger.error(f" Semantic storage failed: {e}")
                     results["semantic_storage"] = {"success": False, "error": str(e)}
 
             # 2. Обработка и сохранение в граф
@@ -165,9 +165,9 @@ class HybridStorageManager:
                 try:
                     graph_result = await self.graph_engine.process_document_to_graph(document)
                     results["graph_storage"] = graph_result
-                    self.logger.info(f"✅ Document processed to graph: {graph_result.get('nodes_created', 0)} nodes")
+                    self.logger.info(f" Document processed to graph: {graph_result.get('nodes_created', 0)} nodes")
                 except Exception as e:
-                    self.logger.error(f"❌ Graph processing failed: {e}")
+                    self.logger.error(f" Graph processing failed: {e}")
                     results["graph_storage"] = {"success": False, "error": str(e)}
 
             # 3. Общий результат
@@ -179,7 +179,7 @@ class HybridStorageManager:
             return results
 
         except Exception as e:
-            self.logger.error(f"❌ Document storage failed: {e}")
+            self.logger.error(f" Document storage failed: {e}")
             return {
                 "semantic_storage": {"success": False, "error": str(e)},
                 "graph_storage": {"success": False, "error": str(e)},
@@ -201,7 +201,7 @@ class HybridStorageManager:
         start_time = datetime.now()
 
         try:
-            self.logger.info(f"🔍 Hybrid search: {query[:100]}...")
+            self.logger.info(f" Hybrid search: {query[:100]}...")
 
             # 1. Семантический поиск через ChromaDB
             semantic_results = await self._semantic_search(query, config)
@@ -233,12 +233,12 @@ class HybridStorageManager:
             await self._update_search_stats(semantic_results, final_results)
 
             processing_time = (datetime.now() - start_time).total_seconds()
-            self.logger.info(f"✅ Hybrid search completed in {processing_time:.2f}s, {len(final_results)} results")
+            self.logger.info(f" Hybrid search completed in {processing_time:.2f}s, {len(final_results)} results")
 
             return final_results
 
         except Exception as e:
-            self.logger.error(f"❌ Hybrid search failed: {e}")
+            self.logger.error(f" Hybrid search failed: {e}")
             return []
 
     async def _semantic_search(
@@ -309,7 +309,7 @@ class HybridStorageManager:
                     text=semantic_result.get("text", ""),
                     metadata=semantic_result.get("metadata", {}),
                     semantic_score=semantic_result.get("similarity", 0.0),
-                    related_entities=graph_result.entities_found if i == 0 else [],  # Добавляем сущности к первому результату
+                    related_entities=graph_result.entities_found if i == 0 else [], # Добавляем сущности к первому результату
                     hybrid_enhancements=[]
                 )
 
@@ -428,7 +428,7 @@ class HybridStorageManager:
             except AttributeError:
                 # Если метода нет, используем поиск по метаданным
                 results = await self.semantic_storage.search_documents(
-                    query="",  # Пустой запрос
+                    query="", # Пустой запрос
                     limit=1000
                 )
                 for result in results:
@@ -443,10 +443,10 @@ class HybridStorageManager:
                 await self.semantic_storage.cleanup()
 
             # Граф engine очистка (если нужна)
-            self.logger.info("🧹 Hybrid Storage Manager cleanup completed")
+            self.logger.info(" Hybrid Storage Manager cleanup completed")
 
         except Exception as e:
-            self.logger.error(f"❌ Cleanup error: {e}")
+            self.logger.error(f" Cleanup error: {e}")
 
     def get_hybrid_stats(self) -> Dict[str, Any]:
         """Статистика гибридного хранилища"""
@@ -487,7 +487,7 @@ async def get_hybrid_storage() -> HybridStorageManager:
 if __name__ == "__main__":
     # Тестирование Hybrid Storage Manager
     async def test_hybrid_storage():
-        print("🔄 Testing Hybrid Storage Manager")
+        print(" Testing Hybrid Storage Manager")
 
         # Создаем менеджер
         manager = HybridStorageManager()
@@ -504,24 +504,24 @@ if __name__ == "__main__":
         }
 
         # 1. Сохранение документа
-        print("💾 Storing document...")
+        print(" Storing document...")
         store_result = await manager.store_document(test_document)
-        print(f"✅ Store result: {store_result}")
+        print(f" Store result: {store_result}")
 
         # 2. Гибридный поиск
-        print("\n🔍 Hybrid search...")
+        print("\n Hybrid search...")
         search_results = await manager.hybrid_search("Какой размер платы концедента?")
 
-        print(f"✅ Search results: {len(search_results)} found")
+        print(f" Search results: {len(search_results)} found")
         for i, result in enumerate(search_results[:3]):
-            print(f"   Result {i+1}:")
-            print(f"     Text: {result.text[:100]}...")
-            print(f"     Semantic score: {result.semantic_score:.3f}")
-            print(f"     Final score: {result.final_score:.3f}")
-            print(f"     Enhancements: {len(result.hybrid_enhancements)}")
+            print(f" Result {i+1}:")
+            print(f" Text: {result.text[:100]}...")
+            print(f" Semantic score: {result.semantic_score:.3f}")
+            print(f" Final score: {result.final_score:.3f}")
+            print(f" Enhancements: {len(result.hybrid_enhancements)}")
 
         # 3. Статистика
         stats = manager.get_hybrid_stats()
-        print(f"\n📊 Hybrid stats: {stats}")
+        print(f"\n Hybrid stats: {stats}")
 
     asyncio.run(test_hybrid_storage())

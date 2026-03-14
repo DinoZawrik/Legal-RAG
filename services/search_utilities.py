@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 Search Service Utilities
+Search Service Utilities
 Утилитарные функции для микросервиса поиска.
 
 Включает функциональность:
@@ -77,7 +77,7 @@ class SearchUtilities:
             return '. '.join(selected) + '.' if selected else text[:200] + "..."
 
         except Exception as e:
-            logger.error(f"❌ Ошибка извлечения ключевых предложений: {e}")
+            logger.error(f" Ошибка извлечения ключевых предложений: {e}")
             return text[:200] + "..." if len(text) > 200 else text
 
     @staticmethod
@@ -91,7 +91,7 @@ class SearchUtilities:
             processed_chunks = []
             seen_texts = set()
 
-            for chunk in chunks[:5]:  # Берем топ-5 результатов
+            for chunk in chunks[:5]: # Берем топ-5 результатов
                 text = chunk.get('text', chunk.get('document', ''))
                 if not text or text in seen_texts:
                     continue
@@ -128,7 +128,7 @@ class SearchUtilities:
             # Дополнительная информация из других фрагментов
             if len(processed_chunks) > 1:
                 additional_info = []
-                for chunk in processed_chunks[1:3]:  # Еще 2 фрагмента
+                for chunk in processed_chunks[1:3]: # Еще 2 фрагмента
                     if chunk['text'] and chunk['text'] != best_chunk['text']:
                         info = chunk['text']
                         if chunk['law_reference']:
@@ -141,14 +141,14 @@ class SearchUtilities:
 
             # Добавляем правовой контекст если есть
             if legal_context and legal_context.get('entities'):
-                entities = legal_context['entities'][:3]  # Топ-3 сущности
+                entities = legal_context['entities'][:3] # Топ-3 сущности
                 if entities:
                     answer_parts.append(f"\n**Связанные правовые понятия:** {', '.join(entities)}")
 
             return '\n'.join(answer_parts)
 
         except Exception as e:
-            logger.error(f"❌ Ошибка составления контекстуального ответа: {e}")
+            logger.error(f" Ошибка составления контекстуального ответа: {e}")
             return "Произошла ошибка при формировании ответа. Попробуйте переформулировать запрос."
 
     @staticmethod
@@ -191,7 +191,7 @@ class SearchUtilities:
             return ' '.join(reference_parts) if reference_parts else ""
 
         except Exception as e:
-            logger.error(f"❌ Ошибка форматирования правовой ссылки: {e}")
+            logger.error(f" Ошибка форматирования правовой ссылки: {e}")
             return ""
 
     @staticmethod
@@ -212,7 +212,7 @@ class SearchUtilities:
             pattern = rf"стат(?:ья|и|ей)\s+{re.escape(article)}(\b|\.)"
             return re.search(pattern, text, re.IGNORECASE) is not None
         except Exception as e:
-            logger.error(f"❌ Ошибка верификации цитаты: {e}")
+            logger.error(f" Ошибка верификации цитаты: {e}")
             return True
 
     @staticmethod
@@ -232,17 +232,17 @@ class SearchUtilities:
             age_days = (today - doc_date).days
 
             # Бонус убывает с возрастом
-            if age_days <= 30:  # Очень свежий документ
+            if age_days <= 30: # Очень свежий документ
                 return max_bonus
-            elif age_days <= 365:  # Документ до года
+            elif age_days <= 365: # Документ до года
                 return max_bonus * (1 - age_days / 365) * 0.8
-            elif age_days <= 365 * 3:  # Документ до 3 лет
+            elif age_days <= 365 * 3: # Документ до 3 лет
                 return max_bonus * 0.2
-            else:  # Старый документ
+            else: # Старый документ
                 return 0.0
 
         except Exception as e:
-            logger.error(f"❌ Ошибка вычисления бонуса актуальности: {e}")
+            logger.error(f" Ошибка вычисления бонуса актуальности: {e}")
             return 0.0
 
     @staticmethod
@@ -279,7 +279,7 @@ class SearchUtilities:
             return None
 
         except Exception as e:
-            logger.error(f"❌ Ошибка парсинга даты '{date_string}': {e}")
+            logger.error(f" Ошибка парсинга даты '{date_string}': {e}")
             return None
 
     @staticmethod
@@ -330,7 +330,7 @@ class SearchUtilities:
             return stats
 
         except Exception as e:
-            logger.error(f"❌ Ошибка получения статистики хранилища: {e}")
+            logger.error(f" Ошибка получения статистики хранилища: {e}")
             return {"error": str(e)}
 
     @staticmethod
@@ -358,7 +358,7 @@ class SearchUtilities:
             return enhanced_query
 
         except Exception as e:
-            logger.error(f"❌ Ошибка улучшения запроса: {e}")
+            logger.error(f" Ошибка улучшения запроса: {e}")
             return query
 
     @staticmethod
@@ -369,7 +369,7 @@ class SearchUtilities:
 
             # Паттерны для правовых сущностей
             patterns = {
-                'законы': r'(?:федеральный\s+)?закон\s+(?:от\s+)?№?\s*(\d+(?:-\w+)?)',
+                'законы': r'(?:федеральный\s+)?закон\s+(?:от\s+)??\s*(\d+(?:-\w+)?)',
                 'статьи': r'стат(?:ь|ья|ей)\s+(\d+(?:\.\d+)?)',
                 'пункты': r'пункт(?:а|е)?\s+(\d+(?:\.\d+)?)',
                 'главы': r'глав(?:а|е|ы)\s+(\d+|\w+)'
@@ -380,8 +380,8 @@ class SearchUtilities:
                 for match in matches:
                     entities.append(f"{entity_type}: {match}")
 
-            return entities[:10]  # Ограничиваем количество
+            return entities[:10] # Ограничиваем количество
 
         except Exception as e:
-            logger.error(f"❌ Ошибка извлечения правовых сущностей: {e}")
+            logger.error(f" Ошибка извлечения правовых сущностей: {e}")
             return []

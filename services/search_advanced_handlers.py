@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 Search Service Advanced Handlers
+Search Service Advanced Handlers
 Продвинутые обработчики поиска для микросервиса.
 
 Включает функциональность:
@@ -39,13 +39,13 @@ class SearchAdvancedHandlers(SearchServiceCore):
 
             self.logger.info(f"[UNIVERSAL] Processing legal query: '{query[:50]}...'")
 
-            # 🔧 КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сначала ищем документы через StorageManager
+            # КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сначала ищем документы через StorageManager
             context_documents = []
             if self.storage_manager:
                 try:
                     search_results = await self.storage_manager.search_documents(
                         query=query,
-                        limit=max_chunks * 2,  # Берем больше для лучшей фильтрации
+                        limit=max_chunks * 2, # Берем больше для лучшей фильтрации
                         use_cache=False
                     )
                     # Конвертируем результаты в формат для Universal Legal System
@@ -65,7 +65,7 @@ class SearchAdvancedHandlers(SearchServiceCore):
                 try:
                     result = await self.universal_legal_system.process_query(
                         query=query,
-                        context_documents=context_documents,  # Передаем найденные документы
+                        context_documents=context_documents, # Передаем найденные документы
                         max_chunks=max_chunks,
                         strict_verification=strict_verification
                     )
@@ -109,7 +109,7 @@ class SearchAdvancedHandlers(SearchServiceCore):
             # Импортируем динамически чтобы избежать циклических импортов
             from services.search_request_handlers import SearchRequestHandlers
             handler = SearchRequestHandlers()
-            handler.__dict__.update(self.__dict__)  # Копируем состояние
+            handler.__dict__.update(self.__dict__) # Копируем состояние
 
             result = await handler._handle_search_request(fallback_request)
             result["query_type"] = "universal_legal_fallback"
@@ -382,7 +382,7 @@ class SearchAdvancedHandlers(SearchServiceCore):
                 # Бонус за графовые связи
                 if result_source == "graph":
                     original_score = result.get('similarity', result.get('score', 0))
-                    processed_result['similarity'] = min(1.0, original_score + 0.05)  # Небольшой бонус
+                    processed_result['similarity'] = min(1.0, original_score + 0.05) # Небольшой бонус
                     processed_result['graph_bonus'] = 0.05
 
                 processed_results.append(processed_result)

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING: # pragma: no cover
     from services.gateway.app import APIGateway
 
 logger = logging.getLogger(__name__)
@@ -83,7 +83,7 @@ def register(gateway: "APIGateway") -> None:
                     "success": True
                 }
 
-            # 🎯 КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Передаем структурированные объекты с полными metadata
+            # КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Передаем структурированные объекты с полными metadata
             context_chunks = []
             for chunk in search_data.get("results", []):
                 # Извлекаем текст из разных возможных полей
@@ -103,15 +103,15 @@ def register(gateway: "APIGateway") -> None:
                     }
                     context_chunks.append(enriched_chunk)
 
-            # 🔍 PHASE 2.1: Log retrieved chunks for analysis
-            gateway.logger.info(f"[📦 CHUNKS] Retrieved {len(context_chunks)} chunks for query: '{query[:100]}...'")
-            for i, chunk in enumerate(context_chunks[:3], 1):  # Log top 3
+            # PHASE 2.1: Log retrieved chunks for analysis
+            gateway.logger.info(f"[ CHUNKS] Retrieved {len(context_chunks)} chunks for query: '{query[:100]}...'")
+            for i, chunk in enumerate(context_chunks[:3], 1): # Log top 3
                 law = chunk.get("law_number", "unknown")
                 sim = chunk.get("similarity", 0)
                 text_preview = chunk.get("text", "")[:150].replace("\n", " ")
-                gateway.logger.info(f"  Chunk {i}: Law={law}, Sim={sim:.3f}, Text='{text_preview}...'")
+                gateway.logger.info(f" Chunk {i}: Law={law}, Sim={sim:.3f}, Text='{text_preview}...'")
             if len(context_chunks) > 3:
-                gateway.logger.info(f"  ... and {len(context_chunks) - 3} more chunks")
+                gateway.logger.info(f" ... and {len(context_chunks) - 3} more chunks")
 
             inference_service = gateway.registry.get_service("inference_service")
             if not inference_service:
@@ -139,15 +139,15 @@ def register(gateway: "APIGateway") -> None:
 
             final_response["source_documents"] = search_data.get("results", [])
 
-            # 🔧 ФАЗА 1.3: Формируем финальный ответ с verification
+            # ФАЗА 1.3: Формируем финальный ответ с verification
             sources_list = search_data.get("results", [])
             result = {
                 "query": query,
                 "answer": final_response.get("answer"),
-                "chunks_used": len(sources_list),  # 🔧 FIX: Count from sources list
+                "chunks_used": len(sources_list), # FIX: Count from sources list
                 "request_id": request_id,
-                "success": True,  # 🔧 FIX: Добавлено поле success
-                "sources": sources_list,  # 🔧 CRITICAL FIX: Return list of sources, not count
+                "success": True, # FIX: Добавлено поле success
+                "sources": sources_list, # CRITICAL FIX: Return list of sources, not count
                 "metadata": {
                     "search_time": search_response.get("response_time", 0),
                     "inference_time": final_response.get("generation_time", 0),

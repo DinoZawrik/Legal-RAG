@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 Search Service Core
+ Search Service Core
 Основная инфраструктура и инициализация микросервиса поиска.
 
 Включает функциональность:
@@ -16,8 +16,8 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 
 from services.base import BaseService
-from services.inference_service import get_inference_service
-    from core.storage_coordinator import create_storage_coordinator, StorageCoordinator
+from services.inference_service import create_inference_service
+from core.storage_coordinator import create_storage_coordinator, StorageCoordinator
 from core.rag_optimizer import get_rag_optimizer, RAGOptimizer
 # MIGRATED FROM: core.intelligent_cache (deprecated) → NEW: core.cache
 from core.cache import IntelligentCache
@@ -154,7 +154,7 @@ class SearchServiceCore(BaseService):
             # НОВОЕ: Инициализация AI Inference Service
             self.logger.info("[TARGET] Loading AI Inference Service...")
             try:
-                self.inference_service = await get_inference_service()
+                self.inference_service = await create_inference_service()
                 self.logger.info("[CHECK_MARK_BUTTON] AI Inference Service loaded successfully")
             except Exception as e:
                 self.logger.warning(f"[WARNING] AI Inference Service failed to load: {e}")
@@ -294,13 +294,13 @@ class SearchServiceCore(BaseService):
             "service_name": self.service_name,
             "default_config": config,
             "component_status": {
-                "storage_manager": "✅" if self.storage_manager else "❌",
-                "rag_optimizer": "✅" if self.rag_optimizer else "❌",
-                "cache": "✅" if self.cache else "❌",
-                "hybrid_storage": "✅" if self.hybrid_storage else "❌",
-                "multimodal_pipeline": "✅" if self.multimodal_pipeline else "❌",
-                "inference_service": "✅" if self.inference_service else "❌",
-                "neo4j_connection": "✅" if self.neo4j_connection else "❌"
+                "storage_manager": "" if self.storage_manager else "",
+                "rag_optimizer": "" if self.rag_optimizer else "",
+                "cache": "" if self.cache else "",
+                "hybrid_storage": "" if self.hybrid_storage else "",
+                "multimodal_pipeline": "" if self.multimodal_pipeline else "",
+                "inference_service": "" if self.inference_service else "",
+                "neo4j_connection": "" if self.neo4j_connection else ""
             },
             "optimization_features": [
                 "RAG optimization",

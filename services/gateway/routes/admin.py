@@ -15,6 +15,7 @@ from fastapi import Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from core.user_management import PermissionType, TelegramUser, UserStatus, user_manager
+from services.base import ServiceStatus
 from services.gateway.models import AdminFileUpload, AdminLoginRequest
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -66,8 +67,8 @@ def _register_system_metrics_route(app, gateway: "APIGateway") -> None:
                 "services": {},
                 "system": {
                     "timestamp": datetime.utcnow().isoformat(),
-                    "uptime": time.time() - gateway.metrics.get("start_time", time.time()),
-                    "total_requests": gateway.metrics.get("total_requests", 0),
+                    "uptime": gateway.metrics.uptime_seconds,
+                    "total_requests": gateway.metrics.request_count,
                 },
             }
 
@@ -84,7 +85,7 @@ def _register_system_metrics_route(app, gateway: "APIGateway") -> None:
             health_checks = await gateway.registry.get_all_health_checks()
             metrics["health_summary"] = {
                 "total_services": len(health_checks),
-                "healthy_services": sum(1 for health in health_checks.values() if health.is_healthy),
+                "healthy_services": sum(1 for health in health_checks.values() if health.status == ServiceStatus.HEALTHY),
                 "details": {name: health.to_dict() for name, health in health_checks.items()},
             }
 
@@ -144,7 +145,7 @@ def _register_file_routes(app, gateway: "APIGateway") -> None:
                         "request_id": uuid.uuid4().hex[:8],
                     }
 
-                        response = await storage_service.handle_request(storage_request)
+                    response = await storage_service.handle_request(storage_request)
 
                     try:
                         os.unlink(tmp_file_path)

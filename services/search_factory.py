@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🏭 Search Service Factory
+Search Service Factory
 Фабрика для создания и управления экземплярами Search Service.
 
 Включает функциональность:
@@ -64,10 +64,10 @@ class SearchService(SearchServiceCore):
 
             # Инициализация обработчиков
             self.request_handlers = SearchRequestHandlers()
-            self.request_handlers.__dict__.update(self.__dict__)  # Копируем состояние
+            self.request_handlers.__dict__.update(self.__dict__) # Копируем состояние
 
             self.advanced_handlers = SearchAdvancedHandlers()
-            self.advanced_handlers.__dict__.update(self.__dict__)  # Копируем состояние
+            self.advanced_handlers.__dict__.update(self.__dict__) # Копируем состояние
 
             self.logger.info("[FACTORY] Search Service handlers initialized")
 

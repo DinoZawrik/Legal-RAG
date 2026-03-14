@@ -159,7 +159,7 @@ class BaseService(ABC):
         request_type = request.get("type", "unknown")
         print(f"[BASE-SERVICE] {self.service_name} - Incoming request type: {request_type}")
         self.logger.info(
-            f"📥 Incoming request",
+            f" Incoming request",
             extra={
                 "service": self.service_name,
                 "request_id": request_id,
@@ -185,7 +185,7 @@ class BaseService(ABC):
             
             # Логирование успешного ответа
             self.logger.info(
-                f"📤 Request completed successfully",
+                f" Request completed successfully",
                 extra={
                     "service": self.service_name,
                     "request_id": request_id,
@@ -242,7 +242,7 @@ class BaseService(ABC):
                 self.metrics.last_request_time is None or
                 (datetime.now() - self.metrics.last_request_time).total_seconds() < 300
             )
-            checks["error_rate_acceptable"] = self.metrics.error_rate < 0.05  # Менее 5% ошибок
+            checks["error_rate_acceptable"] = self.metrics.error_rate < 0.05 # Менее 5% ошибок
             
             # Дополнительные проверки (переопределяются в наследниках)
             additional_checks = await self._additional_health_checks()

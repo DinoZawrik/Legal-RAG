@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import os
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from services.base import ServiceStatus
@@ -14,27 +15,42 @@ if TYPE_CHECKING:  # pragma: no cover
     from services.gateway.app import APIGateway
 
 
+def _verify_health_token(request: Request) -> None:
+    """Verify optional health-check bearer token for detailed endpoints."""
+    expected = os.getenv("HEALTH_CHECK_TOKEN", "")
+    if not expected:
+        return  # Token not configured — allow access (development mode)
+    auth = request.headers.get("Authorization", "")
+    if auth != f"Bearer {expected}":
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+
 def register(gateway: "APIGateway") -> None:
     app = gateway.app
 
     @app.get("/health")
     async def health_endpoint():
+        """Basic health check — always accessible."""
         try:
             health = await gateway.health_check()
             return health.to_dict()
-        except Exception as exc:  # pragma: no cover - исключение уже логируется базовым сервисом
+        except Exception as exc:  # pragma: no cover
             return JSONResponse(status_code=503, content={"status": "unhealthy", "error": str(exc)})
 
     @app.get("/health/all")
-    async def all_health_checks():
+    async def all_health_checks(request: Request):
+        """Detailed health checks — require health token if configured."""
+        _verify_health_token(request)
         try:
             health_checks = await gateway.registry.get_all_health_checks()
             return {name: health.to_dict() for name, health in health_checks.items()}
         except Exception as exc:
-            return JSONResponse(status_code=500, content={"error": str(exc)})
+            return JSONResponse(status_code=500, content={"error": "Health check failed"})
 
     @app.get("/services")
-    async def list_services():
+    async def list_services(request: Request):
+        """List registered services — require health token if configured."""
+        _verify_health_token(request)
         services_info = []
         for service_name in gateway.registry.get_all_services():
             service = gateway.registry.get_service(service_name)
@@ -50,7 +66,8 @@ def register(gateway: "APIGateway") -> None:
         return {"services": services_info}
 
     @app.get("/info")
-    async def get_system_info():
+    async def get_system_info(request: Request):
+        _verify_health_token(request)
         try:
             services = gateway.registry.get_all_services()
             service_details = {}
@@ -95,7 +112,8 @@ def register(gateway: "APIGateway") -> None:
             raise HTTPException(status_code=500, detail="Failed to get system info")
 
     @app.get("/status")
-    async def get_system_status():
+    async def get_system_status(request: Request):
+        _verify_health_token(request)
         try:
             services = gateway.registry.get_all_services()
             healthy_services = 0
@@ -133,17 +151,30 @@ def register(gateway: "APIGateway") -> None:
             raise HTTPException(status_code=500, detail="Failed to get system status")
 
     @app.get("/services/{service_name}/health")
-    async def get_service_health(service_name: str):
+    async def get_service_health(service_name: str, request: Request):
+        _verify_health_token(request)
         try:
             service = gateway.registry.get_service(service_name)
             if not service:
                 raise HTTPException(status_code=404, detail=f"Service {service_name} not found")
 
+            raw_metrics = getattr(service, "metrics", None)
+            if raw_metrics and hasattr(raw_metrics, "request_count"):
+                metrics_dict = {
+                    "request_count": raw_metrics.request_count,
+                    "error_count": raw_metrics.error_count,
+                    "avg_response_time": raw_metrics.avg_response_time,
+                    "error_rate": raw_metrics.error_rate,
+                    "uptime_seconds": raw_metrics.uptime_seconds,
+                }
+            else:
+                metrics_dict = raw_metrics if isinstance(raw_metrics, dict) else {}
+
             health_info = {
                 "service_name": service_name,
                 "status": "healthy" if service.status == ServiceStatus.HEALTHY else "unhealthy",
                 "timestamp": datetime.now().isoformat(),
-                "metrics": getattr(service, "metrics", {}),
+                "metrics": metrics_dict,
                 "checks": gateway._get_service_specific_checks(service_name),
             }
 

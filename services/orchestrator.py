@@ -12,6 +12,12 @@ import os
 from contextlib import asynccontextmanager
 from typing import List, Optional
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # Импорты сервисов
 from services.base import ServiceRegistry, ServiceStatus
 from services.gateway import APIGateway, create_api_gateway
@@ -69,7 +75,7 @@ class ServicesOrchestrator:
             await self._start_api_gateway()
             
             # 4. Health monitoring
-            logger.info("❤️ Phase 4: Starting health monitoring...")
+            logger.info(" Phase 4: Starting health monitoring...")
             await self._start_health_monitoring()
             
             self.services_started = True
@@ -124,6 +130,7 @@ class ServicesOrchestrator:
     async def _start_api_gateway(self) -> None:
         """Запуск API Gateway."""
         self.api_gateway = create_api_gateway()
+        self.api_gateway.registry = self.registry
         await self.api_gateway.start()
         self.registry.register(self.api_gateway)
         logger.info("[CHECK_MARK_BUTTON] API Gateway registered")
@@ -171,7 +178,7 @@ class ServicesOrchestrator:
         for service_name in services:
             service = self.registry.get_service(service_name)
             if service:
-                logger.info(f"   • {service_name}: {service.status.value}")
+                logger.info(f" • {service_name}: {service.status.value}")
         
         logger.info(f"[API] Gateway: http://{self.config['gateway_host']}:{self.config['gateway_port']}")
         logger.info(f"[HEALTH] Endpoint: http://{self.config['gateway_host']}:{self.config['gateway_port']}/health/all")
@@ -202,7 +209,7 @@ class ServicesOrchestrator:
                 if unhealthy_services:
                     logger.warning(f"[WARNING] Unhealthy services detected: {unhealthy_services}")
                 else:
-                    logger.debug("❤️ All services healthy")
+                    logger.debug(" All services healthy")
                 
             except asyncio.CancelledError:
                 break

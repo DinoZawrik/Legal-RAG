@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional
 import time
 
 from services.base import BaseService
-# MIGRATED FROM: core.intelligent_cache (deprecated wrapper) → NEW: core.cache
+# MIGRATED FROM: core.intelligent_cache (deprecated wrapper) NEW: core.cache
 from core.cache import IntelligentCache
 from core.logging_config import configure_logging
 
@@ -56,7 +56,7 @@ class CacheService(BaseService):
             "max_memory_entries": 1000,
             "default_ttl": 3600,
             "semantic_threshold": 0.75,
-            "auto_cleanup_interval": 300  # 5 минут
+            "auto_cleanup_interval": 300 # 5 минут
         }
         
         # Метрики кэша
@@ -406,7 +406,7 @@ class CacheService(BaseService):
                 hit_rate = cache_stats.get("hit_rate", 0)
                 checks["acceptable_hit_rate"] = total_requests < 10 or hit_rate > 0.15
                 checks["memory_usage_ok"] = cache_stats.get("memory_entries", 0) < self.default_config["max_memory_entries"]
-                checks["redis_available"] = cache_stats.get("redis_available", True)  # Default True для fallback
+                checks["redis_available"] = cache_stats.get("redis_available", True) # Default True для fallback
             except Exception:
                 # При ошибках считаем сервис работоспособным, если кэш инициализирован
                 checks["acceptable_hit_rate"] = True

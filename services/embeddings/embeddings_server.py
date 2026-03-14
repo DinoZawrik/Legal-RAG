@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 Giga-Embeddings Local Server
+Giga-Embeddings Local Server
 FastAPI HTTP API для локальной генерации embeddings через Giga-Embeddings-instruct модель.
 
 Архитектура:
@@ -46,9 +46,9 @@ logger = logging.getLogger(__name__)
 model: Optional[SentenceTransformer] = None
 
 # Конфигурация модели
-MODEL_NAME = "ai-forever/sbert_large_nlu_ru"  # Можно заменить на Giga-Embeddings
-EMBEDDING_DIMENSION = 1024  # Размерность для sbert_large_nlu_ru
-DEVICE = "cpu"  # Используем CPU (можно "cuda" если есть GPU)
+MODEL_NAME = "ai-forever/sbert_large_nlu_ru" # Можно заменить на Giga-Embeddings
+EMBEDDING_DIMENSION = 1024 # Размерность для sbert_large_nlu_ru
+DEVICE = "cpu" # Используем CPU (можно "cuda" если есть GPU)
 
 
 @asynccontextmanager
@@ -56,8 +56,8 @@ async def lifespan(app: FastAPI):
     """Lifecycle manager для загрузки модели при старте"""
     global model
 
-    logger.info(f"🚀 Loading embeddings model: {MODEL_NAME}")
-    logger.info(f"📊 Device: {DEVICE}")
+    logger.info(f" Loading embeddings model: {MODEL_NAME}")
+    logger.info(f" Device: {DEVICE}")
 
     try:
         start_time = time.time()
@@ -71,21 +71,21 @@ async def lifespan(app: FastAPI):
 
         load_time = time.time() - start_time
 
-        logger.info(f"✅ Model loaded successfully in {load_time:.2f}s")
-        logger.info(f"📐 Embedding dimension: {actual_dim}")
-        logger.info(f"💾 Model memory footprint: ~{torch.cuda.memory_allocated() / 1024**3:.2f} GB" if torch.cuda.is_available() else "💾 CPU mode")
+        logger.info(f" Model loaded successfully in {load_time:.2f}s")
+        logger.info(f" Embedding dimension: {actual_dim}")
+        logger.info(f" Model memory footprint: ~{torch.cuda.memory_allocated() / 1024**3:.2f} GB" if torch.cuda.is_available() else " CPU mode")
 
         global EMBEDDING_DIMENSION
         EMBEDDING_DIMENSION = actual_dim
 
     except Exception as e:
-        logger.error(f"❌ Failed to load model: {e}")
+        logger.error(f" Failed to load model: {e}")
         raise
 
     yield
 
     # Cleanup при shutdown
-    logger.info("🛑 Shutting down embeddings server")
+    logger.info(" Shutting down embeddings server")
     model = None
 
 
@@ -137,13 +137,13 @@ async def create_embeddings(request: EmbeddingRequest):
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded yet")
 
-    # Нормализация input (str → List[str])
+    # Нормализация input (str List[str])
     texts = [request.input] if isinstance(request.input, str) else request.input
 
     if not texts:
         raise HTTPException(status_code=400, detail="Input cannot be empty")
 
-    logger.info(f"📥 Encoding {len(texts)} text(s)")
+    logger.info(f" Encoding {len(texts)} text(s)")
 
     try:
         start_time = time.time()
@@ -151,10 +151,10 @@ async def create_embeddings(request: EmbeddingRequest):
         # Генерация embeddings через SentenceTransformer
         embeddings = model.encode(
             texts,
-            batch_size=32,  # Батчинг для эффективности
+            batch_size=32, # Батчинг для эффективности
             show_progress_bar=False,
             convert_to_numpy=True,
-            normalize_embeddings=True  # L2 normalization для cosine similarity
+            normalize_embeddings=True # L2 normalization для cosine similarity
         )
 
         inference_time = time.time() - start_time
@@ -162,7 +162,7 @@ async def create_embeddings(request: EmbeddingRequest):
         # Конвертация в list для JSON
         embeddings_list = embeddings.tolist()
 
-        logger.info(f"✅ Generated {len(embeddings_list)} embedding(s) in {inference_time:.3f}s ({inference_time/len(texts):.3f}s per text)")
+        logger.info(f" Generated {len(embeddings_list)} embedding(s) in {inference_time:.3f}s ({inference_time/len(texts):.3f}s per text)")
 
         # Формирование OpenAI-compatible response
         response = EmbeddingResponse(
@@ -177,7 +177,7 @@ async def create_embeddings(request: EmbeddingRequest):
             ],
             model=MODEL_NAME,
             usage={
-                "prompt_tokens": sum(len(text.split()) for text in texts),  # Приблизительная оценка
+                "prompt_tokens": sum(len(text.split()) for text in texts), # Приблизительная оценка
                 "total_tokens": sum(len(text.split()) for text in texts)
             }
         )
@@ -185,7 +185,7 @@ async def create_embeddings(request: EmbeddingRequest):
         return response
 
     except Exception as e:
-        logger.error(f"❌ Encoding error: {e}", exc_info=True)
+        logger.error(f" Encoding error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Encoding failed: {str(e)}")
 
 
@@ -241,14 +241,14 @@ async def global_exception_handler(request: Request, exc: Exception):
 if __name__ == "__main__":
     import uvicorn
 
-    logger.info("🚀 Starting Giga-Embeddings Local Server")
-    logger.info(f"📍 Endpoint: http://0.0.0.0:8001/v1/embeddings")
-    logger.info(f"🔍 Health check: http://0.0.0.0:8001/health")
+    logger.info(" Starting Giga-Embeddings Local Server")
+    logger.info(f" Endpoint: http://0.0.0.0:8001/v1/embeddings")
+    logger.info(f" Health check: http://0.0.0.0:8001/health")
 
     uvicorn.run(
         "embeddings_server:app",
         host="0.0.0.0",
         port=8001,
         log_level="info",
-        reload=False  # Production mode
+        reload=False # Production mode
     )

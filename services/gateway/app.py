@@ -10,6 +10,12 @@ import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 import jwt
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,12 +55,17 @@ class APIGateway(BaseService):
             description="Enterprise-grade AI document analysis system with Admin Panel",
         )
 
+        allowed_origins = [
+            o.strip()
+            for o in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8501").split(",")
+            if o.strip()
+        ]
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],
+            allow_origins=allowed_origins,
             allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
+            allow_methods=["GET", "POST", "PUT", "DELETE"],
+            allow_headers=["Content-Type", "Authorization"],
         )
 
         self.registry = ServiceRegistry()
@@ -62,10 +73,17 @@ class APIGateway(BaseService):
         self.rate_limits: Dict[str, List[float]] = {}
 
         self.security = HTTPBearer()
-        self.jwt_secret = os.getenv(
-            "ADMIN_JWT_SECRET", "change-jwt-secret-in-production"
-        )
-        self.admin_password = os.getenv("ADMIN_PANEL_PASSWORD", "change_me_in_env")
+        self.jwt_secret = os.getenv("ADMIN_JWT_SECRET", "")
+        if not self.jwt_secret or self.jwt_secret.startswith(("change", "your_", "placeholder")):
+            logger.critical(
+                "ADMIN_JWT_SECRET is not set or uses a placeholder value. "
+                "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(32))\""
+            )
+        self.admin_password = os.getenv("ADMIN_PANEL_PASSWORD", "")
+        if not self.admin_password or self.admin_password.startswith(("change", "your_", "placeholder")):
+            logger.critical(
+                "ADMIN_PANEL_PASSWORD is not set or uses a placeholder value."
+            )
 
         register_all_routes(self)
 
@@ -103,14 +121,18 @@ class APIGateway(BaseService):
         return True
 
     def _hash_password(self, password: str) -> str:
-        salt = os.getenv("ADMIN_PASSWORD_SALT", "change-salt-in-production")
-        return hashlib.sha256((password + salt).encode()).hexdigest()
+        salt = os.getenv("ADMIN_PASSWORD_SALT", "")
+        if not salt or salt.startswith(("change", "your_", "placeholder")):
+            logger.warning("ADMIN_PASSWORD_SALT is not configured properly")
+        return hashlib.sha256((salt + password + salt).encode()).hexdigest()
 
     def _create_admin_jwt_token(self, username: str) -> str:
         from datetime import timedelta
 
         payload = {
+            "sub": username,
             "username": username,
+            "role": "admin",
             "iat": datetime.utcnow(),
             "exp": datetime.utcnow() + timedelta(hours=8),
         }

@@ -50,15 +50,15 @@ class InferenceService(BaseService):
         self.russian_legal_prompts = RussianLegalPrompts()
         self.specialized_prompts = SpecializedLegalPrompts()
         self.legal_chunker = RussianLegalChunker()
-        self.storage_manager = None  # Будет инициализирован в initialize()
+        self.storage_manager = None # Будет инициализирован в initialize()
 
         # ФАЗА 1.3: Legal Fact Verifier
         self.legal_verifier = LegalFactVerifier()
-        self.enable_verification = True  # Можно отключить для отладки
+        self.enable_verification = True # Можно отключить для отладки
         
         # Конфигурация
         self.default_config = {
-            "model": "gemini-2.5-flash",
+            "model": os.getenv("AGENT_MODEL_NAME", "gemini-3-flash-preview"),
             "max_tokens": 2048,
             "temperature": 0.1,
             "timeout_seconds": 30
@@ -91,16 +91,16 @@ class InferenceService(BaseService):
             self.universal_legal_system = await get_universal_legal_system()
 
             # КРИТИЧЕСКОЕ УЛУЧШЕНИЕ: Инициализация Self-RAG движка
-            self.logger.info("[🎯] Initializing Self-RAG Engine with IRAC prompts...")
+            self.logger.info("[] Initializing Self-RAG Engine with IRAC prompts...")
             # Создаем storage_manager напрямую
             try:
                 from core.storage_coordinator import create_storage_coordinator
                 self.storage_manager = await create_storage_coordinator()
 
                 self.self_rag_engine = SelfRAGInferenceEngine(self, self.storage_manager)
-                self.logger.info("[✅] Self-RAG Engine initialized successfully")
+                self.logger.info("[] Self-RAG Engine initialized successfully")
             except Exception as e:
-                self.logger.error(f"[❌] Failed to initialize Self-RAG Engine: {e}")
+                self.logger.error(f"[] Failed to initialize Self-RAG Engine: {e}")
                 self.self_rag_engine = None
 
             # Установка статуса в здоровый после успешной инициализации
@@ -184,7 +184,7 @@ class InferenceService(BaseService):
             if result.get("success", False):
                 return {
                     "success": True,
-                    "response": result.get("answer", ""),  # ИСПРАВЛЕНО: answer, а не data.response
+                    "response": result.get("answer", ""), # ИСПРАВЛЕНО: answer, а не data.response
                     "model_info": {"model_used": result.get("model_used", "unknown")},
                     "generation_time": result.get("generation_time", 0)
                 }
@@ -219,12 +219,12 @@ class InferenceService(BaseService):
         else:
             self.logger.info(f"[DOCS] Using {len(context_chunks)} context chunks for response generation")
 
-        # 🎯 КРИТИЧЕСКОЕ УЛУЧШЕНИЕ: Автоматическая активация Self-RAG для multi-document analysis
-        # ⏸️ ВРЕМЕННО ОТКЛЮЧЕНО: Self-RAG слишком медленный (180+ сек) - используем быструю генерацию + verification
+        # КРИТИЧЕСКОЕ УЛУЧШЕНИЕ: Автоматическая активация Self-RAG для multi-document analysis
+        # ВРЕМЕННО ОТКЛЮЧЕНО: Self-RAG слишком медленный (180+ сек) - используем быструю генерацию + verification
         if False and context_chunks and len(context_chunks) > 0 and self.self_rag_engine:
-            self.logger.info(f"[🎯 SELF-RAG] Activating Self-RAG engine for {len(context_chunks)} documents")
+            self.logger.info(f"[ SELF-RAG] Activating Self-RAG engine for {len(context_chunks)} documents")
             try:
-                # 🎯 Преобразуем enriched chunks для Self-RAG с сохранением metadata
+                # Преобразуем enriched chunks для Self-RAG с сохранением metadata
                 document_strings = []
                 documents_metadata = []
                 for chunk in context_chunks:
@@ -252,7 +252,7 @@ class InferenceService(BaseService):
 
                 # Если Self-RAG успешен - возвращаем его результат
                 if self_rag_result.get("success", False):
-                    self.logger.info(f"[✅ SELF-RAG] Success! Confidence: {self_rag_result.get('confidence_score', 0):.2f}")
+                    self.logger.info(f"[ SELF-RAG] Success! Confidence: {self_rag_result.get('confidence_score', 0):.2f}")
                     return {
                         "success": True,
                         "query": query,
@@ -265,9 +265,9 @@ class InferenceService(BaseService):
                         "self_rag_metrics": self_rag_result.get("self_rag_metrics")
                     }
                 else:
-                    self.logger.warning("[⚠️ SELF-RAG] Failed, falling back to standard generation")
+                    self.logger.warning("[ SELF-RAG] Failed, falling back to standard generation")
             except Exception as e:
-                self.logger.warning(f"[⚠️ SELF-RAG] Error: {e}, falling back to standard generation")
+                self.logger.warning(f"[ SELF-RAG] Error: {e}, falling back to standard generation")
 
         self.logger.info(f"[AI] Generating answer for: {query[:100]}...")
 
@@ -283,7 +283,7 @@ class InferenceService(BaseService):
             system_prompt = ""
             user_prompt = ""
 
-            # 🎯 PHASE 2: ENHANCED PROMPTS с few-shot примерами для улучшения качества ответов
+            # PHASE 2: ENHANCED PROMPTS с few-shot примерами для улучшения качества ответов
             try:
                 from core.legal_prompts_enhanced import (
                     get_enhanced_legal_system_prompt,
@@ -293,13 +293,13 @@ class InferenceService(BaseService):
                 system_prompt = get_enhanced_legal_system_prompt()
 
                 if context_chunks:
-                    # 🎯 PHASE 2: Используем новый формат промпта с few-shot примерами
+                    # PHASE 2: Используем новый формат промпта с few-shot примерами
                     # format_enhanced_legal_prompt автоматически обрабатывает enriched chunks
                     user_prompt = format_enhanced_legal_prompt(query, context_chunks)
                 else:
                     user_prompt = format_enhanced_legal_prompt(query, [])
 
-                self.logger.info("[🎓 PHASE2] Using enhanced prompts with few-shot examples")
+                self.logger.info("[ PHASE2] Using enhanced prompts with few-shot examples")
 
             except Exception as e:
                 self.logger.warning(f"[WARNING] Failed to use optimized prompts, falling back: {e}")
@@ -313,7 +313,7 @@ class InferenceService(BaseService):
             else:
                 # Fallback промпт, адаптированный под наличие/отсутствие контекста
                 if context_chunks:
-                    # 🔧 FIX: Extract text from enriched chunks for fallback
+                    # FIX: Extract text from enriched chunks for fallback
                     context_texts = []
                     for chunk in context_chunks:
                         if isinstance(chunk, dict):
@@ -368,29 +368,29 @@ class InferenceService(BaseService):
 
             self.logger.info(f"[CHECK_MARK_BUTTON] Answer generated successfully in {generation_time:.2f}s")
 
-            # 🔍 ФАЗА 1.3: Multi-layer Verification
+            # ФАЗА 1.3: Multi-layer Verification
             verification_result = None
             if self.enable_verification and context_chunks:
                 try:
-                    self.logger.info("[🔍 VERIFICATION] Starting answer verification")
+                    self.logger.info("[ VERIFICATION] Starting answer verification")
                     verification_result = await self.legal_verifier.verify_answer_against_sources(
                         answer=ai_response,
                         sources=context_chunks,
                         query=query
                     )
 
-                    self.logger.info(f"[✓ VERIFIED] Confidence: {verification_result.overall_confidence:.2f}, Recommendation: {verification_result.recommendation}")
+                    self.logger.info(f"[ VERIFIED] Confidence: {verification_result.overall_confidence:.2f}, Recommendation: {verification_result.recommendation}")
 
                     # Если ответ ненадежный - добавляем предупреждение
                     if not verification_result.is_reliable(VerificationSeverity.MEDIUM):
                         warning = (
-                            f"\n\n⚠️ ВНИМАНИЕ: Автоматическая верификация обнаружила возможные проблемы "
+                            f"\n\n ВНИМАНИЕ: Автоматическая верификация обнаружила возможные проблемы "
                             f"(confidence: {verification_result.overall_confidence:.2%}). "
                             f"Рекомендуется дополнительная проверка."
                         )
                         ai_response = ai_response + warning
                 except Exception as e:
-                    self.logger.warning(f"[⚠️ VERIFICATION] Verification failed: {e}")
+                    self.logger.warning(f"[ VERIFICATION] Verification failed: {e}")
 
             response_data = {
                 "success": True,
@@ -441,7 +441,7 @@ class InferenceService(BaseService):
             return {
                 "query": query,
                 "detected_type": query_type.value,
-                "confidence": "high",  # Можно добавить логику определения уверенности
+                "confidence": "high", # Можно добавить логику определения уверенности
                 "available_types": [t.value for t in QueryType],
                 "prompt_stats": prompt_stats
             }
@@ -531,7 +531,7 @@ class InferenceService(BaseService):
             if hasattr(self.inference_system, 'generate_response'):
                 self.logger.info("[CHECK_MARK_BUTTON] Found generate_response method")
 
-                # 🔧 КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Объединяем system_prompt + user_prompt в один промпт
+                # КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Объединяем system_prompt + user_prompt в один промпт
                 # Gemini лучше работает когда все инструкции в одном промпте
                 if system_prompt and system_prompt.strip():
                     combined_prompt = f"{system_prompt}\n\n{'='*80}\n\n{user_prompt}"
@@ -540,14 +540,14 @@ class InferenceService(BaseService):
 
                 # Подготовка параметров для EnhancedInferenceEngine
                 ai_params = {
-                    'prompt': combined_prompt,  # ✅ Всё в одном промпте
+                    'prompt': combined_prompt, # Всё в одном промпте
                     'max_tokens': config.get('max_tokens', 2048),
-                    'temperature': config.get('temperature', 0.05)  # Минимальная температура для точности
+                    'temperature': config.get('temperature', 0.05) # Минимальная температура для точности
                 }
 
                 self.logger.info(f"[ROCKET] Calling generate_response with combined prompt ({len(combined_prompt)} chars)")
                 response_data = await self.inference_system.generate_response(**ai_params)
-                self.logger.info(f"📥 Received response type: {type(response_data)}")
+                self.logger.info(f" Received response type: {type(response_data)}")
 
                 # Извлекаем текст ответа из результата
                 if isinstance(response_data, dict) and 'response' in response_data:
@@ -560,14 +560,14 @@ class InferenceService(BaseService):
                     response_text = str(response_data)
                     self.logger.info(f"[CHECK_MARK_BUTTON] Converted to string: {len(response_text)} chars")
 
-                # 🚨 PHASE 2.1: CRITICAL - Check for empty responses
+                # PHASE 2.1: CRITICAL - Check for empty responses
                 if not response_text or len(response_text.strip()) == 0:
-                    self.logger.error(f"[❌ EMPTY] Gemini returned EMPTY response!")
-                    self.logger.error(f"[❌ EMPTY] Query: {user_prompt[:200]}...")
-                    self.logger.error(f"[❌ EMPTY] Config: {ai_params}")
+                    self.logger.error(f"[ EMPTY] Gemini returned EMPTY response!")
+                    self.logger.error(f"[ EMPTY] Query: {user_prompt[:200]}...")
+                    self.logger.error(f"[ EMPTY] Config: {ai_params}")
 
                     # Попытка retry с упрощенным промптом
-                    self.logger.warning("[🔄 RETRY] Attempting retry with simplified prompt...")
+                    self.logger.warning("[ RETRY] Attempting retry with simplified prompt...")
                     retry_prompt = f"Вопрос: {user_prompt.split('Вопрос:')[-1] if 'Вопрос:' in user_prompt else user_prompt}"
                     ai_params['prompt'] = retry_prompt
 
@@ -580,12 +580,12 @@ class InferenceService(BaseService):
                         response_text = str(response_data_retry)
 
                     if not response_text or len(response_text.strip()) == 0:
-                        self.logger.error("[❌ RETRY FAILED] Still empty after retry!")
+                        self.logger.error("[ RETRY FAILED] Still empty after retry!")
                         return "Извините, не удалось сгенерировать ответ. Попробуйте переформулировать вопрос."
                     else:
-                        self.logger.info(f"[✅ RETRY SUCCESS] Got response after retry: {len(response_text)} chars")
+                        self.logger.info(f"[ RETRY SUCCESS] Got response after retry: {len(response_text)} chars")
 
-                self.logger.info(f"[✅ FINAL] Returning response: {len(response_text)} chars, first 200: {response_text[:200]}")
+                self.logger.info(f"[ FINAL] Returning response: {len(response_text)} chars, first 200: {response_text[:200]}")
                 return response_text
             
             elif hasattr(self.inference_system, 'generate_answer'):
@@ -600,7 +600,7 @@ class InferenceService(BaseService):
                 # Fallback для старого интерфейса
                 response = await self.inference_system.ask_question(
                     question=user_prompt,
-                    context_chunks=[]  # Контекст уже в промпте
+                    context_chunks=[] # Контекст уже в промпте
                 )
                 return response
             
@@ -674,10 +674,10 @@ class InferenceService(BaseService):
 
         try:
             if not self.self_rag_engine:
-                self.logger.warning("[⚠️] Self-RAG engine not available, falling back to standard generation")
+                self.logger.warning("[] Self-RAG engine not available, falling back to standard generation")
                 return await self._fallback_generation(query, initial_documents)
 
-            self.logger.info(f"[🎯] Starting Self-RAG generation for: {query[:100]}...")
+            self.logger.info(f"[] Starting Self-RAG generation for: {query[:100]}...")
 
             # Применяем Self-RAG с автоматической критикой
             self_rag_result: SelfRAGResult = await self.self_rag_engine.generate_with_self_critique(
@@ -721,12 +721,12 @@ class InferenceService(BaseService):
             # Обновляем метрики сервиса
             self._update_self_rag_metrics(response)
 
-            self.logger.info(f"[✅] Self-RAG generation completed: confidence={self_rag_result.confidence_score:.2f}")
+            self.logger.info(f"[] Self-RAG generation completed: confidence={self_rag_result.confidence_score:.2f}")
 
             return response
 
         except Exception as e:
-            self.logger.error(f"[❌] Self-RAG generation failed: {e}")
+            self.logger.error(f"[] Self-RAG generation failed: {e}")
             return await self._fallback_generation(query, initial_documents)
 
     async def _fallback_generation(self, query: str, documents: List[str]) -> Dict[str, Any]:
@@ -744,13 +744,13 @@ class InferenceService(BaseService):
             return {
                 "answer": response_text if isinstance(response_text, str) else str(response_text),
                 "success": True,
-                "confidence_score": 0.5,  # Средняя уверенность для fallback
+                "confidence_score": 0.5, # Средняя уверенность для fallback
                 "generation_method": "fallback_irac",
                 "self_rag_metrics": None
             }
 
         except Exception as e:
-            self.logger.error(f"[❌] Fallback generation failed: {e}")
+            self.logger.error(f"[] Fallback generation failed: {e}")
             return {
                 "answer": "ОШИБКА: Не удалось сгенерировать ответ. Попробуйте переформулировать вопрос.",
                 "success": False,
@@ -795,10 +795,10 @@ class InferenceService(BaseService):
 
         # Паттерны для российских правовых ссылок
         citation_patterns = [
-            r'\d+-ФЗ',  # Федеральные законы
-            r'[Сс]татья\s+\d+',  # Статьи
-            r'[Пп]ункт\s+\d+',  # Пункты
-            r'[Гг]лава\s+\d+'  # Главы
+            r'\d+-ФЗ', # Федеральные законы
+            r'[Сс]татья\s+\d+', # Статьи
+            r'[Пп]ункт\s+\d+', # Пункты
+            r'[Гг]лава\s+\d+' # Главы
         ]
 
         total_citations = 0

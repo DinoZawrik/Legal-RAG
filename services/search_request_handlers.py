@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 Search Service Request Handlers
+Search Service Request Handlers
 Обработчики запросов для микросервиса поиска.
 
 Включает функциональность:
@@ -39,7 +39,7 @@ class SearchRequestHandlers(SearchServiceCore):
                 # Импортируем динамически чтобы избежать циклических импортов
                 from services.search_advanced_handlers import SearchAdvancedHandlers
                 handler = SearchAdvancedHandlers()
-                handler.__dict__.update(self.__dict__)  # Копируем состояние
+                handler.__dict__.update(self.__dict__) # Копируем состояние
                 return await handler._handle_universal_legal_query(request)
             elif request_type == "hybrid_search":
                 from services.search_advanced_handlers import SearchAdvancedHandlers
@@ -83,7 +83,7 @@ class SearchRequestHandlers(SearchServiceCore):
                     "error": "Query parameter is required"
                 }
 
-            max_results = min(request.get("max_results", 10), 50)  # Ограничиваем максимум
+            max_results = min(request.get("max_results", 10), 50) # Ограничиваем максимум
             use_cache = request.get("use_cache", True)
             config = self._load_configuration()
 
@@ -103,7 +103,7 @@ class SearchRequestHandlers(SearchServiceCore):
                 if cached_result:
                     self.logger.info("[CACHE] Returning cached search result")
                     cached_result["cached"] = True
-                    cached_result["success"] = True  # Убеждаемся что success присутствует
+                    cached_result["success"] = True # Убеждаемся что success присутствует
                     return cached_result
 
             # Выполняем поиск через storage manager
@@ -128,14 +128,21 @@ class SearchRequestHandlers(SearchServiceCore):
                         self.logger.info("[GRAPH+HYBRID] Using Graph-Enhanced Hybrid search (BM25+Semantic+Neo4j)")
 
                         graph_results = await graph_enhanced_hybrid_search(
-                            chromadb_collection=chroma_collection,
+                            chroma_collection=chroma_collection,
                             query=query,
                             k=max_results,
-                            graph_depth=1,  # Глубина графового обхода
-                            max_related_per_article=3  # Макс. связанных статей
+                            graph_depth=1, # Глубина графового обхода
+                            max_related_per_article=3 # Макс. связанных статей
                         )
 
                         search_results = graph_results
+
+                        # Конвертируем dataclass в dict если нужно
+                        from dataclasses import asdict, is_dataclass
+                        search_results = [
+                            asdict(r) if is_dataclass(r) else r
+                            for r in search_results
+                        ]
 
                         self.logger.info(f"[GRAPH+HYBRID] Found {len(search_results)} results")
 
@@ -151,7 +158,7 @@ class SearchRequestHandlers(SearchServiceCore):
                             related_count = len(result.get('graph_context', []))
 
                             self.logger.info(
-                                f"  {i}. Final={final:.3f} (Hybrid={hybrid:.3f} + Graph={graph:.3f}) "
+                                f" {i}. Final={final:.3f} (Hybrid={hybrid:.3f} + Graph={graph:.3f}) "
                                 f"Law={law} Art={article}, Related={related_count}"
                             )
 
@@ -163,12 +170,19 @@ class SearchRequestHandlers(SearchServiceCore):
                         self.logger.info("[HYBRID-BM25] Using BM25 + Semantic hybrid search")
 
                         hybrid_results = await hybrid_search(
-                            chromadb_collection=chroma_collection,
+                            chroma_collection=chroma_collection,
                             query=query,
                             k=max_results
                         )
 
                         search_results = hybrid_results
+
+                        # Конвертируем HybridSearchResult dataclass в dict
+                        from dataclasses import asdict, is_dataclass
+                        search_results = [
+                            asdict(r) if is_dataclass(r) else r
+                            for r in search_results
+                        ]
 
                         print(f"[HYBRID-BM25] Found {len(search_results)} results")
                         print(f"[DEBUG] Type of search_results: {type(search_results)}")
@@ -182,7 +196,7 @@ class SearchRequestHandlers(SearchServiceCore):
                             hybrid = result.get('hybrid_score', 0)
                             law = result.get('metadata', {}).get('law', 'N/A')
                             self.logger.info(
-                                f"  {i}. Hybrid={hybrid:.3f} (BM25={bm25:.3f}, Semantic={semantic:.3f}) Law={law}"
+                                f" {i}. Hybrid={hybrid:.3f} (BM25={bm25:.3f}, Semantic={semantic:.3f}) Law={law}"
                             )
                     else:
                         # Fallback: обычный семантический поиск
@@ -205,7 +219,7 @@ class SearchRequestHandlers(SearchServiceCore):
             # Обработка результатов
             if not search_results:
                 result = {
-                    "success": True,  # ВАЖНО: это не ошибка, просто нет результатов
+                    "success": True, # ВАЖНО: это не ошибка, просто нет результатов
                     "query": query,
                     "results": [],
                     "total_results": 0,
@@ -230,18 +244,18 @@ class SearchRequestHandlers(SearchServiceCore):
                 except Exception as _e:
                     self.logger.warning(f"[VERIFY] Ошибка верификации цитат: {_e}")
 
-                # 🎯 ФАЗА 1: Удален composed_answer - теперь Gateway всегда вызывает InferenceService
+                # ФАЗА 1: Удален composed_answer - теперь Gateway всегда вызывает InferenceService
                 # Это критично для работы системы верификации и Self-RAG
                 # composed_answer = SearchUtilities._compose_contextual_answer(
-                #     query=query,
-                #     chunks=processed_results[:5],
-                #     legal_context={"entities": SearchUtilities.extract_legal_entities(query)}
+                # query=query,
+                # chunks=processed_results[:5],
+                # legal_context={"entities": SearchUtilities.extract_legal_entities(query)}
                 # )
 
                 result = {
                     "success": True,
                     "query": query,
-                    # ❌ REMOVED: "answer" - пусть InferenceService генерирует ответы с верификацией
+                    # REMOVED: "answer" - пусть InferenceService генерирует ответы с верификацией
                     "results": processed_results,
                     "total_results": len(processed_results),
                     "cached": False,
@@ -287,23 +301,23 @@ class SearchRequestHandlers(SearchServiceCore):
                 document_date = metadata.get('document_date', '')
                 recency_bonus = SearchUtilities._calculate_recency_bonus(document_date)
 
-                # 🔧 FIX: Сохраняем оригинальные graph поля перед корректировкой
+                # FIX: Сохраняем оригинальные graph поля перед корректировкой
                 has_graph_score = 'graph_score' in result
                 has_graph_context = 'graph_context' in result
 
                 # Корректируем similarity с учетом актуальности
-                original_similarity = result.get('similarity', 0)
+                original_similarity = result.get('similarity', 0) or result.get('hybrid_score', 0)
                 adjusted_similarity = min(1.0, original_similarity + recency_bonus)
                 processed_result['similarity'] = adjusted_similarity
                 processed_result['recency_bonus'] = recency_bonus
 
-                # 🔧 FIX: Восстанавливаем graph поля если они были (Graph-Enhanced Search)
+                # FIX: Восстанавливаем graph поля если они были (Graph-Enhanced Search)
                 if has_graph_score:
                     processed_result['graph_score'] = result.get('graph_score', 0)
                 if has_graph_context:
                     processed_result['graph_context'] = result.get('graph_context', [])
 
-                # 🔧 FIX: Сохраняем также hybrid поля (BM25 + Semantic)
+                # FIX: Сохраняем также hybrid поля (BM25 + Semantic)
                 if 'bm25_score' in result:
                     processed_result['bm25_score'] = result['bm25_score']
                 if 'semantic_score' in result:
@@ -322,7 +336,7 @@ class SearchRequestHandlers(SearchServiceCore):
                 # Добавляем правовые сущности из текста
                 legal_entities = SearchUtilities.extract_legal_entities(text)
                 if legal_entities:
-                    processed_result['legal_entities'] = legal_entities[:5]  # Топ-5
+                    processed_result['legal_entities'] = legal_entities[:5] # Топ-5
 
                 processed_results.append(processed_result)
 
@@ -333,7 +347,7 @@ class SearchRequestHandlers(SearchServiceCore):
 
         except Exception as e:
             self.logger.error(f"[X] Error in post-processing search results: {e}")
-            return results  # Возвращаем оригинальные результаты в случае ошибки
+            return results # Возвращаем оригинальные результаты в случае ошибки
 
     async def _handle_config_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Обработка запроса конфигурации."""

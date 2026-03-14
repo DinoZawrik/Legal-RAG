@@ -125,7 +125,7 @@ clear_chromadb.py
 /task.txt
 /.qoder
 
-# Project-specific temporary artifacts (keep in repo but ignore in VCS)
+# Project-specific temporary artifacts
 test_contextual_fix.py
 Особенности_привлечения_банковского_финансирования_в_проекты_ГЧП.pdf
 /files
@@ -139,3 +139,14 @@ test_contextual_fix.py
 /nginx
 /CLAUDE.md
 /venv_docs
+
+# Chainlit runtime files
+.files/
+.chainlit/translations/
+
+# Temp debug/utility scripts (prefixed with _)
+_check_chunks.py
+_check_db.py
+_fix_leading_spaces.py
+_remove_emojis_safe.py
+quick_test.py

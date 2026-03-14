@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📊 Analysis & Diagnostics Suite
+Analysis & Diagnostics Suite
 Объединенный инструмент для анализа и диагностики системы.
 
 Включает функциональность из папок analysis/ и diagnostics/:
@@ -33,14 +33,14 @@ try:
     from core.analysis_suite_utils import TextAnalyzer
     from core.logging_config import configure_logging
 except ImportError as e:
-    print(f"❌ Не удается импортировать core модули: {e}")
+    print(f" Не удается импортировать core модули: {e}")
     sys.exit(1)
 
 # Database imports
 try:
     from sqlalchemy import text, inspect
 except ImportError as e:
-    print(f"⚠️ SQLAlchemy недоступен: {e}")
+    print(f" SQLAlchemy недоступен: {e}")
 
 logger = logging.getLogger(__name__)
 
@@ -69,14 +69,14 @@ class AnalysisSuite:
             self.analysis_results[component] = []
         self.analysis_results[component].append(result)
         
-        emoji = "✅" if status == "healthy" else "❌" if status == "critical" else "⚠️"
+        emoji = "" if status == "healthy" else "" if status == "critical" else ""
         logger.info(f"{emoji} {component}: {details}")
     
     # === DOCUMENT ANALYSIS ===
     
     async def analyze_documents(self) -> Dict[str, Any]:
         """Анализ документов в системе."""
-        logger.info("📄 Анализ документов")
+        logger.info(" Анализ документов")
         
         analysis = {
             "total_documents": 0,
@@ -189,7 +189,7 @@ class AnalysisSuite:
     
     async def diagnose_database(self) -> Dict[str, Any]:
         """Диагностика состояния базы данных."""
-        logger.info("🗄️ Диагностика базы данных")
+        logger.info(" Диагностика базы данных")
         
         diagnostics = {
             "connection_status": "unknown",
@@ -292,7 +292,7 @@ class AnalysisSuite:
     
     async def diagnose_chroma(self) -> Dict[str, Any]:
         """Диагностика ChromaDB."""
-        logger.info("🔍 Диагностика ChromaDB")
+        logger.info(" Диагностика ChromaDB")
         
         diagnostics = {
             "availability": "unknown",
@@ -344,7 +344,7 @@ class AnalysisSuite:
                 avg_search_time = sum(c["search_time_ms"] for c in diagnostics["collections"]) / len(diagnostics["collections"])
                 diagnostics["performance"]["avg_search_time_ms"] = round(avg_search_time, 2)
                 
-                if avg_search_time > 1000:  # 1 секунда
+                if avg_search_time > 1000: # 1 секунда
                     diagnostics["issues"].append("Медленный поиск в ChromaDB")
                     diagnostics["recommendations"].append("Оптимизировать индексы ChromaDB")
             
@@ -384,7 +384,7 @@ class AnalysisSuite:
     
     async def diagnose_search_system(self) -> Dict[str, Any]:
         """Диагностика поисковой системы."""
-        logger.info("🔍 Диагностика поисковой системы")
+        logger.info(" Диагностика поисковой системы")
         
         diagnostics = {
             "qa_service_status": "unknown",
@@ -454,7 +454,7 @@ class AnalysisSuite:
                 diagnostics["performance"]["success_rate"] = (successful_searches / len(test_queries)) * 100
                 
                 # Анализ производительности
-                if avg_search_time > 2000:  # 2 секунды
+                if avg_search_time > 2000: # 2 секунды
                     diagnostics["issues"].append("Медленный поиск документов")
                     diagnostics["recommendations"].append("Оптимизировать поисковые алгоритмы")
                 
@@ -488,7 +488,7 @@ class AnalysisSuite:
     
     async def run_document_analysis(self) -> Dict[str, Any]:
         """Запуск анализа документов."""
-        logger.info("📄 Запуск анализа документов")
+        logger.info(" Запуск анализа документов")
         
         documents_analysis = await self.analyze_documents()
         
@@ -501,7 +501,7 @@ class AnalysisSuite:
     
     async def run_database_diagnostics(self) -> Dict[str, Any]:
         """Запуск диагностики базы данных."""
-        logger.info("🗄️ Запуск диагностики базы данных")
+        logger.info(" Запуск диагностики базы данных")
         
         database_diagnostics = await self.diagnose_database()
         
@@ -514,7 +514,7 @@ class AnalysisSuite:
     
     async def run_chroma_diagnostics(self) -> Dict[str, Any]:
         """Запуск диагностики ChromaDB."""
-        logger.info("🔍 Запуск диагностики ChromaDB")
+        logger.info(" Запуск диагностики ChromaDB")
         
         chroma_diagnostics = await self.diagnose_chroma()
         
@@ -527,7 +527,7 @@ class AnalysisSuite:
     
     async def run_search_diagnostics(self) -> Dict[str, Any]:
         """Запуск диагностики поисковой системы."""
-        logger.info("🔍 Запуск диагностики поиска")
+        logger.info(" Запуск диагностики поиска")
         
         search_diagnostics = await self.diagnose_search_system()
         
@@ -540,7 +540,7 @@ class AnalysisSuite:
     
     async def run_full_analysis(self) -> Dict[str, Any]:
         """Запуск полного анализа системы."""
-        logger.info("🚀 Запуск полного анализа системы")
+        logger.info(" Запуск полного анализа системы")
         
         # Анализ документов
         documents_analysis = await self.analyze_documents()
@@ -604,35 +604,35 @@ class AnalysisSuite:
         
         # Краткий отчет
         print("\n" + "="*60)
-        print("📊 ОТЧЕТ ПО АНАЛИЗУ СИСТЕМЫ")
+        print(" ОТЧЕТ ПО АНАЛИЗУ СИСТЕМЫ")
         print("="*60)
         
         analysis_type = results.get("analysis_type", "unknown")
-        print(f"🔍 Тип анализа: {analysis_type}")
-        print(f"⏱️ Продолжительность: {results['session_info']['duration_seconds']:.1f}с")
-        print(f"🔧 Компонентов проанализировано: {results['session_info']['components_analyzed']}")
+        print(f" Тип анализа: {analysis_type}")
+        print(f" Продолжительность: {results['session_info']['duration_seconds']:.1f}с")
+        print(f" Компонентов проанализировано: {results['session_info']['components_analyzed']}")
         
         # Показать ключевые метрики
         if "system_health" in results:
             health = results["system_health"]
-            print(f"🏥 Общее состояние системы: {health['overall_status']} ({health['health_percentage']}%)")
+            print(f" Общее состояние системы: {health['overall_status']} ({health['health_percentage']}%)")
             
             for component, status in health["component_statuses"].items():
-                emoji = "✅" if status == "healthy" else "❌" if status == "critical" else "⚠️"
-                print(f"  {emoji} {component}: {status}")
+                emoji = "" if status == "healthy" else "" if status == "critical" else ""
+                print(f" {emoji} {component}: {status}")
         
         elif "results" in results:
             # Показать специфичные результаты
             if analysis_type == "documents":
                 quality = results["results"].get("quality_metrics", {})
                 if quality:
-                    print(f"📄 Качество документов: {quality.get('quality_score', 0)}/100")
+                    print(f" Качество документов: {quality.get('quality_score', 0)}/100")
             
             elif analysis_type == "database":
                 db_status = results["results"].get("connection_status", "unknown")
-                print(f"🗄️ Статус БД: {db_status}")
+                print(f" Статус БД: {db_status}")
             
-        print(f"\n💾 Полный отчет сохранен в: {output_file}")
+        print(f"\n Полный отчет сохранен в: {output_file}")
         print("="*60)
 
 
@@ -666,7 +666,7 @@ async def main():
             results = await suite.run_chroma_diagnostics()
         elif args.mode == "search":
             results = await suite.run_search_diagnostics()
-        else:  # full
+        else: # full
             results = await suite.run_full_analysis()
         
         suite.generate_report(results, args.output)
@@ -681,7 +681,7 @@ async def main():
             sys.exit(1)
         
     except Exception as e:
-        logger.error(f"❌ Критическая ошибка анализа: {e}")
+        logger.error(f" Критическая ошибка анализа: {e}")
         sys.exit(1)
 
 

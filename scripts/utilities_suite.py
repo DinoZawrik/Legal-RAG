@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🛠️ Utilities Suite
+Utilities Suite
 Объединенный инструмент для вспомогательных операций.
 
 Включает оставшиеся утилиты:
@@ -28,7 +28,7 @@ try:
     from core.infrastructure_suite import get_settings, get_core_app
     from core.storage_coordinator import create_storage_coordinator
 except ImportError as e:
-    print(f"❌ Не удается импортировать core модули: {e}")
+    print(f" Не удается импортировать core модули: {e}")
     sys.exit(1)
 
 # Telegram imports (для тестирования бота)
@@ -61,7 +61,7 @@ class UtilitiesSuite:
         }
         self.operations.append(result)
         
-        emoji = "✅" if status == "success" else "❌" if status == "error" else "⚠️"
+        emoji = "" if status == "success" else "" if status == "error" else ""
         logger.info(f"{emoji} {operation}: {details}")
     
     # === DOCKER MANAGEMENT ===
@@ -131,7 +131,7 @@ class UtilitiesSuite:
     
     def build_docker_services(self) -> Dict[str, Any]:
         """Сборка Docker сервисов."""
-        logger.info("🐳 Сборка Docker сервисов")
+        logger.info(" Сборка Docker сервисов")
         
         if not self.check_docker_installation():
             return {"error": "Docker недоступен"}
@@ -145,7 +145,7 @@ class UtilitiesSuite:
                 ["docker-compose", "build"],
                 capture_output=True,
                 text=True,
-                timeout=600  # 10 минут
+                timeout=600 # 10 минут
             )
             
             if result.returncode == 0:
@@ -174,7 +174,7 @@ class UtilitiesSuite:
     
     def start_docker_services(self) -> Dict[str, Any]:
         """Запуск Docker сервисов."""
-        logger.info("🚀 Запуск Docker сервисов")
+        logger.info(" Запуск Docker сервисов")
         
         if not self.check_docker_installation():
             return {"error": "Docker недоступен"}
@@ -185,7 +185,7 @@ class UtilitiesSuite:
                 ["docker-compose", "up", "-d"],
                 capture_output=True,
                 text=True,
-                timeout=120  # 2 минуты
+                timeout=120 # 2 минуты
             )
             
             if result.returncode == 0:
@@ -223,7 +223,7 @@ class UtilitiesSuite:
     
     def stop_docker_services(self) -> Dict[str, Any]:
         """Остановка Docker сервисов."""
-        logger.info("🛑 Остановка Docker сервисов")
+        logger.info(" Остановка Docker сервисов")
         
         try:
             result = subprocess.run(
@@ -259,7 +259,7 @@ class UtilitiesSuite:
     
     def get_docker_status(self) -> Dict[str, Any]:
         """Получение статуса Docker сервисов."""
-        logger.info("📊 Проверка статуса Docker сервисов")
+        logger.info(" Проверка статуса Docker сервисов")
         
         if not self.check_docker_installation():
             return {"error": "Docker недоступен"}
@@ -316,7 +316,7 @@ class UtilitiesSuite:
     
     def test_telegram_bot(self) -> Dict[str, Any]:
         """Тестирование Telegram бота."""
-        logger.info("🤖 Тестирование Telegram бота")
+        logger.info(" Тестирование Telegram бота")
         
         if not requests:
             self.log_operation("bot_test", "error", "Библиотека requests недоступна")
@@ -419,7 +419,7 @@ class UtilitiesSuite:
     
     def run_system_health_check(self) -> Dict[str, Any]:
         """Проверка общего состояния системы."""
-        logger.info("🏥 Проверка состояния системы")
+        logger.info(" Проверка состояния системы")
         
         health_checks = {
             "docker_available": False,
@@ -445,7 +445,7 @@ class UtilitiesSuite:
         required_vars = ["TELEGRAM_BOT_TOKEN", "DATABASE_URL", "GEMINI_API_KEY"]
         configured_vars = sum(1 for var in required_vars if os.getenv(var))
         
-        if configured_vars >= len(required_vars) * 0.75:  # 75% переменных настроены
+        if configured_vars >= len(required_vars) * 0.75: # 75% переменных настроены
             health_checks["environment_configured"] = True
             details["environment"] = f"Настроено {configured_vars}/{len(required_vars)} переменных"
         else:
@@ -534,21 +534,21 @@ class UtilitiesSuite:
         
         # Краткий отчет
         print("\n" + "="*60)
-        print("🛠️ ОТЧЕТ ПО УТИЛИТАМ")
+        print(" ОТЧЕТ ПО УТИЛИТАМ")
         print("="*60)
         
         session_info = results["session_info"]
-        print(f"⏱️ Продолжительность: {session_info['duration_seconds']:.1f}с")
-        print(f"✅ Успешных операций: {session_info['successful_operations']}")
-        print(f"📊 Всего операций: {session_info['total_operations']}")
+        print(f" Продолжительность: {session_info['duration_seconds']:.1f}с")
+        print(f" Успешных операций: {session_info['successful_operations']}")
+        print(f" Всего операций: {session_info['total_operations']}")
         
         # Специфичная информация
         if "overall_status" in results:
             health = results["overall_status"]
             percentage = results.get("health_percentage", 0)
-            print(f"🏥 Состояние системы: {health} ({percentage}%)")
+            print(f" Состояние системы: {health} ({percentage}%)")
         
-        print(f"\n💾 Полный отчет сохранен в: {output_file}")
+        print(f"\n Полный отчет сохранен в: {output_file}")
         print("="*60)
 
 
@@ -585,14 +585,14 @@ async def main():
             storage_manager = await create_storage_coordinator()
             core_app.register_component("storage", storage_manager)
         except Exception as e:
-            logger.warning(f"⚠️ Не удалось инициализировать storage manager: {e}")
+            logger.warning(f" Не удалось инициализировать storage manager: {e}")
 
     suite = UtilitiesSuite(storage_manager=storage_manager)
 
     try:
         if args.mode == "docker":
             if not args.action:
-                print("❌ Для режима 'docker' требуется указать --action")
+                print(" Для режима 'docker' требуется указать --action")
                 sys.exit(1)
 
             if args.action == "build":
@@ -607,7 +607,7 @@ async def main():
         elif args.mode == "bot-test":
             results = suite.test_telegram_bot()
 
-        else:  # health-check
+        else: # health-check
             results = suite.run_system_health_check()
 
         suite.generate_report(results, args.output)
@@ -622,7 +622,7 @@ async def main():
             sys.exit(0)
         
     except Exception as e:
-        logger.error(f"❌ Критическая ошибка утилит: {e}")
+        logger.error(f" Критическая ошибка утилит: {e}")
         sys.exit(1)
 
 

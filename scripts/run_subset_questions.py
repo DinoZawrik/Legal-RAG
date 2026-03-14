@@ -27,14 +27,14 @@ async def main() -> None:
 
         try:
             result = await workflow.run(question)
-        except Exception as exc:  # noqa: BLE001
-            print(f"❌ ОШИБКА: {exc}\n")
+        except Exception as exc: # noqa: BLE001
+            print(f" ОШИБКА: {exc}\n")
             continue
 
         answer = (result.get("answer") or "").strip()
         confidence = result.get("confidence", 0.0)
 
-        print("✅ ОТВЕТ:\n")
+        print(" ОТВЕТ:\n")
         print(answer or "(Ответ пустой)")
         print(f"\nУверенность: {confidence:.2f}\n")
 

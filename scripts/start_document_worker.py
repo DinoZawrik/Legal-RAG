@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔄 Document Worker Startup Script
+Document Worker Startup Script
 Запуск background worker'а для обработки документов через Task Queue
 """
 
@@ -22,12 +22,12 @@ from core.logging_config import configure_logging
 
 # Настройка логирования
 # logging.basicConfig(
-#     level=logging.INFO,
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#     handlers=[
-#         logging.StreamHandler(sys.stdout),
-#         logging.FileHandler('logs/document_worker.log') if os.path.exists('logs') else logging.NullHandler()
-#     ]
+# level=logging.INFO,
+# format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+# handlers=[
+# logging.StreamHandler(sys.stdout),
+# logging.FileHandler('logs/document_worker.log') if os.path.exists('logs') else logging.NullHandler()
+# ]
 # )
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class WorkerManager:
         """Запуск worker'а"""
         worker_id = os.getenv('WORKER_ID', 'main-document-worker')
         
-        logger.info(f"🚀 Starting Document Worker: {worker_id}")
+        logger.info(f" Starting Document Worker: {worker_id}")
         
         # Устанавливаем обработчики сигналов для graceful shutdown
         for sig in [signal.SIGINT, signal.SIGTERM]:
@@ -62,13 +62,13 @@ class WorkerManager:
                 return_exceptions=True
             )
         except Exception as e:
-            logger.error(f"❌ Worker error: {e}")
+            logger.error(f" Worker error: {e}")
         finally:
-            logger.info("🔌 Document Worker shutdown completed")
+            logger.info(" Document Worker shutdown completed")
     
     def _signal_handler(self, signum, frame):
         """Обработчик сигналов для graceful shutdown"""
-        logger.info(f"📡 Received signal {signum}, initiating shutdown...")
+        logger.info(f" Received signal {signum}, initiating shutdown...")
         self.shutdown_event.set()
         
         if self.worker_task and not self.worker_task.done():
@@ -81,11 +81,11 @@ class WorkerManager:
 
 async def main():
     """Основная функция запуска worker'а"""
-    logger.info("🔄 Document Worker starting...")
+    logger.info(" Document Worker starting...")
     
     # Проверяем переменные окружения
     redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379')
-    logger.info(f"📡 Redis URL: {redis_url}")
+    logger.info(f" Redis URL: {redis_url}")
     
     # Создаем и запускаем менеджер worker'а
     manager = WorkerManager()

@@ -25,12 +25,12 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Импорты из внутренних скриптов (асинхронные функции уже доступны)
-from scripts.clear_all_databases import (  # noqa: E402
+from scripts.clear_all_databases import ( # noqa: E402
     clear_chromadb,
     clear_postgresql,
     clear_redis,
 )
-from scripts.data_loaders.load_proper_test_documents import (  # noqa: E402
+from scripts.data_loaders.load_proper_test_documents import ( # noqa: E402
     ProperDocumentLoader,
 )
 
@@ -100,7 +100,7 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 async def reset_datastores() -> Dict[str, int]:
     """Очищает PostgreSQL, Redis и ChromaDB."""
 
-    logging.info("🧹 Запускаю полную очистку стораджей")
+    logging.info(" Запускаю полную очистку стораджей")
     cleared: Dict[str, int] = {}
 
     cleared["postgres"] = await clear_postgresql()
@@ -108,7 +108,7 @@ async def reset_datastores() -> Dict[str, int]:
     cleared["chromadb"] = await clear_chromadb()
 
     logging.info(
-        "✅ Очистка завершена: postgres=%s, redis=%s, chromadb=%s",
+        " Очистка завершена: postgres=%s, redis=%s, chromadb=%s",
         cleared["postgres"],
         cleared["redis"],
         cleared["chromadb"],
@@ -124,25 +124,25 @@ async def ingest_documents(documents_path: Optional[str], verify: bool) -> tuple
         if not path_obj.exists() or not path_obj.is_dir():
             raise FileNotFoundError(f"Каталог с документами не найден: {path_obj}")
         os.environ["TEST_DOCUMENTS_PATH"] = str(path_obj)
-        logging.info("📁 Использую каталог документов: %s", path_obj)
+        logging.info(" Использую каталог документов: %s", path_obj)
 
     loader = ProperDocumentLoader()
 
-    logging.info("🔌 Инициализация UnifiedStorageManager")
+    logging.info(" Инициализация UnifiedStorageManager")
     initialized = await loader.initialize_storage()
     if not initialized:
         raise RuntimeError("Не удалось инициализировать хранилище")
 
-    logging.info("📚 Начинаю загрузку документов")
+    logging.info(" Начинаю загрузку документов")
     chunks = await loader.load_all_test_documents()
 
     if verify:
-        logging.info("🔍 Запускаю верификацию загруженных документов")
+        logging.info(" Запускаю верификацию загруженных документов")
         await loader.verify_loaded_documents()
 
     # Уточняем реальный путь, который использовал loader (на случай автоопределения)
     resolved_path = loader.documents_path
-    logging.info("✅ Загрузка завершена: всего чанков=%s", len(chunks))
+    logging.info(" Загрузка завершена: всего чанков=%s", len(chunks))
     return len(chunks), resolved_path
 
 
@@ -153,7 +153,7 @@ async def orchestrate(args: argparse.Namespace) -> IngestionSummary:
     cleared_items: Dict[str, int] = {"postgres": 0, "redis": 0, "chromadb": 0}
 
     if args.skip_clear:
-        logging.info("⏩ Очистка стораджей пропущена по флагу --skip-clear")
+        logging.info(" Очистка стораджей пропущена по флагу --skip-clear")
     else:
         cleared_items = await reset_datastores()
 
@@ -161,7 +161,7 @@ async def orchestrate(args: argparse.Namespace) -> IngestionSummary:
     documents_root = args.documents_path or "(auto-detect)"
 
     if args.skip_load:
-        logging.info("⏩ Загрузка документов пропущена по флагу --skip-load")
+        logging.info(" Загрузка документов пропущена по флагу --skip-load")
     else:
         chunks_loaded, documents_root = await ingest_documents(
             documents_path=args.documents_path,
@@ -182,7 +182,7 @@ def print_summary(summary: IngestionSummary, args: argparse.Namespace) -> None:
     """Вывод финального отчёта по шагам скрипта."""
 
     logging.info("\n%s", "=" * 72)
-    logging.info("🚀 Итоги автоматизированного сброса и загрузки")
+    logging.info(" Итоги автоматизированного сброса и загрузки")
     logging.info("Время выполнения: %.2f c", summary.duration_seconds)
     logging.info(
         "Очистка: postgres=%s, redis=%s, chromadb=%s",
@@ -209,10 +209,10 @@ def main(argv: Optional[list[str]] = None) -> None:
         summary = asyncio.run(orchestrate(args))
         print_summary(summary, args)
     except KeyboardInterrupt:
-        logging.warning("⛔️ Операция прервана пользователем")
+        logging.warning(" Операция прервана пользователем")
         raise SystemExit(130)
-    except Exception as exc:  # pylint: disable=broad-except
-        logging.exception("❌ Не удалось выполнить сценарий: %s", exc)
+    except Exception as exc: # pylint: disable=broad-except
+        logging.exception(" Не удалось выполнить сценарий: %s", exc)
         raise SystemExit(1) from exc
 
 

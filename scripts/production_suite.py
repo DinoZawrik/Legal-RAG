@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-🚀 Production Management Suite
+Production Management Suite
 Объединенный инструмент для управления продакшн системой.
 
 Включает функциональность из:
 - production_startup.py
-- production_startup_gemini.py  
+- production_startup_gemini.py 
 - production_check_simplified.py
 
 Использование:
@@ -33,7 +33,7 @@ try:
     from core.ai_inference_suite import UnifiedAISystem
     from core.processing_pipeline import DocumentManager, RegulatoryPipeline
 except ImportError as e:
-    print(f"❌ Не удается импортировать core модули: {e}")
+    print(f" Не удается импортировать core модули: {e}")
     sys.exit(1)
 
 from core.logging_config import configure_logging
@@ -59,17 +59,17 @@ class ProductionSuite:
     def add_success(self, component: str, message: str):
         """Добавить успешную проверку."""
         self.checks.append({"status": "success", "component": component, "message": message})
-        logger.info(f"✅ {component}: {message}")
+        logger.info(f" {component}: {message}")
     
     def add_failure(self, component: str, message: str):
         """Добавить неуспешную проверку."""
         self.failures.append({"component": component, "message": message})
-        logger.error(f"❌ {component}: {message}")
+        logger.error(f" {component}: {message}")
     
     def add_warning(self, component: str, message: str):
         """Добавить предупреждение."""
         self.warnings.append({"component": component, "message": message})
-        logger.warning(f"⚠️ {component}: {message}")
+        logger.warning(f" {component}: {message}")
     
     def add_performance_metric(self, metric: str, value: float, unit: str = "ms"):
         """Добавить метрику производительности."""
@@ -79,7 +79,7 @@ class ProductionSuite:
     
     def check_environment_variables(self) -> bool:
         """Проверка переменных окружения."""
-        logger.info("🔍 Проверка переменных окружения...")
+        logger.info(" Проверка переменных окружения...")
         
         required_vars = {
             "GEMINI_API_KEY": "Google Gemini API ключ",
@@ -118,7 +118,7 @@ class ProductionSuite:
     
     def check_gemini_configuration(self) -> bool:
         """Проверка конфигурации Gemini."""
-        logger.info("🤖 Проверка конфигурации Gemini...")
+        logger.info(" Проверка конфигурации Gemini...")
         
         try:
             import google.generativeai as genai
@@ -168,7 +168,7 @@ class ProductionSuite:
     
     def check_telegram_configuration(self) -> bool:
         """Проверка конфигурации Telegram."""
-        logger.info("🤖 Проверка конфигурации Telegram...")
+        logger.info(" Проверка конфигурации Telegram...")
         
         token = os.getenv("TELEGRAM_BOT_TOKEN")
         if not token:
@@ -197,7 +197,7 @@ class ProductionSuite:
                     return False
             else:
                 self.add_warning("Telegram", "Не удается проверить токен")
-                return True  # Предполагаем, что токен корректен
+                return True # Предполагаем, что токен корректен
         except Exception as e:
             self.add_warning("Telegram", f"Проверка токена недоступна: {e}")
             return True
@@ -206,7 +206,7 @@ class ProductionSuite:
     
     async def check_database_connectivity(self) -> bool:
         """Проверка подключения к базе данных."""
-        logger.info("🗄️ Проверка базы данных...")
+        logger.info(" Проверка базы данных...")
 
         if not self.storage or not hasattr(self.storage, 'postgres'):
             self.add_failure("Database", "Storage manager или postgres-менеджер не инициализирован.")
@@ -293,7 +293,7 @@ class ProductionSuite:
     
     async def check_qa_service(self) -> bool:
         """Проверка QA сервиса."""
-        logger.info("🔍 Проверка QA сервиса...")
+        logger.info(" Проверка QA сервиса...")
         
         try:
             start_time = time.time()
@@ -319,7 +319,7 @@ class ProductionSuite:
     
     async def check_document_manager(self) -> bool:
         """Проверка Document Manager."""
-        logger.info("📄 Проверка Document Manager...")
+        logger.info(" Проверка Document Manager...")
         
         try:
             start_time = time.time()
@@ -337,7 +337,7 @@ class ProductionSuite:
     
     async def check_regulatory_pipeline(self) -> bool:
         """Проверка Regulatory Pipeline."""
-        logger.info("⚖️ Проверка Regulatory Pipeline...")
+        logger.info(" Проверка Regulatory Pipeline...")
         
         try:
             start_time = time.time()
@@ -357,13 +357,13 @@ class ProductionSuite:
     
     def check_performance_requirements(self) -> bool:
         """Проверка соответствия требованиям производительности."""
-        logger.info("⚡ Проверка производительности...")
+        logger.info(" Проверка производительности...")
         
         performance_ok = True
         
         # Проверка времени подключения к БД
         db_time = self.performance_metrics.get("database_connection", {}).get("value", 0)
-        if db_time > 1000:  # 1 секунда
+        if db_time > 1000: # 1 секунда
             self.add_warning("Performance", f"Медленное подключение к БД: {db_time:.1f}ms")
             performance_ok = False
         else:
@@ -371,7 +371,7 @@ class ProductionSuite:
         
         # Проверка времени поиска
         search_time = self.performance_metrics.get("qa_service_search", {}).get("value", 0)
-        if search_time > 2000:  # 2 секунды
+        if search_time > 2000: # 2 секунды
             self.add_warning("Performance", f"Медленный поиск: {search_time:.1f}ms")
             performance_ok = False
         else:
@@ -383,7 +383,7 @@ class ProductionSuite:
     
     async def run_startup_checks(self) -> Dict[str, Any]:
         """Запуск проверок готовности к продакшн."""
-        logger.info("🚀 Запуск проверок готовности к продакшн...")
+        logger.info(" Запуск проверок готовности к продакшн...")
         
         results = {
             "timestamp": datetime.now().isoformat(),
@@ -427,7 +427,7 @@ class ProductionSuite:
     
     async def run_simple_check(self) -> Dict[str, Any]:
         """Упрощенная проверка системы."""
-        logger.info("🔍 Запуск упрощенной проверки...")
+        logger.info(" Запуск упрощенной проверки...")
         
         results = {
             "timestamp": datetime.now().isoformat(),
@@ -458,7 +458,7 @@ class ProductionSuite:
     
     async def run_gemini_specific_checks(self) -> Dict[str, Any]:
         """Специфичные проверки для Gemini."""
-        logger.info("🤖 Запуск Gemini-специфичных проверок...")
+        logger.info(" Запуск Gemini-специфичных проверок...")
         
         results = {
             "timestamp": datetime.now().isoformat(),
@@ -496,42 +496,42 @@ class ProductionSuite:
     
     def generate_report(self, results: Dict[str, Any], output_file: str = "production_report.json"):
         """Генерация отчета."""
-        logger.info(f"📊 Сохранение отчета в {output_file}")
+        logger.info(f" Сохранение отчета в {output_file}")
         
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
         
         # Краткий отчет в консоль
         print("\n" + "="*60)
-        print("🚀 ОТЧЕТ ПО ГОТОВНОСТИ ПРОДАКШН СИСТЕМЫ")
+        print(" ОТЧЕТ ПО ГОТОВНОСТИ ПРОДАКШН СИСТЕМЫ")
         print("="*60)
         
         if "all_systems_ready" in results:
-            status_icon = "✅" if results["all_systems_ready"] else "❌"
+            status_icon = "" if results["all_systems_ready"] else ""
             print(f"{status_icon} Система готова: {results['all_systems_ready']}")
-            print(f"📊 Проверок пройдено: {results['checks_passed']}/{results['total_checks']}")
+            print(f" Проверок пройдено: {results['checks_passed']}/{results['total_checks']}")
         
         if "status" in results:
-            status_icon = "✅" if results["status"] == "ready" else "❌"
+            status_icon = "" if results["status"] == "ready" else ""
             print(f"{status_icon} Статус системы: {results['status']}")
         
         if "gemini_ready" in results:
-            status_icon = "✅" if results["gemini_ready"] else "❌"
+            status_icon = "" if results["gemini_ready"] else ""
             print(f"{status_icon} Gemini готов: {results['gemini_ready']}")
         
         # Показать ошибки
         if self.failures:
-            print(f"\n❌ Критические проблемы ({len(self.failures)}):")
+            print(f"\n Критические проблемы ({len(self.failures)}):")
             for failure in self.failures[:3]:
-                print(f"  • {failure['component']}: {failure['message']}")
+                print(f" • {failure['component']}: {failure['message']}")
         
         # Показать предупреждения
         if self.warnings:
-            print(f"\n⚠️ Предупреждения ({len(self.warnings)}):")
+            print(f"\n Предупреждения ({len(self.warnings)}):")
             for warning in self.warnings[:3]:
-                print(f"  • {warning['component']}: {warning['message']}")
+                print(f" • {warning['component']}: {warning['message']}")
         
-        print(f"\n💾 Полный отчет сохранен в: {output_file}")
+        print(f"\n Полный отчет сохранен в: {output_file}")
         print("="*60)
 
 
@@ -561,7 +561,7 @@ async def main():
             results = await suite.run_simple_check()
         elif args.mode == "gemini":
             results = await suite.run_gemini_specific_checks()
-        else:  # full
+        else: # full
             results = await suite.run_startup_checks()
         
         suite.generate_report(results, args.output)
@@ -575,8 +575,8 @@ async def main():
             sys.exit(0 if results["gemini_ready"] else 1)
         
     except Exception as e:
-        logger.error(f"❌ Критическая ошибка: {e}")
-        print(f"❌ Критическая ошибка: {e}")
+        logger.error(f" Критическая ошибка: {e}")
+        print(f" Критическая ошибка: {e}")
         sys.exit(1)
 
 

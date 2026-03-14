@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-📄 Document Loading Suite
+Document Loading Suite
 Объединенный инструмент для загрузки и управления документами.
 
 Включает функциональность из:
 - load_pdf_documents.py
-- load_test_documents.py  
+- load_test_documents.py 
 - test_runner.py
 
 Использование:
@@ -35,14 +35,14 @@ try:
     from core.processing_pipeline import IngestionPipeline
     from core.logging_config import configure_logging
 except ImportError as e:
-    print(f"❌ Не удается импортировать core модули: {e}")
+    print(f" Не удается импортировать core модули: {e}")
     sys.exit(1)
 
 # Additional imports
 try:
     import PyPDF2
 except ImportError as e:
-    print(f"⚠️ PyPDF2 недоступен: {e}")
+    print(f" PyPDF2 недоступен: {e}")
 
 # Logging setup
 configure_logging()
@@ -76,7 +76,7 @@ class DocumentSuite:
         }
         self.results.append(result)
         
-        emoji = "✅" if status == "success" else "❌" if status == "error" else "⚠️"
+        emoji = "" if status == "success" else "" if status == "error" else ""
         logger.info(f"{emoji} {operation}: {message}")
         
         if status == "success":
@@ -173,7 +173,7 @@ class DocumentSuite:
     
     async def load_pdf_batch(self, directory: str, max_files: int = None) -> Dict[str, Any]:
         """Пакетная загрузка PDF файлов."""
-        logger.info(f"🚀 Начинаем пакетную загрузку PDF из: {directory}")
+        logger.info(f" Начинаем пакетную загрузку PDF из: {directory}")
         self.stats["start_time"] = datetime.now()
         
         # Поиск файлов
@@ -184,7 +184,7 @@ class DocumentSuite:
         # Ограничение количества файлов
         if max_files and len(pdf_files) > max_files:
             pdf_files = pdf_files[:max_files]
-            logger.info(f"📊 Ограничиваем загрузку до {max_files} файлов")
+            logger.info(f" Ограничиваем загрузку до {max_files} файлов")
         
         # Валидация файлов
         valid_files = []
@@ -192,12 +192,12 @@ class DocumentSuite:
             if self.validate_pdf_file(pdf_file):
                 valid_files.append(pdf_file)
         
-        logger.info(f"📄 Валидных PDF файлов: {len(valid_files)}")
+        logger.info(f" Валидных PDF файлов: {len(valid_files)}")
         
         # Загрузка файлов
         successful_loads = 0
         for i, pdf_file in enumerate(valid_files, 1):
-            logger.info(f"📄 Обрабатываем {i}/{len(valid_files)}: {pdf_file.name}")
+            logger.info(f" Обрабатываем {i}/{len(valid_files)}: {pdf_file.name}")
             
             success = await self.load_pdf_document(pdf_file)
             if success:
@@ -216,7 +216,7 @@ class DocumentSuite:
         """Генерация контента тестового документа."""
         if doc_type == "regulation":
             return f"""
-ТЕСТОВОЕ ПОСТАНОВЛЕНИЕ №{index}
+ТЕСТОВОЕ ПОСТАНОВЛЕНИЕ {index}
 О РЕГУЛИРОВАНИИ ТЕСТОВОЙ ДЕЯТЕЛЬНОСТИ
 
 В соответствии с федеральным законом "О тестировании системы"
@@ -240,7 +240,7 @@ class DocumentSuite:
         
         elif doc_type == "law":
             return f"""
-ФЕДЕРАЛЬНЫЙ ЗАКОН №{index}-ФЗ
+ФЕДЕРАЛЬНЫЙ ЗАКОН {index}-ФЗ
 О ТЕСТОВОЙ СИСТЕМЕ ОБРАБОТКИ ДОКУМЕНТОВ
 
 Статья 1. Общие положения
@@ -266,7 +266,7 @@ class DocumentSuite:
         
         elif doc_type == "instruction":
             return f"""
-ИНСТРУКЦИЯ ПО ТЕСТИРОВАНИЮ №{index}
+ИНСТРУКЦИЯ ПО ТЕСТИРОВАНИЮ {index}
 
 1. ОБЩИЕ ПОЛОЖЕНИЯ
 Настоящая инструкция определяет порядок тестирования системы.
@@ -288,9 +288,9 @@ class DocumentSuite:
 Дата: {datetime.now().strftime('%d.%m.%Y')}
 """
         
-        else:  # general
+        else: # general
             return f"""
-ТЕСТОВЫЙ ДОКУМЕНТ №{index}
+ТЕСТОВЫЙ ДОКУМЕНТ {index}
 
 Это тестовый документ для проверки работы системы обработки документов.
 
@@ -317,7 +317,7 @@ class DocumentSuite:
             content = self.generate_test_document_content(doc_type, index)
             
             # Создание метаданных
-            title = f"Тестовый {doc_type} №{index}"
+            title = f"Тестовый {doc_type} {index}"
             filename = f"test_{doc_type}_{index}.txt"
             
             # Сохранение в систему через DocumentManager
@@ -348,7 +348,7 @@ class DocumentSuite:
     
     async def generate_test_documents(self, count: int = 10) -> Dict[str, Any]:
         """Генерация набора тестовых документов."""
-        logger.info(f"🧪 Создаем {count} тестовых документов")
+        logger.info(f" Создаем {count} тестовых документов")
         self.stats["start_time"] = datetime.now()
         
         doc_types = ["regulation", "law", "instruction", "general"]
@@ -357,7 +357,7 @@ class DocumentSuite:
         for i in range(1, count + 1):
             doc_type = doc_types[(i - 1) % len(doc_types)]
             
-            logger.info(f"📄 Создаем документ {i}/{count}: {doc_type}")
+            logger.info(f" Создаем документ {i}/{count}: {doc_type}")
             success = await self.create_test_document(doc_type, i)
             
             if success:
@@ -374,7 +374,7 @@ class DocumentSuite:
     
     async def run_qa_tests(self) -> Dict[str, Any]:
         """Запуск тестов QA системы."""
-        logger.info("🔍 Запуск тестов QA системы")
+        logger.info(" Запуск тестов QA системы")
         
         test_queries = [
             "тестовый документ",
@@ -391,7 +391,7 @@ class DocumentSuite:
             test_results = []
             
             for i, query in enumerate(test_queries, 1):
-                logger.info(f"🔍 Тест {i}/{len(test_queries)}: '{query}'")
+                logger.info(f" Тест {i}/{len(test_queries)}: '{query}'")
                 
                 start_time = time.time()
                 results = await qa_service.search_documents(query, limit=5)
@@ -428,7 +428,7 @@ class DocumentSuite:
     
     async def run_document_stats_test(self) -> Dict[str, Any]:
         """Проверка статистики документов."""
-        logger.info("📊 Проверка статистики документов")
+        logger.info(" Проверка статистики документов")
         
         try:
             with get_session() as session:
@@ -451,7 +451,7 @@ class DocumentSuite:
     
     async def run_all_tests(self) -> Dict[str, Any]:
         """Запуск всех тестов."""
-        logger.info("🧪 Запуск полного набора тестов")
+        logger.info(" Запуск полного набора тестов")
         self.stats["start_time"] = datetime.now()
         
         # QA тесты
@@ -480,7 +480,7 @@ class DocumentSuite:
             "message": main_message,
             "statistics": self.stats.copy(),
             "duration_seconds": duration,
-            "results": self.results[-10:],  # Последние 10 результатов
+            "results": self.results[-10:], # Последние 10 результатов
             "success_rate": (self.stats["successful"] / max(1, self.stats["processed"])) * 100
         }
     
@@ -489,24 +489,24 @@ class DocumentSuite:
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2, default=str)
         
-        logger.info(f"💾 Отчет сохранен в {output_file}")
+        logger.info(f" Отчет сохранен в {output_file}")
         
         # Краткий отчет в консоль
         print("\n" + "="*60)
-        print("📄 ОТЧЕТ ПО ОБРАБОТКЕ ДОКУМЕНТОВ")
+        print(" ОТЧЕТ ПО ОБРАБОТКЕ ДОКУМЕНТОВ")
         print("="*60)
-        print(f"📊 Обработано: {self.stats['processed']}")
-        print(f"✅ Успешно: {self.stats['successful']}")
-        print(f"❌ Ошибок: {self.stats['failed']}")
-        print(f"⚠️ Пропущено: {self.stats['skipped']}")
+        print(f" Обработано: {self.stats['processed']}")
+        print(f" Успешно: {self.stats['successful']}")
+        print(f" Ошибок: {self.stats['failed']}")
+        print(f" Пропущено: {self.stats['skipped']}")
         
         if results.get("duration_seconds"):
-            print(f"⏱️ Время выполнения: {results['duration_seconds']:.1f}с")
+            print(f" Время выполнения: {results['duration_seconds']:.1f}с")
         
         if results.get("success_rate"):
-            print(f"📈 Успешность: {results['success_rate']:.1f}%")
+            print(f" Успешность: {results['success_rate']:.1f}%")
         
-        print(f"\n💾 Полный отчет: {output_file}")
+        print(f"\n Полный отчет: {output_file}")
         print("="*60)
 
 
@@ -549,7 +549,7 @@ async def main():
     try:
         if args.mode == "pdf":
             if not args.path:
-                print("❌ Для режима 'pdf' требуется указать --path")
+                print(" Для режима 'pdf' требуется указать --path")
                 sys.exit(1)
             results = await suite.load_pdf_batch(args.path, args.max_files)
             
@@ -559,10 +559,10 @@ async def main():
         elif args.mode == "run-tests":
             results = await suite.run_all_tests()
             
-        else:  # full
+        else: # full
             # Комбинированный режим
             if args.path:
-                logger.info("🚀 Полный режим: загрузка PDF + создание тестов + тестирование")
+                logger.info(" Полный режим: загрузка PDF + создание тестов + тестирование")
                 pdf_results = await suite.load_pdf_batch(args.path, args.max_files)
                 test_results = await suite.generate_test_documents(args.count)
                 test_run_results = await suite.run_all_tests()
@@ -594,8 +594,8 @@ async def main():
         sys.exit(0 if success_rate > 80 else 1)
         
     except Exception as e:
-        logger.error(f"❌ Критическая ошибка: {e}")
-        print(f"❌ Критическая ошибка: {e}")
+        logger.error(f" Критическая ошибка: {e}")
+        print(f" Критическая ошибка: {e}")
         sys.exit(1)
 
 

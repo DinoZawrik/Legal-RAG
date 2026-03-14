@@ -26,7 +26,7 @@ async def clear_postgresql():
             'password': os.getenv('POSTGRES_PASSWORD', 'change_me_in_env')
         }
         
-        logger.info(f"🔄 Подключаюсь к PostgreSQL: {conn_params['host']}:{conn_params['port']}")
+        logger.info(f" Подключаюсь к PostgreSQL: {conn_params['host']}:{conn_params['port']}")
         
         conn = psycopg2.connect(**conn_params)
         cur = conn.cursor()
@@ -38,7 +38,7 @@ async def clear_postgresql():
         """)
         tables = [row[0] for row in cur.fetchall()]
         
-        logger.info(f"📋 Найдено таблиц: {len(tables)}")
+        logger.info(f" Найдено таблиц: {len(tables)}")
         
         # Очищаем таблицы
         total_deleted = 0
@@ -51,23 +51,23 @@ async def clear_postgresql():
                 if count > 0:
                     # Удаляем записи
                     cur.execute(f"TRUNCATE TABLE {table} RESTART IDENTITY CASCADE")
-                    logger.info(f"✅ Таблица {table}: удалено {count} записей")
+                    logger.info(f" Таблица {table}: удалено {count} записей")
                     total_deleted += count
                 else:
-                    logger.info(f"📊 Таблица {table}: уже пуста")
+                    logger.info(f" Таблица {table}: уже пуста")
                     
             except Exception as e:
-                logger.warning(f"⚠️ Ошибка очистки таблицы {table}: {e}")
+                logger.warning(f" Ошибка очистки таблицы {table}: {e}")
         
         conn.commit()
         cur.close()
         conn.close()
         
-        logger.info(f"✅ PostgreSQL очищен. Всего удалено записей: {total_deleted}")
+        logger.info(f" PostgreSQL очищен. Всего удалено записей: {total_deleted}")
         return total_deleted
         
     except Exception as e:
-        logger.error(f"❌ Ошибка очистки PostgreSQL: {e}")
+        logger.error(f" Ошибка очистки PostgreSQL: {e}")
         return 0
 
 async def clear_redis():
@@ -80,7 +80,7 @@ async def clear_redis():
         port = int(os.getenv('REDIS_PORT', 6379))
         db = int(os.getenv('REDIS_DB', 0))
         
-        logger.info(f"🔄 Подключаюсь к Redis: {host}:{port}")
+        logger.info(f" Подключаюсь к Redis: {host}:{port}")
         
         r = redis.Redis(host=host, port=port, db=db, decode_responses=True)
         
@@ -93,14 +93,14 @@ async def clear_redis():
         if keys_count > 0:
             # Очищаем все ключи
             r.flushdb()
-            logger.info(f"✅ Redis очищен. Удалено ключей: {keys_count}")
+            logger.info(f" Redis очищен. Удалено ключей: {keys_count}")
         else:
-            logger.info("📊 Redis уже пуст")
+            logger.info(" Redis уже пуст")
             
         return keys_count
         
     except Exception as e:
-        logger.error(f"❌ Ошибка очистки Redis: {e}")
+        logger.error(f" Ошибка очистки Redis: {e}")
         return 0
 
 async def clear_chromadb():
@@ -112,7 +112,7 @@ async def clear_chromadb():
         host = os.getenv('CHROMA_HOST', 'localhost')
         port = int(os.getenv('CHROMA_PORT', 8000))
         
-        logger.info(f"🔄 Подключаюсь к ChromaDB: http://{host}:{port}")
+        logger.info(f" Подключаюсь к ChromaDB: http://{host}:{port}")
         
         # Создаем клиент
         client = chromadb.HttpClient(host=host, port=port)
@@ -120,7 +120,7 @@ async def clear_chromadb():
         # Получаем список коллекций
         collections = client.list_collections()
         
-        logger.info(f"📋 Найдено коллекций: {len(collections)}")
+        logger.info(f" Найдено коллекций: {len(collections)}")
         
         total_documents = 0
         for collection in collections:
@@ -131,21 +131,21 @@ async def clear_chromadb():
                 
                 # Удаляем коллекцию
                 client.delete_collection(collection.name)
-                logger.info(f"✅ Коллекция {collection.name}: удалено {count} документов")
+                logger.info(f" Коллекция {collection.name}: удалено {count} документов")
                 
             except Exception as e:
-                logger.warning(f"⚠️ Ошибка очистки коллекции {collection.name}: {e}")
+                logger.warning(f" Ошибка очистки коллекции {collection.name}: {e}")
         
-        logger.info(f"✅ ChromaDB очищен. Всего удалено документов: {total_documents}")
+        logger.info(f" ChromaDB очищен. Всего удалено документов: {total_documents}")
         return total_documents
         
     except Exception as e:
-        logger.error(f"❌ Ошибка очистки ChromaDB: {e}")
+        logger.error(f" Ошибка очистки ChromaDB: {e}")
         return 0
 
 async def main():
     """Основная функция"""
-    logger.info("🗑️ Начинаю полную очистку баз данных LegalRAG")
+    logger.info(" Начинаю полную очистку баз данных LegalRAG")
     start_time = datetime.now()
     
     results = {}
@@ -163,20 +163,20 @@ async def main():
     duration = (datetime.now() - start_time).total_seconds()
     
     logger.info("=" * 60)
-    logger.info("🧹 РЕЗУЛЬТАТЫ ОЧИСТКИ БАЗЫ ДАННЫХ")
+    logger.info(" РЕЗУЛЬТАТЫ ОЧИСТКИ БАЗЫ ДАННЫХ")
     logger.info("=" * 60)
-    logger.info(f"⏱️ Время выполнения: {duration:.1f}с")
-    logger.info(f"🗄️ PostgreSQL записей удалено: {results['postgresql_records']}")
-    logger.info(f"🔑 Redis ключей удалено: {results['redis_keys']}")
-    logger.info(f"📄 ChromaDB документов удалено: {results['chromadb_documents']}")
+    logger.info(f" Время выполнения: {duration:.1f}с")
+    logger.info(f" PostgreSQL записей удалено: {results['postgresql_records']}")
+    logger.info(f" Redis ключей удалено: {results['redis_keys']}")
+    logger.info(f" ChromaDB документов удалено: {results['chromadb_documents']}")
     
     total_items = sum(results.values())
-    logger.info(f"📊 Общее количество удаленных элементов: {total_items}")
+    logger.info(f" Общее количество удаленных элементов: {total_items}")
     
     if total_items > 0:
-        logger.info("✅ Очистка баз данных завершена успешно!")
+        logger.info(" Очистка баз данных завершена успешно!")
     else:
-        logger.info("📊 Базы данных были пусты")
+        logger.info(" Базы данных были пусты")
     
     logger.info("=" * 60)
 
@@ -185,4 +185,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logger.warning("👋 Очистка прервана пользователем")
+        logger.warning(" Очистка прервана пользователем")

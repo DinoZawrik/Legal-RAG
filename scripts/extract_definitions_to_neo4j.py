@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📖 Extract Definitions to Neo4j
+Extract Definitions to Neo4j
 Parses legal documents and extracts definitions into Neo4j graph
 """
 
@@ -93,7 +93,7 @@ class DefinitionExtractor:
                 # For other patterns, use group(1)
                 if len(match.groups()) >= 2:
                     # Pattern: "full term (далее - short term)"
-                    term = match.group(2).strip()  # Use the short form
+                    term = match.group(2).strip() # Use the short form
                     full_term = match.group(1).strip()
                 else:
                     # Pattern: "term понимается/означает/это..."
@@ -224,16 +224,16 @@ async def main():
         all_definitions.extend(definitions)
 
         if (i + 1) % 100 == 0:
-            logger.info(f"  Processed {i+1}/{len(all_docs['documents'])} documents...")
+            logger.info(f" Processed {i+1}/{len(all_docs['documents'])} documents...")
 
     logger.info(f"Extracted {len(all_definitions)} definitions")
 
     # Show sample definitions
     logger.info("\nSample definitions found:")
     for i, defn in enumerate(all_definitions[:10], 1):
-        logger.info(f"  {i}. '{defn['term']}' (from: {defn.get('full_term', defn['term'])})")
-        logger.info(f"     Law: {defn['law']}, Article: {defn['article']}")
-        logger.info(f"     Text: {defn['definition_text'][:120]}...")
+        logger.info(f" {i}. '{defn['term']}' (from: {defn.get('full_term', defn['term'])})")
+        logger.info(f" Law: {defn['law']}, Article: {defn['article']}")
+        logger.info(f" Text: {defn['definition_text'][:120]}...")
 
     # 4. Connect to Neo4j
     logger.info("\n[4/5] Connecting to Neo4j...")
@@ -252,7 +252,7 @@ async def main():
             logger.warning(f"Failed to load definition '{defn['term']}': {e}")
 
         if (i + 1) % 10 == 0:
-            logger.info(f"  Loaded {loaded_count}/{len(all_definitions)} definitions...")
+            logger.info(f" Loaded {loaded_count}/{len(all_definitions)} definitions...")
 
     # Final count
     final_count = await neo4j_loader.get_definition_count()

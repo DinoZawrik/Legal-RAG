@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔧 Maintenance Suite
+Maintenance Suite
 Объединенный инструмент для обслуживания и управления системой.
 
 Включает функциональность из папки maintenance/:
@@ -40,14 +40,14 @@ try:
     from core.processing_pipeline import DocumentManager
     from core.logging_config import configure_logging
 except ImportError as e:
-    print(f"❌ Не удается импортировать core модули: {e}")
+    print(f" Не удается импортировать core модули: {e}")
     sys.exit(1)
 
 # Database imports
 try:
     from sqlalchemy import text, inspect
 except ImportError as e:
-    print(f"⚠️ SQLAlchemy недоступен: {e}")
+    print(f" SQLAlchemy недоступен: {e}")
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class MaintenanceSuite:
         }
         self.operations.append(result)
         
-        emoji = "✅" if status == "success" else "❌" if status == "error" else "⚠️"
+        emoji = "" if status == "success" else "" if status == "error" else ""
         duration_str = f" ({duration*1000:.1f}ms)" if duration else ""
         logger.info(f"{emoji} {operation}: {details}{duration_str}")
     
@@ -80,10 +80,10 @@ class MaintenanceSuite:
     
     async def clear_all_databases(self, confirm: bool = False) -> Dict[str, Any]:
         """Полная очистка всех баз данных."""
-        logger.info("🗑️ Запуск полной очистки баз данных")
+        logger.info(" Запуск полной очистки баз данных")
         
         if not confirm:
-            logger.warning("⚠️ Операция требует подтверждения. Используйте --confirm")
+            logger.warning(" Операция требует подтверждения. Используйте --confirm")
             return {"error": "Требуется подтверждение", "cleared": False}
         
         results = {
@@ -157,7 +157,7 @@ class MaintenanceSuite:
     
     async def clear_chroma_database(self) -> Dict[str, Any]:
         """Очистка ChromaDB."""
-        logger.info("🔍 Очистка ChromaDB")
+        logger.info(" Очистка ChromaDB")
         
         try:
             # Пробуем подключиться к ChromaDB
@@ -219,7 +219,7 @@ class MaintenanceSuite:
     
     async def fix_database_schema(self) -> Dict[str, Any]:
         """Исправление схемы базы данных."""
-        logger.info("🔧 Исправление схемы базы данных")
+        logger.info(" Исправление схемы базы данных")
         
         results = {
             "fixes_applied": [],
@@ -296,7 +296,7 @@ class MaintenanceSuite:
     
     async def fix_database_records(self) -> Dict[str, Any]:
         """Исправление записей в базе данных."""
-        logger.info("📝 Исправление записей в БД")
+        logger.info(" Исправление записей в БД")
         
         results = {
             "fixes_applied": [],
@@ -365,7 +365,7 @@ class MaintenanceSuite:
     
     async def reindex_documents(self) -> Dict[str, Any]:
         """Переиндексация документов."""
-        logger.info("🔄 Переиндексация документов")
+        logger.info(" Переиндексация документов")
         
         results = {
             "documents_processed": 0,
@@ -422,7 +422,7 @@ class MaintenanceSuite:
     
     async def final_cleanup(self) -> Dict[str, Any]:
         """Финальная очистка системы."""
-        logger.info("🧹 Финальная очистка системы")
+        logger.info(" Финальная очистка системы")
         
         results = {
             "cleanup_operations": [],
@@ -446,7 +446,7 @@ class MaintenanceSuite:
                         temp_files_size += file_size
                         
                 except Exception:
-                    pass  # Игнорируем ошибки доступа к временным файлам
+                    pass # Игнорируем ошибки доступа к временным файлам
             
             if temp_files_size > 0:
                 results["cleanup_operations"].append("Удалены временные файлы")
@@ -456,7 +456,7 @@ class MaintenanceSuite:
             log_files = Path("logs/").glob("*.log") if Path("logs/").exists() else []
             for log_file in log_files:
                 try:
-                    if log_file.stat().st_size > 100 * 1024 * 1024:  # 100MB
+                    if log_file.stat().st_size > 100 * 1024 * 1024: # 100MB
                         # Сжатие больших логов
                         with open(log_file, 'r') as f:
                             lines = f.readlines()
@@ -505,7 +505,7 @@ class MaintenanceSuite:
     
     async def run_full_maintenance(self, confirm_clear: bool = False) -> Dict[str, Any]:
         """Запуск полного обслуживания системы."""
-        logger.info("🔧 Запуск полного обслуживания системы")
+        logger.info(" Запуск полного обслуживания системы")
         
         results = {
             "maintenance_type": "full",
@@ -563,19 +563,19 @@ class MaintenanceSuite:
         
         # Краткий отчет
         print("\n" + "="*60)
-        print("🔧 ОТЧЕТ ПО ОБСЛУЖИВАНИЮ СИСТЕМЫ")
+        print(" ОТЧЕТ ПО ОБСЛУЖИВАНИЮ СИСТЕМЫ")
         print("="*60)
         
         maintenance_type = results.get("maintenance_type", "unknown")
-        print(f"🛠️ Тип обслуживания: {maintenance_type}")
-        print(f"⏱️ Продолжительность: {results['session_info']['duration_seconds']:.1f}с")
-        print(f"✅ Успешных операций: {results['session_info']['successful_operations']}")
-        print(f"❌ Неудачных операций: {results['session_info']['failed_operations']}")
+        print(f" Тип обслуживания: {maintenance_type}")
+        print(f" Продолжительность: {results['session_info']['duration_seconds']:.1f}с")
+        print(f" Успешных операций: {results['session_info']['successful_operations']}")
+        print(f" Неудачных операций: {results['session_info']['failed_operations']}")
         
         if "summary" in results:
-            print(f"📊 Общая успешность: {results['summary']['success_rate']:.1f}%")
+            print(f" Общая успешность: {results['summary']['success_rate']:.1f}%")
         
-        print(f"\n💾 Полный отчет сохранен в: {output_file}")
+        print(f"\n Полный отчет сохранен в: {output_file}")
         print("="*60)
 
 
@@ -596,7 +596,7 @@ async def main_async(args: argparse.Namespace) -> Dict[str, Any]:
             results = await suite.reindex_documents()
         elif args.mode == "cleanup":
             results = await suite.final_cleanup()
-        else:  # full
+        else: # full
             results = await suite.run_full_maintenance(args.confirm)
         
         suite.generate_report(results, args.output)
@@ -612,7 +612,7 @@ async def main_async(args: argparse.Namespace) -> Dict[str, Any]:
         sys.exit(0)
         
     except Exception as e:
-        logger.error(f"❌ Критическая ошибка обслуживания: {e}")
+        logger.error(f" Критическая ошибка обслуживания: {e}")
         sys.exit(1)
 
 

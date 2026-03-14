@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🚀 LegalRAG Microservices Startup Script
+LegalRAG Microservices Startup Script
 Запуск всех микросервисов через оркестратор
 """
 
@@ -8,6 +8,13 @@ import asyncio
 import sys
 import signal
 import argparse
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from services.orchestrator import ServicesOrchestrator
 
 
@@ -26,14 +33,14 @@ async def main():
     
     # Обработка сигналов завершения
     def signal_handler(signum, frame):
-        print(f"\n🛑 Получен сигнал {signum}, завершение работы...")
+        print(f"\n Получен сигнал {signum}, завершение работы...")
         orchestrator.shutdown_event.set()
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
     try:
-        print("🎭 Запуск LegalRAG Microservices...")
+        print(" Запуск LegalRAG Microservices...")
         
         # Обновляем конфигурацию из аргументов
         orchestrator.config.update({
@@ -45,26 +52,26 @@ async def main():
         # Запуск всех сервисов
         await orchestrator.start_all_services()
         
-        print("✅ Все микросервисы запущены успешно!")
-        print(f"🌐 API Gateway доступен на: http://{args.host}:{args.port}")
-        print("📊 Health check: http://{host}:{port}/health".format(host=args.host, port=args.port))
+        print(" Все микросервисы запущены успешно!")
+        print(f" API Gateway доступен на: http://{args.host}:{args.port}")
+        print(" Health check: http://{host}:{port}/health".format(host=args.host, port=args.port))
         
         # Запуск API Gateway сервера
         if not args.no_gateway:
-            print("🚀 Запуск API Gateway сервера...")
+            print(" Запуск API Gateway сервера...")
             await orchestrator.run_server()
         else:
             # Ожидание сигнала завершения без gateway
             await orchestrator.shutdown_event.wait()
         
     except Exception as e:
-        print(f"❌ Ошибка при запуске микросервисов: {e}")
+        print(f" Ошибка при запуске микросервисов: {e}")
         sys.exit(1)
     
     finally:
-        print("\n🔄 Завершение работы микросервисов...")
+        print("\n Завершение работы микросервисов...")
         await orchestrator.shutdown_all_services()
-        print("✅ Все сервисы остановлены")
+        print(" Все сервисы остановлены")
 
 
 if __name__ == "__main__":
@@ -72,7 +79,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n👋 Завершение по Ctrl+C")
+        print("\n Завершение по Ctrl+C")
     except Exception as e:
-        print(f"❌ Критическая ошибка: {e}")
+        print(f" Критическая ошибка: {e}")
         sys.exit(1)

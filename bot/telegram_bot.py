@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 Telegram Bot (Compatibility Wrapper)
+Telegram Bot (Compatibility Wrapper)
 Обратная совместимость для модулярной архитектуры телеграм-бота.
 
 УСТАРЕЛ: Этот файл является wrapper для новых модулей:
@@ -67,8 +67,8 @@ __all__ = [
 ]
 
 # Compatibility notice for developers
-logger.info("📦 Loading modular Telegram bot architecture (compatibility wrapper)")
-logger.debug(f"✅ Imported {len(__all__)} components from modular bot suite")
+logger.info(" Loading modular Telegram bot architecture (compatibility wrapper)")
+logger.debug(f" Imported {len(__all__)} components from modular bot suite")
 
 # Architecture transition guide for developers
 def _show_migration_guide():
@@ -96,9 +96,9 @@ def _show_migration_guide():
         }
     }
 
-    logger.debug("🔄 Telegram Bot Architecture Migration Guide:")
+    logger.debug(" Telegram Bot Architecture Migration Guide:")
     for operation, examples in migration_examples.items():
-        logger.debug(f"  {operation}: {examples['old']} → {examples['new']}")
+        logger.debug(f" {operation}: {examples['old']} {examples['new']}")
 
 # Show migration guide in debug mode
 if logger.isEnabledFor(logging.DEBUG):
@@ -106,51 +106,51 @@ if logger.isEnabledFor(logging.DEBUG):
 
 # Developer migration notes
 """
-📋 MIGRATION GUIDE: From Monolithic to Modular Architecture
+MIGRATION GUIDE: From Monolithic to Modular Architecture
 
-🗂️ Old Structure (v1.0):
-   └── bot/telegram_bot.py (1288 lines)
-       ├── TelegramBot class (all functionality)
-       ├── Message handling methods
-       ├── Command handlers (/start, /help, etc.)
-       ├── Document processing
-       └── User management
+Old Structure (v1.0):
+   bot/telegram_bot.py (1288 lines)
+       TelegramBot class (all functionality)
+       Message handling methods
+       Command handlers (/start, /help, etc.)
+       Document processing
+       User management
 
-🎯 New Structure (v2.0):
-   ├── bot/core_bot.py (~250 lines)
-   │   ├── TelegramBot class (core only)
-   │   ├── main() function
-   │   └── get_bot_instance()
-   │
-   ├── bot/states.py (~50 lines)
-   │   └── Form (FSM states)
-   │
-   ├── bot/message_handlers.py (~200 lines)
-   │   ├── MessageHandlers class
-   │   ├── Text formatting methods
-   │   └── Message splitting logic
-   │
-   ├── bot/command_handlers.py (~200 lines)
-   │   ├── CommandHandlers class
-   │   ├── /start, /help commands
-   │   └── Permission request handling
-   │
-   ├── bot/document_handlers.py (~300 lines)
-   │   ├── DocumentHandlers class
-   │   ├── File upload processing
-   │   ├── Archive handling
-   │   └── Document type selection
-   │
-   ├── bot/user_management.py (~200 lines)
-   │   ├── UserManagement class
-   │   ├── Clear chat functionality
-   │   ├── Notification processing
-   │   └── Status updates
-   │
-   └── bot/telegram_bot.py (120 lines, this file)
-       └── Compatibility wrapper
+New Structure (v2.0):
+   bot/core_bot.py (~250 lines)
+   TelegramBot class (core only)
+   main() function
+   get_bot_instance()
+   
+   bot/states.py (~50 lines)
+   Form (FSM states)
+   
+   bot/message_handlers.py (~200 lines)
+   MessageHandlers class
+   Text formatting methods
+   Message splitting logic
+   
+   bot/command_handlers.py (~200 lines)
+   CommandHandlers class
+   /start, /help commands
+   Permission request handling
+   
+   bot/document_handlers.py (~300 lines)
+   DocumentHandlers class
+   File upload processing
+   Archive handling
+   Document type selection
+   
+   bot/user_management.py (~200 lines)
+   UserManagement class
+   Clear chat functionality
+   Notification processing
+   Status updates
+   
+   bot/telegram_bot.py (120 lines, this file)
+       Compatibility wrapper
 
-🔄 Migration Steps:
+Migration Steps:
 1. Replace imports:
    OLD: from bot.telegram_bot import TelegramBot
    NEW: from bot.core_bot import TelegramBot
@@ -163,14 +163,14 @@ if logger.isEnabledFor(logging.DEBUG):
    OLD: bot.start_command()
    NEW: CommandHandlers.start_command()
 
-📈 Benefits:
-- 79% code reduction per file (1288 → ~200-300 lines each)
+Benefits:
+- 79% code reduction per file (1288 ~200-300 lines each)
 - Clear separation of concerns
 - Improved testability
 - Better maintainability
 - Enhanced code organization
 
-⚠️ Breaking Changes: None
+Breaking Changes: None
 This wrapper maintains 100% backward compatibility.
 """
 

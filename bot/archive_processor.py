@@ -62,12 +62,12 @@ class ArchiveProcessor:
     
     # Кодировки для fallback декодирования (приоритетный порядок)
     ENCODING_PRIORITY = [
-        'utf-8',      # Современный стандарт
-        'cp1251',     # Windows Кириллица
-        'cp866',      # DOS Кириллица
-        'koi8-r',     # KOI8-R Кириллица
+        'utf-8', # Современный стандарт
+        'cp1251', # Windows Кириллица
+        'cp866', # DOS Кириллица
+        'koi8-r', # KOI8-R Кириллица
         'iso-8859-5', # ISO Кириллица
-        'latin1'      # Fallback
+        'latin1' # Fallback
     ]
     
     def __init__(self):
@@ -89,9 +89,9 @@ class ArchiveProcessor:
             if any(ord(c) > 127 for c in filename):
                 # Пробуем основные кодировки для русского языка
                 encodings = [
-                    ('cp866', 'latin1'),    # DOS Russian
-                    ('cp1251', 'latin1'),   # Windows Russian  
-                    ('utf-8', 'latin1'),    # UTF-8
+                    ('cp866', 'latin1'), # DOS Russian
+                    ('cp1251', 'latin1'), # Windows Russian 
+                    ('utf-8', 'latin1'), # UTF-8
                 ]
                 
                 for target_encoding, source_encoding in encodings:
@@ -99,7 +99,7 @@ class ArchiveProcessor:
                         decoded = filename.encode(source_encoding).decode(target_encoding, errors='ignore')
                         # Проверяем, что декодирование дало разумный результат
                         if decoded != filename and len(decoded.strip()) > 0:
-                            logger.debug(f"✅ Декодировано с {target_encoding}: {repr(filename)} -> {repr(decoded)}")
+                            logger.debug(f" Декодировано с {target_encoding}: {repr(filename)} -> {repr(decoded)}")
                             return decoded
                     except (UnicodeDecodeError, UnicodeEncodeError):
                         continue
@@ -107,53 +107,53 @@ class ArchiveProcessor:
                 # Если ничего не сработало, убираем проблемные символы
                 safe_filename = ''.join(c if ord(c) < 128 else '_' for c in filename)
                 if safe_filename != filename:
-                    logger.debug(f"🔄 Очищено имя файла: {repr(filename)} -> {repr(safe_filename)}")
+                    logger.debug(f" Очищено имя файла: {repr(filename)} -> {repr(safe_filename)}")
                     return safe_filename
                     
         except Exception as e:
-            logger.debug(f"❌ Ошибка декодирования имени файла: {e}")
+            logger.debug(f" Ошибка декодирования имени файла: {e}")
         
         return filename
     
     def _log_supported_formats(self):
         """Логирование поддерживаемых форматов архивов и документов"""
-        logger.info("📚 Инициализация ArchiveProcessor...")
+        logger.info(" Инициализация ArchiveProcessor...")
         
         # Проверяем поддержку архивных форматов
         archive_support = {
-            'ZIP': True,  # Всегда поддерживается
+            'ZIP': True, # Всегда поддерживается
             'RAR': RARFILE_AVAILABLE,
             '7-Zip': PY7ZR_AVAILABLE
         }
         
         # Проверяем поддержку документов
         doc_support = {
-            'PDF': True,  # Всегда поддерживается
-            'TXT': True,  # Всегда поддерживается
+            'PDF': True, # Всегда поддерживается
+            'TXT': True, # Всегда поддерживается
             'DOCX': self._check_docx_support(),
             'DOC': self._check_doc_support(), 
             'RTF': self._check_rtf_support(),
         }
         
         # Логируем статус поддержки
-        logger.info("📁 Поддерживаемые архивы:")
+        logger.info(" Поддерживаемые архивы:")
         for format_name, supported in archive_support.items():
-            status = "✅" if supported else "❌"
+            status = "" if supported else ""
             support_text = "поддерживается" if supported else "недоступно"
-            logger.info(f"  {status} {format_name}: {support_text}")
+            logger.info(f" {status} {format_name}: {support_text}")
             
-        logger.info("📄 Поддерживаемые документы:")
+        logger.info(" Поддерживаемые документы:")
         for format_name, supported in doc_support.items():
-            status = "✅" if supported else "❌"
+            status = "" if supported else ""
             support_text = "поддерживается" if supported else "недоступно"
-            logger.info(f"  {status} {format_name}: {support_text}")
+            logger.info(f" {status} {format_name}: {support_text}")
         
         # Финальный список поддерживаемых форматов
         supported_archives = [f for f, s in archive_support.items() if s]
         supported_documents = [f for f, s in doc_support.items() if s]
         
-        logger.info(f"✨ Доступные архивы: {', '.join(supported_archives)}")
-        logger.info(f"✨ Доступные документы: {', '.join(supported_documents)}")
+        logger.info(f" Доступные архивы: {', '.join(supported_archives)}")
+        logger.info(f" Доступные документы: {', '.join(supported_documents)}")
     
     def _check_docx_support(self) -> bool:
         """Проверка поддержки DOCX"""
@@ -283,13 +283,13 @@ class ArchiveProcessor:
                     raw_filename = file_info.filename
                     filename = self._simple_decode_filename(raw_filename)
                     
-                    logger.debug(f"📁 Обработка файла: {filename} (оригинал: {raw_filename})")
+                    logger.debug(f" Обработка файла: {filename} (оригинал: {raw_filename})")
                     
                     # Проверяем, является ли файл поддерживаемым документом
                     if self.is_supported_document(filename):
                         try:
                             # Проверяем размер файла
-                            if file_info.file_size > 100 * 1024 * 1024:  # 100MB
+                            if file_info.file_size > 100 * 1024 * 1024: # 100MB
                                 logger.warning(f"Файл {filename} слишком большой ({file_info.file_size} байт), пропускаем")
                                 failed_extractions.append({
                                     'filename': filename,
@@ -297,31 +297,52 @@ class ArchiveProcessor:
                                     'size': file_info.file_size
                                 })
                                 continue
-                                
-                            # Извлекаем файл с оригинальным именем из архива
-                            zip_ref.extract(file_info, temp_dir)
-                            extracted_path = os.path.join(temp_dir, raw_filename)
+
+                            # Security: Path traversal protection
+                            safe_filename = os.path.basename(raw_filename)
+                            if '..' in file_info.filename or file_info.filename.startswith(('/', '\\')):
+                                logger.warning(f"Path traversal attempt blocked: {file_info.filename}")
+                                failed_extractions.append({
+                                    'filename': filename,
+                                    'reason': 'path_traversal_blocked',
+                                })
+                                continue
+
+                            # Safe extraction: read from archive and write to validated path
+                            extracted_path = os.path.join(temp_dir, safe_filename)
+                            real_temp = os.path.realpath(temp_dir)
+                            real_target = os.path.realpath(extracted_path)
+                            if not real_target.startswith(real_temp + os.sep) and real_target != real_temp:
+                                logger.error(f"Path traversal detected after resolve: {file_info.filename}")
+                                failed_extractions.append({
+                                    'filename': filename,
+                                    'reason': 'path_traversal_blocked',
+                                })
+                                continue
+
+                            with zip_ref.open(file_info) as src, open(extracted_path, 'wb') as dst:
+                                dst.write(src.read())
                             
                             # Переименовываем файл, если нужно исправить кодировку
-                            if raw_filename != filename and os.path.exists(extracted_path):
+                            if safe_filename != filename and os.path.exists(extracted_path):
                                 new_path = os.path.join(temp_dir, filename)
                                 try:
                                     # Проверяем, что файл с таким именем не существует
                                     if not os.path.exists(new_path):
                                         os.rename(extracted_path, new_path)
                                         extracted_path = new_path
-                                        logger.debug(f"✅ Переименован: {raw_filename} -> {filename}")
+                                        logger.debug(f" Переименован: {safe_filename} -> {filename}")
                                     else:
                                         logger.warning(f"Файл {filename} уже существует, используем оригинальное имя")
                                 except OSError as e:
-                                    logger.debug(f"Не удалось переименовать {raw_filename} -> {filename}: {e}")
+                                    logger.debug(f"Не удалось переименовать {safe_filename} -> {filename}: {e}")
                             
                             # Проверяем, что файл действительно извлечен и читаем
                             if os.path.exists(extracted_path) and os.path.getsize(extracted_path) > 0:
                                 extracted_documents.append(extracted_path)
-                                logger.debug(f"✅ Извлечен документ: {filename}")
+                                logger.debug(f" Извлечен документ: {filename}")
                             else:
-                                logger.warning(f"⚠️ Файл не найден или пуст после извлечения: {filename}")
+                                logger.warning(f" Файл не найден или пуст после извлечения: {filename}")
                                 failed_extractions.append({
                                     'filename': filename,
                                     'reason': 'empty_or_missing',
@@ -329,7 +350,7 @@ class ArchiveProcessor:
                                 })
                                 
                         except Exception as e:
-                            logger.error(f"❌ Ошибка при извлечении файла {filename}: {e}")
+                            logger.error(f" Ошибка при извлечении файла {filename}: {e}")
                             failed_extractions.append({
                                 'filename': filename,
                                 'reason': 'extraction_error',
@@ -337,20 +358,20 @@ class ArchiveProcessor:
                             })
                             continue
                     else:
-                        logger.debug(f"⏭️ Пропущен неподдерживаемый файл: {filename}")
+                        logger.debug(f" Пропущен неподдерживаемый файл: {filename}")
                         
             # Логируем результаты
             if failed_extractions:
                 logger.warning(f"Не удалось извлечь {len(failed_extractions)} файлов")
                 for failure in failed_extractions:
-                    logger.debug(f"  - {failure['filename']}: {failure['reason']}")
+                    logger.debug(f" - {failure['filename']}: {failure['reason']}")
                         
         except zipfile.BadZipFile:
             raise ValueError("Повреждённый ZIP архив")
         except PermissionError:
             raise ValueError("Недостаточно прав для извлечения архива")
         except Exception as e:
-            logger.error(f"❌ Ошибка обработки ZIP архива: {e}")
+            logger.error(f" Ошибка обработки ZIP архива: {e}")
             raise ValueError(f"Ошибка обработки ZIP архива: {str(e)}")
             
         return extracted_documents
@@ -375,16 +396,16 @@ class ArchiveProcessor:
                     # unrar возвращает не 0 код, но если он запустился, то это хорошо
                     if 'usage' in result.stderr.lower() or 'unrar' in result.stderr.lower():
                         rarfile.UNRAR_TOOL = unrar_path
-                        logger.info(f"✅ Настроен unrar: {unrar_path}")
+                        logger.info(f" Настроен unrar: {unrar_path}")
                         return True
                 except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
                     continue
                     
-            logger.warning("⚠️ unrar не найден в системе")
+            logger.warning(" unrar не найден в системе")
             return False
             
         except Exception as e:
-            logger.error(f"❌ Ошибка настройки unrar: {e}")
+            logger.error(f" Ошибка настройки unrar: {e}")
             return False
     
     async def _extract_rar(self, archive_path: str, temp_dir: str) -> List[str]:
@@ -395,8 +416,8 @@ class ArchiveProcessor:
         # Настраиваем unrar перед обработкой
         if not self._setup_unrar_tool():
             raise ValueError(
-                "❌ RAR архивы не поддерживаются: unrar не установлен.\n\n"
-                "📁 Пожалуйста, используйте ZIP или 7z архивы, либо отправьте документы по одному."
+                " RAR архивы не поддерживаются: unrar не установлен.\n\n"
+                " Пожалуйста, используйте ZIP или 7z архивы, либо отправьте документы по одному."
             )
         
         try:
@@ -410,13 +431,13 @@ class ArchiveProcessor:
                     raw_filename = file_info.filename
                     filename = self._simple_decode_filename(raw_filename)
                     
-                    logger.debug(f"📁 RAR файл: {filename}")
+                    logger.debug(f" RAR файл: {filename}")
                     
                     # Проверяем, является ли файл поддерживаемым документом
                     if self.is_supported_document(filename):
                         try:
                             # Проверяем размер файла
-                            if file_info.file_size > 100 * 1024 * 1024:  # 100MB
+                            if file_info.file_size > 100 * 1024 * 1024: # 100MB
                                 logger.warning(f"RAR файл {filename} слишком большой, пропускаем")
                                 failed_extractions.append({
                                     'filename': filename,
@@ -438,23 +459,23 @@ class ArchiveProcessor:
                                     if not os.path.exists(new_path):
                                         os.rename(extracted_path, new_path)
                                         extracted_path = new_path
-                                        logger.debug(f"✅ Переименован RAR файл: {raw_filename} -> {filename}")
+                                        logger.debug(f" Переименован RAR файл: {raw_filename} -> {filename}")
                                 except OSError:
                                     logger.debug(f"Не удалось переименовать RAR файл: {raw_filename}")
                             
                             # Проверяем, что файл действительно извлечен
                             if os.path.exists(extracted_path) and os.path.getsize(extracted_path) > 0:
                                 extracted_documents.append(extracted_path)
-                                logger.debug(f"✅ Извлечен RAR документ: {filename}")
+                                logger.debug(f" Извлечен RAR документ: {filename}")
                             else:
-                                logger.warning(f"⚠️ RAR файл не найден или пуст после извлечения: {filename}")
+                                logger.warning(f" RAR файл не найден или пуст после извлечения: {filename}")
                                 failed_extractions.append({
                                     'filename': filename,
                                     'reason': 'empty_or_missing'
                                 })
                                 
                         except Exception as e:
-                            logger.error(f"❌ Ошибка при извлечении RAR файла {filename}: {e}")
+                            logger.error(f" Ошибка при извлечении RAR файла {filename}: {e}")
                             failed_extractions.append({
                                 'filename': filename,
                                 'reason': 'extraction_error',
@@ -462,26 +483,26 @@ class ArchiveProcessor:
                             })
                             continue
                     else:
-                        logger.debug(f"⏭️ Пропущен неподдерживаемый RAR файл: {filename}")
+                        logger.debug(f" Пропущен неподдерживаемый RAR файл: {filename}")
                         
             # Логируем результаты
             if failed_extractions:
                 logger.warning(f"Не удалось извлечь {len(failed_extractions)} RAR файлов")
                 for failure in failed_extractions:
-                    logger.debug(f"  - {failure['filename']}: {failure['reason']}")
+                    logger.debug(f" - {failure['filename']}: {failure['reason']}")
                         
         except rarfile.RarCannotExec as e:
             logger.error(f"Невозможно запустить unrar: {e}")
             raise ValueError(
-                "❌ RAR архивы не поддерживаются в текущей конфигурации.\n\n"
-                "📁 Пожалуйста, используйте ZIP или 7z архивы, либо отправьте документы по одному."
+                " RAR архивы не поддерживаются в текущей конфигурации.\n\n"
+                " Пожалуйста, используйте ZIP или 7z архивы, либо отправьте документы по одному."
             )
         except rarfile.BadRarFile:
             raise ValueError("Повреждённый RAR архив")
         except PermissionError:
             raise ValueError("Недостаточно прав для извлечения RAR архива")
         except Exception as e:
-            logger.error(f"❌ Общая ошибка при обработке RAR: {e}")
+            logger.error(f" Общая ошибка при обработке RAR: {e}")
             raise ValueError(f"Ошибка обработки RAR архива: {str(e)}")
             
         return extracted_documents
@@ -504,7 +525,7 @@ class ArchiveProcessor:
                     # Проверяем, является ли файл поддерживаемым документом
                     if self.is_supported_document(filename):
                         try:
-                            logger.debug(f"📁 Обработка 7z файла: {filename}")
+                            logger.debug(f" Обработка 7z файла: {filename}")
                             
                             # Извлекаем конкретный файл
                             archive_ref.extract(targets=[filename], path=temp_dir)
@@ -514,16 +535,16 @@ class ArchiveProcessor:
                             
                             if os.path.exists(extracted_path) and os.path.getsize(extracted_path) > 0:
                                 extracted_documents.append(extracted_path)
-                                logger.debug(f"✅ Извлечен 7z документ: {filename}")
+                                logger.debug(f" Извлечен 7z документ: {filename}")
                             else:
-                                logger.warning(f"⚠️ 7z файл не найден или пуст после извлечения: {filename}")
+                                logger.warning(f" 7z файл не найден или пуст после извлечения: {filename}")
                                 failed_extractions.append({
                                     'filename': filename,
                                     'reason': 'empty_or_missing'
                                 })
                                 
                         except Exception as e:
-                            logger.error(f"❌ Ошибка при извлечении 7z файла {filename}: {e}")
+                            logger.error(f" Ошибка при извлечении 7z файла {filename}: {e}")
                             failed_extractions.append({
                                 'filename': filename,
                                 'reason': 'extraction_error',
@@ -531,20 +552,20 @@ class ArchiveProcessor:
                             })
                             continue
                     else:
-                        logger.debug(f"⏭️ Пропущен неподдерживаемый 7z файл: {filename}")
+                        logger.debug(f" Пропущен неподдерживаемый 7z файл: {filename}")
                         
             # Логируем результаты
             if failed_extractions:
                 logger.warning(f"Не удалось извлечь {len(failed_extractions)} 7z файлов")
                 for failure in failed_extractions:
-                    logger.debug(f"  - {failure['filename']}: {failure['reason']}")
+                    logger.debug(f" - {failure['filename']}: {failure['reason']}")
                         
         except py7zr.exceptions.Bad7zFile:
             raise ValueError("Повреждённый 7-Zip архив")
         except PermissionError:
             raise ValueError("Недостаточно прав для извлечения 7z архива")
         except Exception as e:
-            logger.error(f"❌ Ошибка обработки 7-Zip архива: {e}")
+            logger.error(f" Ошибка обработки 7-Zip архива: {e}")
             raise ValueError(f"Ошибка обработки 7-Zip архива: {str(e)}")
             
         return extracted_documents
@@ -576,7 +597,7 @@ class ArchiveProcessor:
                         content = f.read()
                         file_hash = hashlib.sha256(content).hexdigest()
                 except Exception as e:
-                    logger.warning(f"⚠️ Не удалось вычислить хеш для {filename}: {e}")
+                    logger.warning(f" Не удалось вычислить хеш для {filename}: {e}")
                 
                 documents_info.append({
                     'filename': display_filename,
@@ -598,12 +619,12 @@ class ArchiveProcessor:
             # Выполняем массовую проверку дубликатов
             duplicate_check = await storage_manager.postgres.check_duplicates_bulk(documents_info)
             
-            logger.info(f"🔍 Предварительная проверка архива: найдено {duplicate_check['summary']['duplicates_found']} дубликатов из {duplicate_check['summary']['total_files']} файлов")
+            logger.info(f" Предварительная проверка архива: найдено {duplicate_check['summary']['duplicates_found']} дубликатов из {duplicate_check['summary']['total_files']} файлов")
             
             return duplicate_check
             
         except Exception as e:
-            logger.error(f"❌ Ошибка предварительной проверки дубликатов: {e}")
+            logger.error(f" Ошибка предварительной проверки дубликатов: {e}")
             return {
                 'duplicates': [],
                 'new_files': documents_info if 'documents_info' in locals() else [],
@@ -658,7 +679,7 @@ class ArchiveProcessor:
             skipped_duplicates = []
             
             if skip_duplicates:
-                logger.info(f"🔍 Выполняем предварительную проверку дубликатов для {len(extracted_documents)} файлов...")
+                logger.info(f" Выполняем предварительную проверку дубликатов для {len(extracted_documents)} файлов...")
                 duplicate_check = await self.pre_check_duplicates(extracted_documents, document_type)
                 
                 if duplicate_check['summary']['duplicates_found'] > 0:
@@ -667,7 +688,7 @@ class ArchiveProcessor:
                     documents_to_process = new_file_paths
                     skipped_duplicates = duplicate_check['duplicates']
                     
-                    logger.info(f"⏭️ Пропущено {len(skipped_duplicates)} дубликатов, обрабатываем {len(documents_to_process)} новых файлов")
+                    logger.info(f" Пропущено {len(skipped_duplicates)} дубликатов, обрабатываем {len(documents_to_process)} новых файлов")
             
             logger.info(f"Начинаем обработку {len(documents_to_process)} документов")
             
@@ -690,9 +711,9 @@ class ArchiveProcessor:
                         file_path=doc_path,
                         force_type=document_type,
                         metadata={
-                            "original_filename": display_filename,  # Исправленное имя файла
+                            "original_filename": display_filename, # Исправленное имя файла
                             "from_archive": True,
-                            "raw_filename": filename,  # Сохраняем оригинальное имя для отладки
+                            "raw_filename": filename, # Сохраняем оригинальное имя для отладки
                             "archive_extraction": True
                         }
                     )
@@ -701,9 +722,9 @@ class ArchiveProcessor:
                     results.append(result)
                     
                     if result.get("success"):
-                        logger.info(f"✅ Успешно обработан: {filename}")
+                        logger.info(f" Успешно обработан: {filename}")
                     else:
-                        logger.warning(f"❌ Ошибка обработки: {filename} - {result.get('error', 'Неизвестная ошибка')}")
+                        logger.warning(f" Ошибка обработки: {filename} - {result.get('error', 'Неизвестная ошибка')}")
                         errors.append({
                             "filename": filename,
                             "error": result.get('error', 'Неизвестная ошибка')
@@ -765,16 +786,16 @@ class ArchiveProcessor:
         """Форматирует результат обработки для отправки пользователю"""
         
         if result.total_files == 0:
-            return "📁 В архиве не найдено поддерживаемых документов (.pdf, .docx, .doc, .rtf, .txt)"
+            return " В архиве не найдено поддерживаемых документов (.pdf, .docx, .doc, .rtf, .txt)"
         
         # Основная статистика
-        message = f"""🎉 **Обработка архива завершена!**
+        message = f""" **Обработка архива завершена!**
 
-📊 **Статистика:**
+**Статистика:**
 • Всего файлов: {result.total_files}
 • Обработано: {result.processed_files}
-• Успешно: {result.successful_files} ✅
-• Ошибки: {result.failed_files} ❌
+• Успешно: {result.successful_files} 
+• Ошибки: {result.failed_files} 
 
 """
         
@@ -784,7 +805,7 @@ class ArchiveProcessor:
         
         # Список новых обработанных файлов (максимум 10)
         if new_files:
-            message += "📋 **Новые обработанные файлы:**\n"
+            message += " **Новые обработанные файлы:**\n"
             for i, result_item in enumerate(new_files[:10]):
                 filename = result_item.get("filename", "unknown")
                 message += f"• {filename}\n"
@@ -796,7 +817,7 @@ class ArchiveProcessor:
         
         # Список пропущенных дубликатов (максимум 5)
         if duplicate_files:
-            message += "🔄 **Пропущенные дубликаты:**\n"
+            message += " **Пропущенные дубликаты:**\n"
             for i, result_item in enumerate(duplicate_files[:5]):
                 filename = result_item.get("filename", "unknown")
                 reason = result_item.get("message", "дубликат")
@@ -809,7 +830,7 @@ class ArchiveProcessor:
         
         # Список ошибок (максимум 5)
         if result.errors:
-            message += "⚠️ **Ошибки обработки:**\n"
+            message += " **Ошибки обработки:**\n"
             for i, error in enumerate(result.errors[:5]):
                 filename = error.get("filename", "unknown")
                 error_msg = error.get("error", "Неизвестная ошибка")

@@ -101,9 +101,9 @@ class PaginationManager:
         end_index = pagination_data.get("end_index", 0)
 
         if total_items == 0:
-            return "❌ Ничего не найдено"
+            return " Ничего не найдено"
 
-        return f"📄 Страница {current_page} из {total_pages} (Показаны {start_index + 1}-{end_index} из {total_items} результатов)"
+        return f" Страница {current_page} из {total_pages} (Показаны {start_index + 1}-{end_index} из {total_items} результатов)"
 
 
 # Глобальный экземпляр менеджера пагинации

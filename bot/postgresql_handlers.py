@@ -69,7 +69,7 @@ async def show_database_menu(callback_query: CallbackQuery):
 
         if not documents:
             await callback_query.message.edit_text(
-                "📊 *База документов пуста*\n\n"
+                " *База документов пуста*\n\n"
                 "В базе данных пока нет документов.\n"
                 "Используйте кнопку 'Загрузить документ' для добавления файлов.",
                 parse_mode="Markdown",
@@ -78,7 +78,7 @@ async def show_database_menu(callback_query: CallbackQuery):
             return
 
         keyboard = create_document_list_keyboard(documents)
-        text = f"📊 *База документов* ({len(documents)} документов)\n\nВыберите документ для просмотра информации:"
+        text = f" *База документов* ({len(documents)} документов)\n\nВыберите документ для просмотра информации:"
         await callback_query.message.edit_text(text, parse_mode="Markdown", reply_markup=keyboard)
 
     except Exception as e:
@@ -89,7 +89,7 @@ async def show_database_menu(callback_query: CallbackQuery):
 async def show_search_menu(callback_query: CallbackQuery):
     """Показывает меню поиска."""
     try:
-        text = "🔍 *Поиск по документам*\n\nВыберите тип поиска:"
+        text = " *Поиск по документам*\n\nВыберите тип поиска:"
         await callback_query.message.edit_text(text, parse_mode="Markdown", reply_markup=create_search_type_keyboard())
     except Exception as e:
         logger.error("Ошибка в show_search_menu: %s", e, exc_info=True)
@@ -106,7 +106,7 @@ async def show_regulatory_documents(callback_query: CallbackQuery):
 
         if not industries_with_counts:
             await callback_query.message.edit_text(
-                "📊 *Документы по отраслям*\n\nДокументов пока нет в базе.\nЗагрузите документы через команду /upload.",
+                " *Документы по отраслям*\n\nДокументов пока нет в базе.\nЗагрузите документы через команду /upload.",
                 parse_mode="Markdown",
                 reply_markup=get_main_menu_keyboard(),
             )
@@ -116,7 +116,7 @@ async def show_regulatory_documents(callback_query: CallbackQuery):
         keyboard = create_industry_selection_keyboard_with_counts(industries_with_counts, [])
         total_docs = sum(industries_with_counts.values())
         text = (
-            f"📊 *Документы по отраслям* ({total_docs} документов)\n\n"
+            f" *Документы по отраслям* ({total_docs} документов)\n\n"
             f"Доступно отраслей: {len(industries_with_counts)}\n\n"
             "_Выберите отрасли для работы:_"
         )
@@ -147,14 +147,14 @@ async def show_legal_documents(callback_query: CallbackQuery):
 
         if not documents:
             await callback_query.message.edit_text(
-                "⚖️ *Юридические документы*\n\nЮридических документов пока нет в базе.\nЗагрузите соответствующие файлы.",
+                " *Юридические документы*\n\nЮридических документов пока нет в базе.\nЗагрузите соответствующие файлы.",
                 parse_mode="Markdown",
                 reply_markup=get_main_menu_keyboard(),
             )
             return
 
         keyboard = create_document_list_keyboard(documents)
-        text = f"⚖️ *Юридические документы* ({len(documents)} документов)\n\nВыберите документ для просмотра:"
+        text = f" *Юридические документы* ({len(documents)} документов)\n\nВыберите документ для просмотра:"
         await callback_query.message.edit_text(text, parse_mode="Markdown", reply_markup=keyboard)
 
     except Exception as e:
@@ -166,7 +166,7 @@ async def show_upload_menu(callback_query: CallbackQuery):
     """Показывает меню загрузки."""
     try:
         text = (
-            "📁 *Загрузка документов*\n\n"
+            " *Загрузка документов*\n\n"
             "Поддерживаемые форматы:\n"
             "• PDF, TXT, MD, RTF\n\n"
             "Просто отправьте файл в чат для автоматической обработки!"
@@ -202,12 +202,12 @@ async def show_statistics(callback_query: CallbackQuery):
         avg_chunk_str = f"{int(chunk_stats.get('avg_chunk_length', 0) or 0)} символов"
 
         text = (
-            f"📈 *Статистика базы данных*\n\n"
-            f"📄 Всего документов: *{stats.get('total_documents', 0)}*\n"
-            f"💾 Общий размер: *{total_size_str}*\n"
-            f"📊 Средний размер: *{avg_size_str}*\n"
-            f"📝 Всего чанков: *{chunk_stats.get('total_chunks', 0)}*\n"
-            f"📏 Средняя длина чанка: *{avg_chunk_str}*\n\n"
+            f" *Статистика базы данных*\n\n"
+            f" Всего документов: *{stats.get('total_documents', 0)}*\n"
+            f" Общий размер: *{total_size_str}*\n"
+            f" Средний размер: *{avg_size_str}*\n"
+            f" Всего чанков: *{chunk_stats.get('total_chunks', 0)}*\n"
+            f" Средняя длина чанка: *{avg_chunk_str}*\n\n"
         )
 
         if type_stats:
@@ -218,8 +218,8 @@ async def show_statistics(callback_query: CallbackQuery):
                 count = type_stat["count"]
                 size = format_file_size(type_stat.get("total_size", 0) or 0)
                 
-                type_map = {"regulatory": "📋 Регуляторные", "legal": "⚖️ Юридические"}
-                icon_name = type_map.get(doc_type, "📄 Обычные")
+                type_map = {"regulatory": " Регуляторные", "legal": " Юридические"}
+                icon_name = type_map.get(doc_type, " Обычные")
                 text += f"{icon_name}: *{count}* ({size})\n"
 
         await callback_query.message.edit_text(
@@ -235,12 +235,12 @@ async def show_help(callback_query: CallbackQuery):
     """Показывает справку."""
     try:
         text = (
-            "❓ *Справка по боту*\n\n"
+            " *Справка по боту*\n\n"
             "*Основные возможности:*\n"
-            "• 📊 Просмотр и поиск документов\n"
-            "• 📋⚖️ Работа с регуляторными и юридическими типами\n"
-            "• 📁 Загрузка новых документов (PDF, TXT, MD, RTF)\n"
-            "• 📈 Просмотр статистики\n\n"
+            "• Просмотр и поиск документов\n"
+            "• Работа с регуляторными и юридическими типами\n"
+            "• Загрузка новых документов (PDF, TXT, MD, RTF)\n"
+            "• Просмотр статистики\n\n"
             "*Как использовать:*\n"
             "1. Отправьте файл в чат для обработки\n"
             "2. Используйте меню для навигации\n"
@@ -276,27 +276,27 @@ async def handle_document_info(callback_query: CallbackQuery):
         created_at = format_date(document.get("processed_at"))
         status = document.get("status", "N/A")
 
-        type_map = {"regulatory": "📋 Регуляторный", "legal": "⚖️ Юридический"}
-        type_icon_name = type_map.get(doc_type, "📄 Обычный")
+        type_map = {"regulatory": " Регуляторный", "legal": " Юридический"}
+        type_icon_name = type_map.get(doc_type, " Обычный")
         type_name = f"{type_icon_name} документ"
 
-        status_icon = "✅" if status == "completed" else "⏳"
+        status_icon = "" if status == "completed" else ""
 
         text = (
-            f"ℹ️ *Информация о документе*\n\n"
-            f"📁 *Название:* {filename}\n"
-            f"📋 *Тип:* {type_name}\n"
-            f"💾 *Размер:* {file_size}\n"
-            f"📅 *Загружен:* {created_at}\n"
+            f" *Информация о документе*\n\n"
+            f" *Название:* {filename}\n"
+            f" *Тип:* {type_name}\n"
+            f" *Размер:* {file_size}\n"
+            f" *Загружен:* {created_at}\n"
             f"{status_icon} *Статус:* {status}\n"
-            f"📝 *Чанков:* {len(chunks)}\n\n"
+            f" *Чанков:* {len(chunks)}\n\n"
         )
 
         if chunks:
             total_content_length = sum(len(chunk["text"]) for chunk in chunks)
             avg_chunk_length = total_content_length // len(chunks) if chunks else 0
-            text += f"📏 *Общий объем:* {total_content_length} символов\n"
-            text += f"📊 *Средняя длина чанка:* {avg_chunk_length} символов"
+            text += f" *Общий объем:* {total_content_length} символов\n"
+            text += f" *Средняя длина чанка:* {avg_chunk_length} символов"
 
         await callback_query.message.edit_text(
             text, parse_mode="Markdown", reply_markup=create_document_info_keyboard(doc_id)
@@ -315,7 +315,7 @@ def register_postgresql_handlers(dp: Dispatcher):
     @dp.callback_query(F.data == "back_to_main")
     async def back_to_main_handler(callback_query: CallbackQuery):
         await callback_query.message.edit_text(
-            "🏠 *Главное меню*\n\nВыберите действие:",
+            " *Главное меню*\n\nВыберите действие:",
             parse_mode="Markdown",
             reply_markup=get_main_menu_keyboard(),
         )

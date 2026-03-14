@@ -32,17 +32,17 @@ class PermissionNotifications:
         try:
             # TELEGRAM_ADMIN_IDS уже обработан как List[int] в настройках
             admin_ids = SETTINGS.TELEGRAM_ADMIN_IDS or []
-            logger.info(f"📢 Найдено {len(admin_ids)} администраторов для уведомлений")
+            logger.info(f" Найдено {len(admin_ids)} администраторов для уведомлений")
             return admin_ids
         except Exception as e:
-            logger.error(f"❌ Ошибка при получении TELEGRAM_ADMIN_IDS: {e}")
+            logger.error(f" Ошибка при получении TELEGRAM_ADMIN_IDS: {e}")
             return []
     
     async def notify_admins_new_request(self, request_data: Dict[str, Any]):
         """Уведомление администраторов о новом запросе на права"""
         try:
             if not self.admin_chat_ids:
-                logger.warning("⚠️ Нет администраторов для уведомления")
+                logger.warning(" Нет администраторов для уведомления")
                 return
             
             # Формируем сообщение о новом запросе
@@ -56,12 +56,12 @@ class PermissionNotifications:
                         text=message,
                         parse_mode="Markdown"
                     )
-                    logger.info(f"📤 Уведомление отправлено администратору {admin_id}")
+                    logger.info(f" Уведомление отправлено администратору {admin_id}")
                 except Exception as e:
-                    logger.error(f"❌ Ошибка отправки уведомления администратору {admin_id}: {e}")
+                    logger.error(f" Ошибка отправки уведомления администратору {admin_id}: {e}")
             
         except Exception as e:
-            logger.error(f"❌ Ошибка при уведомлении администраторов: {e}")
+            logger.error(f" Ошибка при уведомлении администраторов: {e}")
     
     async def notify_user_request_status(self, telegram_id: int, status: str, request_data: Dict[str, Any]):
         """Уведомление пользователя о статусе запроса"""
@@ -76,16 +76,16 @@ class PermissionNotifications:
                 parse_mode="Markdown"
             )
             
-            logger.info(f"📤 Уведомление о статусе отправлено пользователю {telegram_id}")
+            logger.info(f" Уведомление о статусе отправлено пользователю {telegram_id}")
             
         except Exception as e:
-            logger.error(f"❌ Ошибка отправки уведомления пользователю {telegram_id}: {e}")
+            logger.error(f" Ошибка отправки уведомления пользователю {telegram_id}: {e}")
     
     async def notify_admins_batch_processed(self, batch_result: Dict[str, Any]):
         """Уведомление администраторов о массовой обработке запросов"""
         try:
             if not self.admin_chat_ids:
-                logger.warning("⚠️ Нет администраторов для уведомления")
+                logger.warning(" Нет администраторов для уведомления")
                 return
             
             # Формируем сообщение о массовой обработке
@@ -99,12 +99,12 @@ class PermissionNotifications:
                         text=message,
                         parse_mode="Markdown"
                     )
-                    logger.info(f"📤 Уведомление о массовой обработке отправлено администратору {admin_id}")
+                    logger.info(f" Уведомление о массовой обработке отправлено администратору {admin_id}")
                 except Exception as e:
-                    logger.error(f"❌ Ошибка отправки уведомления администратору {admin_id}: {e}")
+                    logger.error(f" Ошибка отправки уведомления администратору {admin_id}: {e}")
             
         except Exception as e:
-            logger.error(f"❌ Ошибка при уведомлении администраторов о массовой обработке: {e}")
+            logger.error(f" Ошибка при уведомлении администраторов о массовой обработке: {e}")
     
     def _format_new_request_message(self, request_data: Dict[str, Any]) -> str:
         """Формирование сообщения о новом запросе"""
@@ -123,16 +123,16 @@ class PermissionNotifications:
             except:
                 pass
         
-        message_text = f"""🔑 *Новый запрос на права доступа*
+        message_text = f""" *Новый запрос на права доступа*
 
-👤 **Пользователь:** {user_info}
-📋 **ID запроса:** #{request_id}
-🔒 **Тип прав:** {permission}
-📅 **Запрошено:** {date_str}
-💬 **Сообщение:**
+**Пользователь:** {user_info}
+**ID запроса:** #{request_id}
+**Тип прав:** {permission}
+**Запрошено:** {date_str}
+**Сообщение:**
 {message}
 
-👉 Перейти к обработке: http://localhost:8090/"""
+Перейти к обработке: http://localhost:8090/"""
         
         return message_text
     
@@ -145,30 +145,30 @@ class PermissionNotifications:
         
         # Определяем эмодзи и текст статуса
         if status == 'approved':
-            emoji = "✅"
+            emoji = ""
             status_text = "одобрен"
         elif status == 'rejected':
-            emoji = "❌"
+            emoji = ""
             status_text = "отклонен"
         else:
-            emoji = "⏳"
+            emoji = ""
             status_text = "обработан"
         
         message_text = f"""{emoji} *Статус вашего запроса*
 
-👤 **Пользователь:** {user_info}
-📋 **ID запроса:** #{request_id}
-🔒 **Тип прав:** {permission}
+**Пользователь:** {user_info}
+**ID запроса:** #{request_id}
+**Тип прав:** {permission}
 {emoji} **Статус:** {status_text}
 """
         
         if admin_comment:
-            message_text += f"\n💬 **Комментарий администратора:**\n{admin_comment}"
+            message_text += f"\n **Комментарий администратора:**\n{admin_comment}"
         
         if status == 'approved':
-            message_text += f"\n\n🎉 Поздравляем! Вам выданы права на {permission}. Теперь вы можете использовать команду /upload для загрузки документов."
+            message_text += f"\n\n Поздравляем! Вам выданы права на {permission}. Теперь вы можете использовать команду /upload для загрузки документов."
         elif status == 'rejected':
-            message_text += f"\n\n😔 К сожалению, ваш запрос был отклонен. Вы можете попробовать запросить права снова через некоторое время."
+            message_text += f"\n\n К сожалению, ваш запрос был отклонен. Вы можете попробовать запросить права снова через некоторое время."
         
         return message_text
     
@@ -181,25 +181,25 @@ class PermissionNotifications:
         
         # Определяем эмодзи и текст действия
         if action == 'approve':
-            emoji = "✅"
+            emoji = ""
             action_text = "одобрено"
         elif action == 'reject':
-            emoji = "❌"
+            emoji = ""
             action_text = "отклонено"
         else:
-            emoji = "⚙️"
+            emoji = ""
             action_text = "обработано"
         
         message_text = f"""{emoji} *Массовая обработка запросов*
 
-📊 **Результаты:**
+**Результаты:**
 {emoji} **Успешно:** {processed_count}
-❌ **Не удалось:** {failed_count}
+**Не удалось:** {failed_count}
 
-🔧 **Действие:** {action_text}
-👤 **Обработано:** {processed_by}
+**Действие:** {action_text}
+**Обработано:** {processed_by}
 
-👉 [Перейти к списку запросов](http://localhost:8080/admin/permission-requests/list)"""
+[Перейти к списку запросов](http://localhost:8080/admin/permission-requests/list)"""
         
         return message_text
     
@@ -211,18 +211,18 @@ class PermissionNotifications:
                 'data': data,
                 'timestamp': datetime.utcnow().isoformat()
             })
-            logger.info(f"📝 Уведомление добавлено в очередь: {notification_type}")
+            logger.info(f" Уведомление добавлено в очередь: {notification_type}")
         except Exception as e:
-            logger.error(f"❌ Ошибка добавления уведомления в очередь: {e}")
+            logger.error(f" Ошибка добавления уведомления в очередь: {e}")
     
     async def process_queue(self):
         """Обработка очереди уведомлений"""
         if self.is_processing:
-            logger.warning("⚠️ Обработка очереди уже идет")
+            logger.warning(" Обработка очереди уже идет")
             return
         
         self.is_processing = True
-        logger.info("🚀 Начало обработки очереди уведомлений")
+        logger.info(" Начало обработки очереди уведомлений")
         
         try:
             while not self.notification_queue.empty():
@@ -232,7 +232,7 @@ class PermissionNotifications:
                     notification_type = notification['type']
                     data = notification['data']
                     
-                    logger.info(f"📤 Обработка уведомления: {notification_type}")
+                    logger.info(f" Обработка уведомления: {notification_type}")
                     
                     # Обрабатываем уведомление в зависимости от типа
                     if notification_type == 'new_request':
@@ -245,30 +245,30 @@ class PermissionNotifications:
                     elif notification_type == 'batch_processed':
                         await self.notify_admins_batch_processed(data)
                     else:
-                        logger.warning(f"⚠️ Неизвестный тип уведомления: {notification_type}")
+                        logger.warning(f" Неизвестный тип уведомления: {notification_type}")
                     
                     # Подтверждаем обработку
                     self.notification_queue.task_done()
                     
                 except Exception as e:
-                    logger.error(f"❌ Ошибка обработки уведомления: {e}")
+                    logger.error(f" Ошибка обработки уведомления: {e}")
                     
         except Exception as e:
-            logger.error(f"❌ Критическая ошибка при обработке очереди: {e}")
+            logger.error(f" Критическая ошибка при обработке очереди: {e}")
         finally:
             self.is_processing = False
-            logger.info("✅ Обработка очереди уведомлений завершена")
+            logger.info(" Обработка очереди уведомлений завершена")
     
     async def start_processing(self):
         """Запуск фоновой обработки очереди уведомлений"""
-        logger.info("🚀 Запуск фоновой обработки очереди уведомлений")
+        logger.info(" Запуск фоновой обработки очереди уведомлений")
         
         # Запускаем обработку в отдельной задаче
         asyncio.create_task(self.process_queue())
     
     async def stop_processing(self):
         """Остановка фоновой обработки очереди уведомлений"""
-        logger.info("🛑 Остановка фоновой обработки очереди уведомлений")
+        logger.info(" Остановка фоновой обработки очереди уведомлений")
         self.is_processing = False
 
 
@@ -291,7 +291,7 @@ async def notify_admins_new_request(bot: Bot, request_data: Dict[str, Any]):
         notifications = await get_permission_notifications(bot)
         await notifications.add_to_queue('new_request', request_data)
     except Exception as e:
-        logger.error(f"❌ Ошибка при уведомлении администраторов: {e}")
+        logger.error(f" Ошибка при уведомлении администраторов: {e}")
 
 
 async def notify_user_request_status(bot: Bot, telegram_id: int, status: str, request_data: Dict[str, Any]):
@@ -304,7 +304,7 @@ async def notify_user_request_status(bot: Bot, telegram_id: int, status: str, re
             'request_data': request_data
         })
     except Exception as e:
-        logger.error(f"❌ Ошибка при уведомлении пользователя: {e}")
+        logger.error(f" Ошибка при уведомлении пользователя: {e}")
 
 
 async def notify_admins_batch_processed(bot: Bot, batch_result: Dict[str, Any]):
@@ -313,4 +313,4 @@ async def notify_admins_batch_processed(bot: Bot, batch_result: Dict[str, Any]):
         notifications = await get_permission_notifications(bot)
         await notifications.add_to_queue('batch_processed', batch_result)
     except Exception as e:
-        logger.error(f"❌ Ошибка при уведомлении о массовой обработке: {e}")
+        logger.error(f" Ошибка при уведомлении о массовой обработке: {e}")

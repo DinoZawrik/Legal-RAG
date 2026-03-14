@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 Telegram Bot Core
+Telegram Bot Core
 Основной модуль телеграм-бота с интеграцией всех обработчиков.
 
 Включает функциональность:
@@ -57,14 +57,14 @@ class TelegramBot:
     def __init__(self, token: str):
         """Инициализация бота."""
         self.redis = Redis(host=SETTINGS.REDIS_HOST, port=SETTINGS.REDIS_PORT, db=SETTINGS.REDIS_DB)
-        self.async_redis = None  # Будет инициализирован в start_polling
+        self.async_redis = None # Будет инициализирован в start_polling
         self.storage = RedisStorage(self.redis)
         self.bot = Bot(token=token)
         self.dp = Dispatcher(bot=self.bot, storage=self.storage)
         self.processing_pipeline = UnifiedDocumentProcessor()
         self.archive_processor = ArchiveProcessor()
         self.processing_users = set()
-        self.user_history = None  # Будет инициализировано позже
+        self.user_history = None # Будет инициализировано позже
         self.api_gateway_url = os.getenv("API_GATEWAY_URL", "http://localhost:8080")
         self.notification_service = PermissionNotifications(self.bot)
 
@@ -80,11 +80,11 @@ class TelegramBot:
     async def setup_bot_commands(self):
         """Настройка команд бота для меню."""
         commands = [
-            BotCommand(command="start", description="🚀 Начать работу"),
-            BotCommand(command="help", description="❓ Помощь"),
-            BotCommand(command="upload", description="📄 Загрузить документ"),
-            BotCommand(command="clear", description="🗑️ Очистить все сообщения (кроме документов)"),
-            BotCommand(command="request_access", description="🔑 Запросить права доступа"),
+            BotCommand(command="start", description=" Начать работу"),
+            BotCommand(command="help", description=" Помощь"),
+            BotCommand(command="upload", description=" Загрузить документ"),
+            BotCommand(command="clear", description=" Очистить все сообщения (кроме документов)"),
+            BotCommand(command="request_access", description=" Запросить права доступа"),
         ]
         await self.bot.set_my_commands(commands)
 
@@ -118,25 +118,32 @@ class TelegramBot:
         _global_bot_instance = self
 
         try:
-            logger.info("🚀 Запуск Telegram бота...")
+            logger.info(" Запуск Telegram бота...")
 
             # Инициализация основной системы
-            logger.info("🔧 Инициализация основной системы...")
+            logger.info(" Инициализация основной системы...")
             await initialize_core_system()
 
             # Инициализация async Redis клиента
-            logger.info("🔧 Подключение к Redis...")
+            logger.info(" Подключение к Redis...")
+            redis_password = getattr(SETTINGS, 'REDIS_PASSWORD', '') or ''
+            if redis_password:
+                redis_url = f"redis://:{redis_password}@{SETTINGS.REDIS_HOST}:{SETTINGS.REDIS_PORT}/{SETTINGS.REDIS_DB}"
+            else:
+                redis_url = f"redis://{SETTINGS.REDIS_HOST}:{SETTINGS.REDIS_PORT}/{SETTINGS.REDIS_DB}"
             self.async_redis = redis_async.from_url(
-                f"redis://{SETTINGS.REDIS_HOST}:{SETTINGS.REDIS_PORT}/{SETTINGS.REDIS_DB}",
-                decode_responses=True
+                redis_url,
+                decode_responses=True,
+                socket_connect_timeout=5,
+                socket_timeout=10,
             )
 
             # Проверка подключения к Redis
             await self.async_redis.ping()
-            logger.info("✅ Redis подключение установлено")
+            logger.info(" Redis подключение установлено")
 
             # Инициализация истории пользователей
-            logger.info("🔧 Инициализация истории пользователей...")
+            logger.info(" Инициализация истории пользователей...")
             try:
                 # Создаем Redis клиент для UserHistory
                 from core.redis_manager import RedisManager
@@ -144,9 +151,9 @@ class TelegramBot:
                 await redis_manager.initialize()
                 self.user_history = UserHistory(redis_manager)
                 # UserHistory не требует отдельной инициализации
-                logger.info("✅ История пользователей инициализирована")
+                logger.info(" История пользователей инициализирована")
             except Exception as e:
-                logger.error(f"❌ Ошибка инициализации истории: {e}")
+                logger.error(f" Ошибка инициализации истории: {e}")
                 self.user_history = None
 
             # Обновляем ссылку на историю в обработчиках
@@ -160,57 +167,57 @@ class TelegramBot:
             self.document_handlers.async_redis = self.async_redis
 
             # Настройка команд бота
-            logger.info("🔧 Настройка команд бота...")
+            logger.info(" Настройка команд бота...")
             await self.setup_bot_commands()
 
             # Запуск обработки уведомлений в фоне
-            logger.info("🔧 Запуск обработки уведомлений...")
+            logger.info(" Запуск обработки уведомлений...")
             asyncio.create_task(self._notification_loop())
 
             # Получение информации о боте
             bot_info = await self.bot.get_me()
-            logger.info(f"✅ Бот @{bot_info.username} запущен и готов к работе!")
+            logger.info(f" Бот @{bot_info.username} запущен и готов к работе!")
             telegram_logger.info(f"Бот @{bot_info.username} начал работу")
 
             # Запуск polling
             await self.dp.start_polling(self.bot, skip_updates=True)
 
         except Exception as e:
-            logger.error(f"❌ Критическая ошибка при запуске бота: {e}")
+            logger.error(f" Критическая ошибка при запуске бота: {e}")
             raise
         finally:
             # Закрытие соединений при завершении
             if self.async_redis:
                 await self.async_redis.close()
-            logger.info("🔒 Telegram бот остановлен")
+            logger.info(" Telegram бот остановлен")
 
     async def _notification_loop(self):
         """Цикл обработки уведомлений в фоне."""
         while True:
             try:
                 await self.user_management._process_notification_queue()
-                await asyncio.sleep(10)  # Проверяем каждые 10 секунд
+                await asyncio.sleep(10) # Проверяем каждые 10 секунд
             except Exception as e:
-                logger.error(f"❌ Ошибка в цикле уведомлений: {e}")
-                await asyncio.sleep(30)  # При ошибке ждем дольше
+                logger.error(f" Ошибка в цикле уведомлений: {e}")
+                await asyncio.sleep(30) # При ошибке ждем дольше
 
     async def stop(self):
         """Корректная остановка бота."""
         try:
-            logger.info("🔄 Остановка Telegram бота...")
+            logger.info(" Остановка Telegram бота...")
 
             # Закрытие Redis соединения
             if self.async_redis:
                 await self.async_redis.close()
-                logger.info("✅ Redis соединение закрыто")
+                logger.info(" Redis соединение закрыто")
 
             # Очистка обрабатывающихся пользователей
             self.processing_users.clear()
 
-            logger.info("✅ Telegram бот корректно остановлен")
+            logger.info(" Telegram бот корректно остановлен")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка при остановке бота: {e}")
+            logger.error(f" Ошибка при остановке бота: {e}")
 
     def get_health_status(self) -> dict:
         """Получение статуса здоровья бота."""
@@ -233,7 +240,7 @@ async def main():
     # Получаем токен из переменных окружения
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     if not token:
-        logger.error("❌ TELEGRAM_BOT_TOKEN не найден в переменных окружения")
+        logger.error(" TELEGRAM_BOT_TOKEN не найден в переменных окружения")
         return
 
     # Создание и запуск бота
@@ -242,9 +249,9 @@ async def main():
     try:
         await bot.start_polling()
     except KeyboardInterrupt:
-        logger.info("⏹️ Получен сигнал остановки")
+        logger.info(" Получен сигнал остановки")
     except Exception as e:
-        logger.error(f"❌ Критическая ошибка: {e}")
+        logger.error(f" Критическая ошибка: {e}")
     finally:
         await bot.stop()
 

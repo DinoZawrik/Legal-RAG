@@ -90,13 +90,13 @@ class AnswerRating:
 
         keyboard = [
             [
-                InlineKeyboardButton(text="⭐", callback_data=f"rate:{question_id}:1"),
-                InlineKeyboardButton(text="⭐⭐", callback_data=f"rate:{question_id}:2"),
-                InlineKeyboardButton(text="⭐⭐⭐", callback_data=f"rate:{question_id}:3"),
-                InlineKeyboardButton(text="⭐⭐⭐⭐", callback_data=f"rate:{question_id}:4"),
-                InlineKeyboardButton(text="⭐⭐⭐⭐⭐", callback_data=f"rate:{question_id}:5"),
+                InlineKeyboardButton(text="", callback_data=f"rate:{question_id}:1"),
+                InlineKeyboardButton(text="", callback_data=f"rate:{question_id}:2"),
+                InlineKeyboardButton(text="", callback_data=f"rate:{question_id}:3"),
+                InlineKeyboardButton(text="", callback_data=f"rate:{question_id}:4"),
+                InlineKeyboardButton(text="", callback_data=f"rate:{question_id}:5"),
             ],
-            [InlineKeyboardButton(text="💬 Оставить отзыв", callback_data=f"feedback:{question_id}")],
+            [InlineKeyboardButton(text=" Оставить отзыв", callback_data=f"feedback:{question_id}")],
         ]
 
         return InlineKeyboardMarkup(inline_keyboard=keyboard)

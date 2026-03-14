@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 Telegram Bot Message Handlers
+Telegram Bot Message Handlers
 Модуль для обработки и форматирования сообщений.
 
 Включает функциональность:
@@ -37,7 +37,12 @@ class MessageHandlers:
 
     def _fix_telegram_formatting(self, text: str) -> str:
         """КРИТИЧЕСКАЯ принудительная постобработка для Telegram форматирования."""
-        logger.info(f"🔧 ИСХОДНЫЙ ТЕКСТ ДЛЯ ИСПРАВЛЕНИЯ: {text[:200]}...")
+        # Protect against ReDoS: limit text length before regex processing
+        MAX_FORMAT_LENGTH = 50000
+        if len(text) > MAX_FORMAT_LENGTH:
+            text = text[:MAX_FORMAT_LENGTH]
+
+        logger.info(f" ИСХОДНЫЙ ТЕКСТ ДЛЯ ИСПРАВЛЕНИЯ: {text[:200]}...")
 
         # 1. Заменяем ### заголовки на **жирный текст**
         text = re.sub(r'^### (.+)$', r'**\1**', text, flags=re.MULTILINE)
@@ -63,8 +68,8 @@ class MessageHandlers:
 
         # 6. Специальная обработка для презентационных отчетов
         # Экранируем потенциально проблематичные символы в Telegram
-        text = text.replace('_', '\\_')  # Экранируем подчеркивания
-        text = re.sub(r'([*~`\[\]()])', r'\\\1', text)  # Экранируем Markdown символы
+        text = text.replace('_', '\\_') # Экранируем подчеркивания
+        text = re.sub(r'([*~`\[\]()])', r'\\\1', text) # Экранируем Markdown символы
 
         # 7. Очищаем множественные пустые строки
         text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
@@ -72,16 +77,16 @@ class MessageHandlers:
         # 8. Удаляем проблематичные символы, которые могут вызвать parsing errors
         text = re.sub(r'[^\w\s\n•\-\.,!?:;()«»"""\'\u0400-\u04FF]', '', text)
 
-        logger.info(f"✅ ИСПРАВЛЕННЫЙ ТЕКСТ: {text[:200]}...")
+        logger.info(f" ИСПРАВЛЕННЫЙ ТЕКСТ: {text[:200]}...")
         return text.strip()
 
     async def send_formatted_message(self, message: Message, text: str):
         """Отправляет длинные сообщения, разбивая их на части."""
         # КРИТИЧНАЯ ПОСТОБРАБОТКА для правильного форматирования в Telegram
         text = self._fix_telegram_formatting(text)
-        logger.info(f"📝 После постобработки: {text[:100]}...")
+        logger.info(f" После постобработки: {text[:100]}...")
 
-        max_length = 3800  # Уменьшено для запаса безопасности (Telegram лимит 4096)
+        max_length = 3800 # Уменьшено для запаса безопасности (Telegram лимит 4096)
         if len(text) > max_length:
             chunks = self.split_long_message(text, max_length)
             for i, chunk in enumerate(chunks):
@@ -114,7 +119,7 @@ class MessageHandlers:
                 # Если один параграф слишком длинный, разбиваем его по предложениям
                 if len(paragraph) > max_length:
                     sentence_chunks = self._split_by_sentences(paragraph, max_length)
-                    chunks.extend(sentence_chunks[:-1])  # Добавляем все кроме последнего
+                    chunks.extend(sentence_chunks[:-1]) # Добавляем все кроме последнего
                     current_chunk = sentence_chunks[-1] if sentence_chunks else ""
                 else:
                     current_chunk = paragraph
@@ -125,7 +130,7 @@ class MessageHandlers:
         if current_chunk:
             chunks.append(current_chunk.strip())
 
-        logger.info(f"📑 Разбито на {len(chunks)} частей")
+        logger.info(f" Разбито на {len(chunks)} частей")
         return chunks
 
     def _split_by_sentences(self, text: str, max_length: int) -> list:
@@ -154,20 +159,20 @@ class MessageHandlers:
     async def _send_single_message(self, message: Message, text: str):
         """Отправляет одно сообщение с обработкой ошибок."""
         try:
-            await message.answer(text, parse_mode=None)  # Отключаем parse_mode для безопасности
+            await message.answer(text, parse_mode=None) # Отключаем parse_mode для безопасности
         except TelegramBadRequest as e:
             if "message text is too long" in str(e).lower():
-                logger.warning(f"⚠️ Сообщение слишком длинное ({len(text)} символов), разбиваем дополнительно...")
+                logger.warning(f" Сообщение слишком длинное ({len(text)} символов), разбиваем дополнительно...")
                 half_length = len(text) // 2
                 await self._send_single_message(message, text[:half_length])
                 await self._send_single_message(message, text[half_length:])
             else:
-                logger.error(f"❌ Ошибка форматирования Telegram: {e}")
+                logger.error(f" Ошибка форматирования Telegram: {e}")
                 cleaned_text = re.sub(r'[^\w\s\n•\-\.,!?:;()«»"""\'а-яё]', '', text, flags=re.IGNORECASE)
                 await message.answer(cleaned_text, parse_mode=None)
         except Exception as e:
-            logger.error(f"❌ Критическая ошибка отправки сообщения: {e}")
-            await message.answer("❌ Ошибка при отправке ответа. Попробуйте переформулировать вопрос.", parse_mode=None)
+            logger.error(f" Критическая ошибка отправки сообщения: {e}")
+            await message.answer(" Ошибка при отправке ответа. Попробуйте переформулировать вопрос.", parse_mode=None)
 
     def _convert_markdown_to_html(self, text: str) -> str:
         """Конвертирует Markdown в HTML."""
@@ -188,10 +193,10 @@ class MessageHandlers:
     def _clean_problematic_markdown(self, text: str) -> str:
         """Очищает проблематичный Markdown для Telegram."""
         # Удаляем неподдерживаемые элементы
-        text = re.sub(r'```[\s\S]*?```', '', text)  # Блоки кода
-        text = re.sub(r'`[^`]+`', '', text)  # Инлайн код
-        text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)  # Ссылки
-        text = re.sub(r'!\[([^\]]*)\]\([^\)]+\)', r'\1', text)  # Изображения
+        text = re.sub(r'```[\s\S]*?```', '', text) # Блоки кода
+        text = re.sub(r'`[^`]+`', '', text) # Инлайн код
+        text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text) # Ссылки
+        text = re.sub(r'!\[([^\]]*)\]\([^\)]+\)', r'\1', text) # Изображения
 
         # Экранируем специальные символы
         for char in ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']:
@@ -207,7 +212,7 @@ class MessageHandlers:
 
             # Проверяем, не обрабатывается ли уже запрос пользователя
             if user_id in self.processing_users:
-                await message.answer("⏳ Подождите, пока обрабатывается предыдущий запрос...")
+                await message.answer(" Подождите, пока обрабатывается предыдущий запрос...")
                 return
 
             # Добавляем пользователя в список обрабатывающихся
@@ -247,22 +252,27 @@ class MessageHandlers:
                     telegram_logger.info(f"Успешно отправлен ответ пользователю {user_id}")
                 else:
                     error_message = result.get('error', 'Неизвестная ошибка')
-                    await message.answer(f"❌ Ошибка при обработке запроса: {error_message}")
-                    telegram_logger.error(f"Ошибка API Gateway для пользователя {user_id}: {error_message}")
+                    logger.error(f"API Gateway error for user {user_id}: {error_message}")
+                    await message.answer(" Не удалось обработать запрос. Попробуйте переформулировать вопрос или повторите позже.")
 
             except Exception as e:
-                logger.error(f"❌ Ошибка при запросе к API Gateway: {e}")
-                await message.answer("❌ Произошла ошибка при обработке вашего запроса. Попробуйте еще раз.")
+                logger.error(f" Ошибка при запросе к API Gateway: {e}")
+                await message.answer(" Произошла ошибка при обработке вашего запроса. Попробуйте еще раз.")
 
         except Exception as e:
-            logger.error(f"❌ Критическая ошибка в handle_text_message: {e}")
-            await message.answer("❌ Произошла критическая ошибка. Обратитесь к администратору.")
+            logger.error(f" Критическая ошибка в handle_text_message: {e}")
+            await message.answer(" Произошла критическая ошибка. Обратитесь к администратору.")
         finally:
             # Убираем пользователя из списка обрабатывающихся
             self.processing_users.discard(user_id)
 
     async def _query_api_gateway(self, query: str) -> dict:
         """Отправка запроса к API Gateway."""
+        # Limit query size to prevent DoS
+        MAX_QUERY_SIZE = 10000
+        if len(query) > MAX_QUERY_SIZE:
+            return {"success": False, "error": "Запрос слишком длинный"}
+
         try:
             async with aiohttp.ClientSession() as session:
                 url = f"{self.api_gateway_url}/api/query"
@@ -274,24 +284,24 @@ class MessageHandlers:
                 async with session.post(url, json=data, timeout=aiohttp.ClientTimeout(total=30)) as response:
                     if response.status == 200:
                         result = await response.json()
-                        logger.info(f"✅ API Gateway query response: {result.get('success', False)}")
+                        logger.info(f" API Gateway query response: {result.get('success', False)}")
                         return result
                     else:
                         error_text = await response.text()
-                        logger.error(f"❌ API Gateway query error {response.status}: {error_text}")
+                        logger.error(f" API Gateway query error {response.status}: {error_text}")
                         return {
                             "success": False,
-                            "error": f"API Gateway error: {response.status} - {error_text}"
+                            "error": "Сервис временно недоступен"
                         }
 
         except asyncio.TimeoutError:
-            logger.error("❌ API Gateway query timeout")
+            logger.error(" API Gateway query timeout")
             return {
                 "success": False,
                 "error": "API Gateway timeout"
             }
         except Exception as e:
-            logger.error(f"❌ API Gateway query request error: {e}")
+            logger.error(f" API Gateway query request error: {e}")
             return {
                 "success": False,
                 "error": f"API Gateway request error: {str(e)}"

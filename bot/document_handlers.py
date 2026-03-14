@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 Telegram Bot Document Handlers
+Telegram Bot Document Handlers
 Модуль для обработки документов в телеграм-боте.
 
 Включает функциональность:
@@ -50,12 +50,12 @@ class DocumentHandlers:
             # Проверяем права доступа
             has_permission = await check_user_permission_async(user_id)
             if not has_permission:
-                await message.answer("❌ У вас нет прав для загрузки документов. Используйте /request_access.")
+                await message.answer(" У вас нет прав для загрузки документов. Используйте /request_access.")
                 return
 
             # Проверяем, не обрабатывается ли уже файл пользователя
             if user_id in self.processing_users:
-                await message.answer("⏳ Дождитесь завершения обработки предыдущего файла...")
+                await message.answer(" Дождитесь завершения обработки предыдущего файла...")
                 return
 
             document = message.document
@@ -63,12 +63,12 @@ class DocumentHandlers:
             file_size = document.file_size
 
             # Проверки файла
-            if file_size > 20 * 1024 * 1024:  # 20 МБ
-                await message.answer("❌ Размер файла превышает 20 МБ. Загрузите файл меньшего размера.")
+            if file_size > 20 * 1024 * 1024: # 20 МБ
+                await message.answer(" Размер файла превышает 20 МБ. Загрузите файл меньшего размера.")
                 return
 
             if not any(file_name.lower().endswith(ext) for ext in ['.pdf', '.zip', '.pptx']):
-                await message.answer("❌ Поддерживаются только файлы: PDF, ZIP, PPTX")
+                await message.answer(" Поддерживаются только файлы: PDF, ZIP, PPTX")
                 return
 
             # Добавляем пользователя в обработку
@@ -101,16 +101,16 @@ class DocumentHandlers:
                     await self._show_document_type_selection(message, state, file_name, is_archive=False)
 
             except Exception as e:
-                logger.error(f"❌ Ошибка при загрузке файла: {e}")
-                await message.answer("❌ Ошибка при загрузке файла. Попробуйте еще раз.")
+                logger.error(f" Ошибка при загрузке файла: {e}")
+                await message.answer(" Ошибка при загрузке файла. Попробуйте еще раз.")
             finally:
                 # Убираем пользователя из обработки только при ошибке
                 # При успешной загрузке убираем после обработки
                 pass
 
         except Exception as e:
-            logger.error(f"❌ Критическая ошибка в handle_document_upload: {e}")
-            await message.answer("❌ Критическая ошибка при обработке документа.")
+            logger.error(f" Критическая ошибка в handle_document_upload: {e}")
+            await message.answer(" Критическая ошибка при обработке документа.")
             self.processing_users.discard(user_id)
 
     async def _show_document_type_selection(self, message: Message, state: FSMContext, file_name: str, is_archive: bool = False):
@@ -118,26 +118,26 @@ class DocumentHandlers:
         try:
             file_type = "архива" if is_archive else "документа"
 
-            selection_text = f"""📄 **Выберите тип {file_type}**
+            selection_text = f""" **Выберите тип {file_type}**
 
-📁 Файл: `{file_name}`
+Файл: `{file_name}`
 
-🔍 **Доступные типы:**
+**Доступные типы:**
 • **Регулятивный** - Законы, постановления, нормативы
 • **Общий** - Договоры, письма, прочие документы
 
-💡 **Совет:** Правильный выбор типа улучшает качество анализа."""
+**Совет:** Правильный выбор типа улучшает качество анализа."""
 
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [
                     InlineKeyboardButton(
-                        text="📜 Регулятивный документ",
+                        text=" Регулятивный документ",
                         callback_data=f"{DOC_TYPE_PREFIX}regulatory"
                     )
                 ],
                 [
                     InlineKeyboardButton(
-                        text="📄 Общий документ",
+                        text=" Общий документ",
                         callback_data=f"{DOC_TYPE_PREFIX}general"
                     )
                 ]
@@ -147,8 +147,8 @@ class DocumentHandlers:
             await state.set_state(Form.selecting_document_type)
 
         except Exception as e:
-            logger.error(f"❌ Ошибка в _show_document_type_selection: {e}")
-            await message.answer("❌ Ошибка при отображении выбора типа документа.")
+            logger.error(f" Ошибка в _show_document_type_selection: {e}")
+            await message.answer(" Ошибка при отображении выбора типа документа.")
 
     async def handle_document_type_selection(self, callback_query: CallbackQuery, state: FSMContext):
         """Обработка выбора типа документа."""
@@ -161,14 +161,14 @@ class DocumentHandlers:
             # Получаем путь к файлу из Redis
             temp_file_path = await self.get_user_temp_file_path(user_id)
             if not temp_file_path or not os.path.exists(temp_file_path):
-                await callback_query.answer("❌ Файл не найден. Загрузите документ заново.")
+                await callback_query.answer(" Файл не найден. Загрузите документ заново.")
                 return
 
             original_filename = os.path.basename(temp_file_path).split('_', 1)[1]
 
-            await callback_query.answer(f"✅ Выбран тип: {document_type}")
+            await callback_query.answer(f" Выбран тип: {document_type}")
             await callback_query.message.edit_text(
-                f"🔄 Обрабатываем файл `{original_filename}` как {document_type} документ...\n\n⏳ Это может занять несколько минут..."
+                f" Обрабатываем файл `{original_filename}` как {document_type} документ...\n\n Это может занять несколько минут..."
             )
 
             # Определяем тип файла и обрабатываем
@@ -180,8 +180,8 @@ class DocumentHandlers:
             await state.clear()
 
         except Exception as e:
-            logger.error(f"❌ Ошибка в handle_document_type_selection: {e}")
-            await callback_query.answer("❌ Ошибка при обработке выбора.")
+            logger.error(f" Ошибка в handle_document_type_selection: {e}")
+            await callback_query.answer(" Ошибка при обработке выбора.")
 
     async def _handle_archive_processing(self, message: Message, file_path: str, original_filename: str, document_type: str):
         """Обработка архива документов."""
@@ -203,18 +203,18 @@ class DocumentHandlers:
                 total_files = result.get('total_files', 0)
                 processing_time = result.get('processing_time', 0)
 
-                success_text = f"""✅ **Архив успешно обработан!**
+                success_text = f""" **Архив успешно обработан!**
 
-📊 **Статистика обработки:**
+**Статистика обработки:**
 • Всего файлов: {total_files}
 • Обработано: {processed_files}
 • Пропущено: {skipped_files}
 • Время обработки: {processing_time:.1f} сек
 
-📁 **Файл:** `{original_filename}`
-🏷️ **Тип:** {document_type}
+**Файл:** `{original_filename}`
+**Тип:** {document_type}
 
-💬 **Теперь вы можете задавать вопросы по содержимому архива!**"""
+**Теперь вы можете задавать вопросы по содержимому архива!**"""
 
                 await message.edit_text(success_text)
 
@@ -229,18 +229,18 @@ class DocumentHandlers:
 
             else:
                 error_message = result.get('error', 'Неизвестная ошибка')
-                await message.edit_text(f"❌ Ошибка при обработке архива: {error_message}")
+                await message.edit_text(f" Ошибка при обработке архива: {error_message}")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка при обработке архива: {e}")
-            await message.edit_text(f"❌ Ошибка при обработке архива: {str(e)}")
+            logger.error(f" Ошибка при обработке архива: {e}")
+            await message.edit_text(f" Ошибка при обработке архива: {str(e)}")
         finally:
             # Очищаем временный файл
             try:
                 if os.path.exists(file_path):
                     os.remove(file_path)
             except Exception as e:
-                logger.warning(f"⚠️ Не удалось удалить временный файл {file_path}: {e}")
+                logger.warning(f" Не удалось удалить временный файл {file_path}: {e}")
 
             # Убираем пользователя из обработки
             self.processing_users.discard(user_id)
@@ -264,17 +264,17 @@ class DocumentHandlers:
                 processing_time = result.get('processing_time', 0)
                 document_id = result.get('document_id', 'N/A')
 
-                success_text = f"""✅ **Документ успешно обработан!**
+                success_text = f""" **Документ успешно обработан!**
 
-📊 **Статистика обработки:**
+**Статистика обработки:**
 • Создано фрагментов: {chunks_created}
 • Время обработки: {processing_time:.1f} сек
 • ID документа: {document_id}
 
-📁 **Файл:** `{original_filename}`
-🏷️ **Тип:** {document_type}
+**Файл:** `{original_filename}`
+**Тип:** {document_type}
 
-💬 **Теперь вы можете задавать вопросы по содержимому документа!**"""
+**Теперь вы можете задавать вопросы по содержимому документа!**"""
 
                 await message.edit_text(success_text)
 
@@ -289,18 +289,18 @@ class DocumentHandlers:
 
             else:
                 error_message = result.get('error', 'Неизвестная ошибка')
-                await message.edit_text(f"❌ Ошибка при обработке документа: {error_message}")
+                await message.edit_text(f" Ошибка при обработке документа: {error_message}")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка при обработке документа: {e}")
-            await message.edit_text(f"❌ Ошибка при обработке документа: {str(e)}")
+            logger.error(f" Ошибка при обработке документа: {e}")
+            await message.edit_text(f" Ошибка при обработке документа: {str(e)}")
         finally:
             # Очищаем временный файл
             try:
                 if os.path.exists(file_path):
                     os.remove(file_path)
             except Exception as e:
-                logger.warning(f"⚠️ Не удалось удалить временный файл {file_path}: {e}")
+                logger.warning(f" Не удалось удалить временный файл {file_path}: {e}")
 
             # Убираем пользователя из обработки
             self.processing_users.discard(user_id)
@@ -311,13 +311,13 @@ class DocumentHandlers:
             user_id = message.from_user.id
             telegram_logger.info(f"Обработка презентации {original_filename}")
 
-            await message.answer(f"🔄 Обрабатываем презентацию `{original_filename}`...\n\n⏳ Это может занять несколько минут...")
+            await message.answer(f" Обрабатываем презентацию `{original_filename}`...\n\n Это может занять несколько минут...")
 
             # Сканируем презентацию
             scan_result = await scan_presentation_for_bot(file_path, original_filename)
 
             if scan_result['success']:
-                await message.answer(f"✅ Презентация `{original_filename}` успешно обработана!\n\n💬 Теперь вы можете задавать вопросы по её содержимому.")
+                await message.answer(f" Презентация `{original_filename}` успешно обработана!\n\n Теперь вы можете задавать вопросы по её содержимому.")
 
                 # Добавляем в историю
                 if self.user_history:
@@ -329,18 +329,18 @@ class DocumentHandlers:
                     )
             else:
                 error_message = scan_result.get('error', 'Неизвестная ошибка')
-                await message.answer(f"❌ Ошибка при обработке презентации: {error_message}")
+                await message.answer(f" Ошибка при обработке презентации: {error_message}")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка при обработке презентации: {e}")
-            await message.answer(f"❌ Ошибка при обработке презентации: {str(e)}")
+            logger.error(f" Ошибка при обработке презентации: {e}")
+            await message.answer(f" Ошибка при обработке презентации: {str(e)}")
         finally:
             # Очищаем временный файл
             try:
                 if os.path.exists(file_path):
                     os.remove(file_path)
             except Exception as e:
-                logger.warning(f"⚠️ Не удалось удалить временный файл {file_path}: {e}")
+                logger.warning(f" Не удалось удалить временный файл {file_path}: {e}")
 
             # Убираем пользователя из обработки
             self.processing_users.discard(user_id)
@@ -357,7 +357,7 @@ class DocumentHandlers:
                 data = aiohttp.FormData()
                 data.add_field('file', file_content, filename=original_filename, content_type='application/pdf')
                 data.add_field('original_filename', original_filename)
-                data.add_field('category', document_type)  # API ожидает 'category', а не 'document_type'
+                data.add_field('category', document_type) # API ожидает 'category', а не 'document_type'
                 data.add_field('is_presentation', str(is_presentation).lower())
 
                 # Отправляем запрос к API Gateway
@@ -366,24 +366,24 @@ class DocumentHandlers:
                 async with session.post(url, data=data, timeout=aiohttp.ClientTimeout(total=60)) as response:
                     if response.status == 200:
                         result = await response.json()
-                        logger.info(f"✅ API Gateway response: {result}")
+                        logger.info(f" API Gateway response: {result}")
                         return result
                     else:
                         error_text = await response.text()
-                        logger.error(f"❌ API Gateway error {response.status}: {error_text}")
+                        logger.error(f" API Gateway error {response.status}: {error_text}")
                         return {
                             "success": False,
                             "error": f"API Gateway error: {response.status} - {error_text}"
                         }
 
         except asyncio.TimeoutError:
-            logger.error("❌ API Gateway timeout")
+            logger.error(" API Gateway timeout")
             return {
                 "success": False,
                 "error": "API Gateway timeout"
             }
         except Exception as e:
-            logger.error(f"❌ API Gateway request error: {e}")
+            logger.error(f" API Gateway request error: {e}")
             return {
                 "success": False,
                 "error": f"API Gateway request error: {str(e)}"
@@ -394,9 +394,9 @@ class DocumentHandlers:
         try:
             if self.async_redis:
                 key = f"user:{user_id}:temp_file_path"
-                await self.async_redis.set(key, file_path, ex=3600)  # Сохраняем на 1 час
+                await self.async_redis.set(key, file_path, ex=3600) # Сохраняем на 1 час
         except Exception as e:
-            logger.error(f"❌ Ошибка сохранения пути файла в Redis: {e}")
+            logger.error(f" Ошибка сохранения пути файла в Redis: {e}")
 
     async def get_user_temp_file_path(self, user_id: int) -> str:
         """Получить путь к временному файлу пользователя из Redis."""
@@ -407,5 +407,5 @@ class DocumentHandlers:
                 return file_path.decode() if file_path else None
             return None
         except Exception as e:
-            logger.error(f"❌ Ошибка получения пути файла из Redis: {e}")
+            logger.error(f" Ошибка получения пути файла из Redis: {e}")
             return None

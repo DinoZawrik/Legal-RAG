@@ -33,7 +33,7 @@ class EnhancedLegalBotAdapter:
     async def initialize(self, vector_store=None):
         """Инициализация Enhanced Legal System."""
         try:
-            logger.info("🚀 Инициализация Enhanced Legal Bot Adapter...")
+            logger.info(" Инициализация Enhanced Legal Bot Adapter...")
 
             # Инициализация базовой системы
             await initialize_core_system()
@@ -42,10 +42,10 @@ class EnhancedLegalBotAdapter:
             self.enhanced_assistant = EnhancedLegalAssistant()
 
             self.initialized = True
-            logger.info("✅ Enhanced Legal Bot Adapter инициализирован")
+            logger.info(" Enhanced Legal Bot Adapter инициализирован")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации Enhanced Legal Bot Adapter: {e}")
+            logger.error(f" Ошибка инициализации Enhanced Legal Bot Adapter: {e}")
             self.initialized = False
             raise
 
@@ -65,7 +65,7 @@ class EnhancedLegalBotAdapter:
             }
 
         try:
-            logger.info(f"📝 Обработка запроса через Enhanced Legal System: {query[:100]}...")
+            logger.info(f" Обработка запроса через Enhanced Legal System: {query[:100]}...")
 
             # Подготовка истории разговора
             conversation_history = []
@@ -95,12 +95,12 @@ class EnhancedLegalBotAdapter:
             # Преобразование ответа в формат совместимый с UnifiedAISystem
             response_data = self._format_response_for_bot(consultation_response)
 
-            logger.info(f"✅ Ответ получен (качество: {consultation_response.validation_report.quality_grade.value})")
+            logger.info(f" Ответ получен (качество: {consultation_response.validation_report.quality_grade.value})")
 
             return response_data
 
         except Exception as e:
-            logger.error(f"❌ Ошибка обработки запроса: {e}")
+            logger.error(f" Ошибка обработки запроса: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -130,7 +130,7 @@ class EnhancedLegalBotAdapter:
         # Анализ истории - если есть много юридических запросов
         history_legal_count = 0
         if history:
-            for entry in history[-5:]:  # Последние 5 сообщений
+            for entry in history[-5:]: # Последние 5 сообщений
                 content = entry.get("content", "").lower()
                 history_legal_count += sum(1 for term in legal_terms if term in content)
 
@@ -155,29 +155,29 @@ class EnhancedLegalBotAdapter:
 
         # Краткое резюме
         if hasattr(structured_response, 'sections') and 'summary' in structured_response.sections:
-            response_parts.append(f"📋 **Краткий ответ:**\n{structured_response.sections['summary']}")
+            response_parts.append(f" **Краткий ответ:**\n{structured_response.sections['summary']}")
 
         # Правовая основа
         if hasattr(structured_response, 'sections') and 'legal_basis' in structured_response.sections:
-            response_parts.append(f"\n⚖️ **Правовая основа:**\n{structured_response.sections['legal_basis']}")
+            response_parts.append(f"\n **Правовая основа:**\n{structured_response.sections['legal_basis']}")
 
         # Практические рекомендации
         if hasattr(structured_response, 'sections') and 'recommendations' in structured_response.sections:
-            response_parts.append(f"\n💡 **Рекомендации:**\n{structured_response.sections['recommendations']}")
+            response_parts.append(f"\n **Рекомендации:**\n{structured_response.sections['recommendations']}")
 
         # Источники
         sources_text = self._format_sources(structured_response)
         if sources_text:
-            response_parts.append(f"\n📚 **Источники:**\n{sources_text}")
+            response_parts.append(f"\n **Источники:**\n{sources_text}")
 
         # Предупреждения (если есть)
         if hasattr(structured_response, 'warnings') and structured_response.warnings:
-            warnings_text = "\n".join(f"⚠️ {warning}" for warning in structured_response.warnings)
+            warnings_text = "\n".join(f" {warning}" for warning in structured_response.warnings)
             response_parts.append(f"\n{warnings_text}")
 
         # Качество ответа (если низкое)
         if validation_report.overall_score < 0.7:
-            response_parts.append(f"\n⚠️ *Качество ответа: {validation_report.quality_grade.value}. Рекомендуется проконсультироваться со специалистом.*")
+            response_parts.append(f"\n *Качество ответа: {validation_report.quality_grade.value}. Рекомендуется проконсультироваться со специалистом.*")
 
         response_text = "\n".join(response_parts)
 
@@ -206,7 +206,7 @@ class EnhancedLegalBotAdapter:
             return ""
 
         sources_list = []
-        for i, source in enumerate(structured_response.sources[:5], 1):  # Максимум 5 источников
+        for i, source in enumerate(structured_response.sources[:5], 1): # Максимум 5 источников
             if hasattr(source, 'document_title'):
                 title = source.document_title
             elif isinstance(source, dict):

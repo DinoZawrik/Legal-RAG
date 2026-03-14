@@ -36,9 +36,9 @@ class NotificationManager:
             try:
                 await self.bot.send_message(
                     user_id,
-                    f"✅ *Документ обработан*\n\n"
-                    f"📄 {document_name}\n"
-                    f"🆔 ID: `{document_id}`\n\n"
+                    f" *Документ обработан*\n\n"
+                    f" {document_name}\n"
+                    f" ID: `{document_id}`\n\n"
                     f"Теперь вы можете задавать вопросы по этому документу!",
                     parse_mode="Markdown",
                 )
@@ -56,10 +56,10 @@ class NotificationManager:
             try:
                 await self.bot.send_message(
                     user_id,
-                    f"🔍 *Найдено совпадение*\n\n"
+                    f" *Найдено совпадение*\n\n"
                     f"Ключевое слово: `{keyword}`\n"
-                    f"📄 Документ: {document_name}\n"
-                    f"📝 Контекст: {context[:200]}...\n\n"
+                    f" Документ: {document_name}\n"
+                    f" Контекст: {context[:200]}...\n\n"
                     f"Используйте /documents для работы с документом",
                     parse_mode="Markdown",
                 )

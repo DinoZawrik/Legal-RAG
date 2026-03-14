@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 Telegram Bot User Management
+Telegram Bot User Management
 Модуль для управления пользователями и уведомлениями.
 
 Включает функциональность:
@@ -38,33 +38,33 @@ class UserManagement:
             # Проверяем права доступа
             has_permission = await check_user_permission_async(user_id)
             if not has_permission:
-                await callback_query.answer("❌ У вас нет прав для этого действия.")
+                await callback_query.answer(" У вас нет прав для этого действия.")
                 return
 
-            await callback_query.answer("🗑️ Очищаем историю...")
+            await callback_query.answer(" Очищаем историю...")
 
             try:
                 # Очищаем историю пользователя
                 if self.user_history:
                     cleared_count = await self.user_history.clear_user_history(user_id)
 
-                    success_text = f"""✅ **История чата очищена!**
+                    success_text = f""" **История чата очищена!**
 
-📊 **Статистика:**
+**Статистика:**
 • Удалено сообщений: {cleared_count}
 • Документы сохранены: Да
 • Права доступа: Сохранены
 
-💡 **Что произошло:**
+**Что произошло:**
 • Удалены все текстовые сообщения
 • Очищена история диалогов
 • Загруженные документы остались в системе
 
 🆕 **Теперь вы можете начать новый диалог!**"""
                 else:
-                    success_text = """✅ **История чата очищена!**
+                    success_text = """ **История чата очищена!**
 
-💡 Вы можете начать новый диалог с чистой историей."""
+Вы можете начать новый диалог с чистой историей."""
 
                 await callback_query.message.edit_text(success_text)
 
@@ -72,14 +72,14 @@ class UserManagement:
                 telegram_logger.info(f"История пользователя {user_id} очищена")
 
             except Exception as e:
-                logger.error(f"❌ Ошибка при очистке истории: {e}")
+                logger.error(f" Ошибка при очистке истории: {e}")
                 await callback_query.message.edit_text(
-                    "❌ Произошла ошибка при очистке истории. Попробуйте еще раз."
+                    " Произошла ошибка при очистке истории. Попробуйте еще раз."
                 )
 
         except Exception as e:
-            logger.error(f"❌ Критическая ошибка в handle_clear_confirmation: {e}")
-            await callback_query.answer("❌ Произошла критическая ошибка.")
+            logger.error(f" Критическая ошибка в handle_clear_confirmation: {e}")
+            await callback_query.answer(" Произошла критическая ошибка.")
 
     async def handle_cancel_clear(self, callback_query: CallbackQuery):
         """Обработка отмены очистки чата."""
@@ -87,22 +87,22 @@ class UserManagement:
             user_id = callback_query.from_user.id
             telegram_logger.info(f"Отмена очистки от пользователя {user_id}")
 
-            await callback_query.answer("❌ Очистка отменена")
+            await callback_query.answer(" Очистка отменена")
 
-            cancel_text = """❌ **Очистка истории отменена**
+            cancel_text = """ **Очистка истории отменена**
 
-📝 **Ваша история диалогов сохранена:**
+**Ваша история диалогов сохранена:**
 • Все сообщения остались на месте
 • Контекст предыдущих диалогов сохранен
 • Загруженные документы не затронуты
 
-💡 **Если потребуется очистка позже**, используйте команду `/clear`"""
+**Если потребуется очистка позже**, используйте команду `/clear`"""
 
             await callback_query.message.edit_text(cancel_text)
 
         except Exception as e:
-            logger.error(f"❌ Ошибка в handle_cancel_clear: {e}")
-            await callback_query.answer("❌ Произошла ошибка.")
+            logger.error(f" Ошибка в handle_cancel_clear: {e}")
+            await callback_query.answer(" Произошла ошибка.")
 
     async def _process_notification_queue(self):
         """Обработка очереди уведомлений."""
@@ -110,29 +110,29 @@ class UserManagement:
             if self.notification_service:
                 await self.notification_service.process_pending_notifications()
         except Exception as e:
-            logger.error(f"❌ Ошибка при обработке уведомлений: {e}")
+            logger.error(f" Ошибка при обработке уведомлений: {e}")
 
     async def _send_status_notification(self, user_id: int, status: str, message: str):
         """Отправка уведомления о статусе пользователю."""
         try:
             status_messages = {
-                "approved": "✅ **Доступ одобрен!**\n\nВы можете использовать все функции бота.",
-                "denied": "❌ **Доступ отклонен**\n\nОбратитесь к администратору за дополнительной информацией.",
-                "pending": "⏳ **Запрос на рассмотрении**\n\nДождитесь решения администратора.",
-                "banned": "🚫 **Доступ заблокирован**\n\nВы не можете использовать бота.",
-                "warning": "⚠️ **Предупреждение**\n\nБудьте внимательны при использовании бота."
+                "approved": " **Доступ одобрен!**\n\nВы можете использовать все функции бота.",
+                "denied": " **Доступ отклонен**\n\nОбратитесь к администратору за дополнительной информацией.",
+                "pending": " **Запрос на рассмотрении**\n\nДождитесь решения администратора.",
+                "banned": " **Доступ заблокирован**\n\nВы не можете использовать бота.",
+                "warning": " **Предупреждение**\n\nБудьте внимательны при использовании бота."
             }
 
-            notification_text = status_messages.get(status, f"📢 **Уведомление**: {message}")
+            notification_text = status_messages.get(status, f" **Уведомление**: {message}")
 
             if message:
-                notification_text += f"\n\n💬 **Дополнительно**: {message}"
+                notification_text += f"\n\n **Дополнительно**: {message}"
 
             await self.bot.send_message(user_id, notification_text)
             telegram_logger.info(f"Отправлено уведомление пользователю {user_id}: {status}")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка отправки уведомления пользователю {user_id}: {e}")
+            logger.error(f" Ошибка отправки уведомления пользователю {user_id}: {e}")
 
     async def get_user_stats(self, user_id: int) -> dict:
         """Получение статистики пользователя."""
@@ -156,7 +156,7 @@ class UserManagement:
             return stats
 
         except Exception as e:
-            logger.error(f"❌ Ошибка получения статистики пользователя {user_id}: {e}")
+            logger.error(f" Ошибка получения статистики пользователя {user_id}: {e}")
             return {"user_id": user_id, "error": str(e)}
 
     async def notify_user_status_change(self, user_id: int, new_status: str, admin_message: str = None):
@@ -174,7 +174,7 @@ class UserManagement:
                 )
 
         except Exception as e:
-            logger.error(f"❌ Ошибка уведомления об изменении статуса для пользователя {user_id}: {e}")
+            logger.error(f" Ошибка уведомления об изменении статуса для пользователя {user_id}: {e}")
 
     async def handle_user_activity(self, user_id: int, activity_type: str, details: str = None):
         """Обработка активности пользователя."""
@@ -190,7 +190,7 @@ class UserManagement:
             await self._check_user_limits(user_id, activity_type)
 
         except Exception as e:
-            logger.error(f"❌ Ошибка обработки активности пользователя {user_id}: {e}")
+            logger.error(f" Ошибка обработки активности пользователя {user_id}: {e}")
 
     async def _check_user_limits(self, user_id: int, activity_type: str):
         """Проверка лимитов пользователя."""
@@ -202,19 +202,19 @@ class UserManagement:
             pass
 
         except Exception as e:
-            logger.error(f"❌ Ошибка проверки лимитов для пользователя {user_id}: {e}")
+            logger.error(f" Ошибка проверки лимитов для пользователя {user_id}: {e}")
 
     async def cleanup_inactive_users(self, days_inactive: int = 30):
         """Очистка данных неактивных пользователей."""
         try:
             if self.user_history:
                 cleaned_count = await self.user_history.cleanup_inactive_users(days_inactive)
-                logger.info(f"✅ Очищены данные {cleaned_count} неактивных пользователей")
+                logger.info(f" Очищены данные {cleaned_count} неактивных пользователей")
                 return cleaned_count
             return 0
 
         except Exception as e:
-            logger.error(f"❌ Ошибка очистки неактивных пользователей: {e}")
+            logger.error(f" Ошибка очистки неактивных пользователей: {e}")
             return 0
 
     async def export_user_data(self, user_id: int) -> dict:
@@ -234,5 +234,5 @@ class UserManagement:
             return export_data
 
         except Exception as e:
-            logger.error(f"❌ Ошибка экспорта данных пользователя {user_id}: {e}")
+            logger.error(f" Ошибка экспорта данных пользователя {user_id}: {e}")
             return {"user_id": user_id, "error": str(e)}

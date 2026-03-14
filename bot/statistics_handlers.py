@@ -161,7 +161,7 @@ async def handle_statistics_request(message: Message | CallbackQuery, stats_type
 
     except Exception as e:
         logger.error("Критическая ошибка при обработке запроса статистики: %s", e, exc_info=True)
-        error_message_text = "❌ Произошла серьезная ошибка при получении статистики."
+        error_message_text = " Произошла серьезная ошибка при получении статистики."
         if isinstance(message, Message):
             await message.answer(error_message_text)
         elif isinstance(message, CallbackQuery) and message.message:

@@ -38,25 +38,25 @@ class DataExporter:
     def create_summary_report(user_history: List[Dict], documents: List[Dict]) -> str:
         """Создает сводный отчет"""
         report = []
-        report.append("📊 СВОДНЫЙ ОТЧЕТ")
+        report.append(" СВОДНЫЙ ОТЧЕТ")
         report.append("=" * 50)
-        report.append(f"📅 Дата создания: {datetime.now().strftime('%d.%m.%Y %H:%M')}")
+        report.append(f" Дата создания: {datetime.now().strftime('%d.%m.%Y %H:%M')}")
         report.append("")
 
-        report.append("📄 ДОКУМЕНТЫ:")
-        for doc in documents[:10]:  # Показываем первые 10
+        report.append(" ДОКУМЕНТЫ:")
+        for doc in documents[:10]: # Показываем первые 10
             report.append(f"• {doc.get('filename', 'Неизвестно')}")
 
         if len(documents) > 10:
             report.append(f"... и еще {len(documents) - 10} документов")
 
         report.append("")
-        report.append("❓ ПОСЛЕДНИЕ ВОПРОСЫ:")
-        for question in user_history[:5]:  # Последние 5 вопросов
+        report.append(" ПОСЛЕДНИЕ ВОПРОСЫ:")
+        for question in user_history[:5]: # Последние 5 вопросов
             report.append(f"• {question.get('question', '')[:100]}...")
 
         report.append("")
-        report.append("📈 СТАТИСТИКА:")
+        report.append(" СТАТИСТИКА:")
         report.append(f"Всего документов: {len(documents)}")
         report.append(f"Всего вопросов: {len(user_history)}")
 

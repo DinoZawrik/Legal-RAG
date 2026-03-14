@@ -22,9 +22,9 @@ class EnhancedFormatter:
             str: Отформатированный текст результатов поиска
         """
         if not results:
-            return "❌ По вашему запросу ничего не найдено"
+            return " По вашему запросу ничего не найдено"
 
-        formatted_results = ["🔍 *Результаты поиска:*\n"]
+        formatted_results = [" *Результаты поиска:*\n"]
         display_results = results[:limit]
 
         for i, result in enumerate(display_results, 1):
@@ -40,7 +40,7 @@ class EnhancedFormatter:
 
         total_count = len(results)
         if total_count > limit:
-            formatted_results.append(f"\n📝 *Показано {limit} из {total_count} результатов*")
+            formatted_results.append(f"\n *Показано {limit} из {total_count} результатов*")
             formatted_results.append("_Используйте пагинацию для просмотра остальных результатов_")
 
         return "\n".join(formatted_results)
@@ -58,12 +58,12 @@ class EnhancedFormatter:
         content = EnhancedFormatter._escape_markdown(result.get("content", "")[:200])
         score = result.get("score", 0)
         document_type = result.get("document_type", "Документ")
-        type_emoji = {"pdf": "📄", "regulatory": "📋", "legal": "⚖️"}.get(document_type, "📄")
+        type_emoji = {"pdf": "", "regulatory": "", "legal": ""}.get(document_type, "")
 
         return (
             f"{index}. {type_emoji} **{filename}**\n"
-            f"   📊 Релевантность: {score:.2f}\n"
-            f"   📝 {content}{'...' if len(result.get('content', '')) > 200 else ''}\n"
+            f"    Релевантность: {score:.2f}\n"
+            f"    {content}{'...' if len(result.get('content', '')) > 200 else ''}\n"
         )
 
     @staticmethod
@@ -75,10 +75,10 @@ class EnhancedFormatter:
         content = EnhancedFormatter._escape_markdown(result.get("content", "")[:200])
 
         return (
-            f"{index}. 📋 **{title}**\n"
-            f"   🏭 Отрасль: {industry}\n"
-            f"   📄 Тип: {doc_type}\n"
-            f"   📝 {content}{'...' if len(result.get('content', '')) > 200 else ''}\n"
+            f"{index}.  **{title}**\n"
+            f"    Отрасль: {industry}\n"
+            f"    Тип: {doc_type}\n"
+            f"    {content}{'...' if len(result.get('content', '')) > 200 else ''}\n"
         )
 
     @staticmethod
@@ -87,7 +87,7 @@ class EnhancedFormatter:
         table_name = EnhancedFormatter._escape_markdown(result.get("table_name", "Неизвестная таблица"))
         row_data = result.get("data", {})
         formatted_data = [f"   • {EnhancedFormatter._escape_markdown(str(k))}: {EnhancedFormatter._escape_markdown(str(v))}" for k, v in row_data.items()]
-        return f"{index}. 📊 **{table_name}**\n" f"{'\n'.join(formatted_data)}\n"
+        return f"{index}.  **{table_name}**\n" f"{'\n'.join(formatted_data)}\n"
 
     @staticmethod
     def _format_generic_result(result: Dict, index: int) -> str:
@@ -104,8 +104,8 @@ class EnhancedFormatter:
         title = EnhancedFormatter._escape_markdown(title)
         content = EnhancedFormatter._escape_markdown(result.get("content", result.get("description", ""))[:200])
         return (
-            f"{index}. 📄 **{title}**\n"
-            f"   📝 {content}{'...' if len(result.get('content', result.get('description', ''))) > 200 else ''}\n"
+            f"{index}.  **{title}**\n"
+            f"    {content}{'...' if len(result.get('content', result.get('description', ''))) > 200 else ''}\n"
         )
 
     @staticmethod
@@ -125,27 +125,27 @@ class EnhancedFormatter:
 
         size_str = format_file_size(file_size)
         date_str = format_date(created_at) if created_at else "Не указана"
-        type_emoji = {"pdf": "📄", "regulatory": "📋", "legal": "⚖️"}.get(doc_type, "📄")
+        type_emoji = {"pdf": "", "regulatory": "", "legal": ""}.get(doc_type, "")
 
         info_lines = [
             f"{type_emoji} **Информация о документе**\n",
-            f"📁 **Имя файла:** {EnhancedFormatter._escape_markdown(filename)}",
-            f"📄 **Тип документа:** {EnhancedFormatter._escape_markdown(doc_type)}",
-            f"📊 **Размер:** {size_str}",
-            f"📅 **Дата загрузки:** {date_str}",
-            f"🧩 **Количество фрагментов:** {chunk_count}",
+            f" **Имя файла:** {EnhancedFormatter._escape_markdown(filename)}",
+            f" **Тип документа:** {EnhancedFormatter._escape_markdown(doc_type)}",
+            f" **Размер:** {size_str}",
+            f" **Дата загрузки:** {date_str}",
+            f" **Количество фрагментов:** {chunk_count}",
         ]
         if industry:
-            info_lines.append(f"🏭 **Отрасль:** {EnhancedFormatter._escape_markdown(industry)}")
+            info_lines.append(f" **Отрасль:** {EnhancedFormatter._escape_markdown(industry)}")
         if doc_subtype:
-            info_lines.append(f"📋 **Подтип:** {EnhancedFormatter._escape_markdown(doc_subtype)}")
+            info_lines.append(f" **Подтип:** {EnhancedFormatter._escape_markdown(doc_subtype)}")
         return "\n".join(info_lines)
 
     @staticmethod
     def format_statistics_data(stats_data: Dict) -> str:
         """Централизованно форматирует все виды статистических данных."""
         if not stats_data or "error" in stats_data:
-            return f"❌ Ошибка получения статистики: {stats_data.get('error', 'Неизвестная ошибка')}"
+            return f" Ошибка получения статистики: {stats_data.get('error', 'Неизвестная ошибка')}"
 
         stats_type = stats_data.get("type")
         data = stats_data.get("data", {})
@@ -165,24 +165,24 @@ class EnhancedFormatter:
                 return formatter(data, stats_data.get("query", ""))
             return formatter(data)
         
-        return "📊 Неизвестный тип статистики."
+        return " Неизвестный тип статистики."
 
     @staticmethod
     def _format_general_statistics(data: Dict) -> str:
         """Форматирует общую статистику."""
-        text = "📊 **Общая статистика по документам**\n\n"
-        text += f"📄 **Всего документов:** {data.get('total_documents', 0)}\n"
-        text += f"💾 **Общий размер:** {format_file_size(data.get('total_size', 0))}\n"
-        text += f"📏 **Средний размер:** {format_file_size(int(data.get('avg_size', 0)))}\n"
-        text += f"🧩 **Всего фрагментов (чанков):** {data.get('total_chunks', 0)}\n"
+        text = " **Общая статистика по документам**\n\n"
+        text += f" **Всего документов:** {data.get('total_documents', 0)}\n"
+        text += f" **Общий размер:** {format_file_size(data.get('total_size', 0))}\n"
+        text += f" **Средний размер:** {format_file_size(int(data.get('avg_size', 0)))}\n"
+        text += f" **Всего фрагментов (чанков):** {data.get('total_chunks', 0)}\n"
         if data.get("latest_upload"):
-            text += f"📅 **Последняя загрузка:** {format_date(data['latest_upload'])}\n"
+            text += f" **Последняя загрузка:** {format_date(data['latest_upload'])}\n"
         return text
 
     @staticmethod
     def _format_type_statistics(data: List[Dict]) -> str:
         """Форматирует статистику по типам документов."""
-        text = "📋 **Статистика по типам документов**\n\n"
+        text = " **Статистика по типам документов**\n\n"
         if not data:
             return text + "Нет данных по типам."
         
@@ -190,14 +190,14 @@ class EnhancedFormatter:
             doc_type = item.get("document_type", "Неизвестный")
             count = item.get("count", 0)
             total_size = format_file_size(item.get("total_size", 0))
-            type_emoji = {"regulatory": "📋", "legal": "⚖️", "general": "📄"}.get(doc_type, "📄")
+            type_emoji = {"regulatory": "", "legal": "", "general": ""}.get(doc_type, "")
             text += f"{type_emoji} **{doc_type.capitalize()}:** {count} док. ({total_size})\n"
         return text
 
     @staticmethod
     def _format_date_statistics(data: List[Dict]) -> str:
         """Форматирует статистику по датам загрузки."""
-        text = "📅 **Статистика загрузок по месяцам**\n\n"
+        text = " **Статистика загрузок по месяцам**\n\n"
         if not data:
             return text + "Нет данных по датам."
 
@@ -215,19 +215,19 @@ class EnhancedFormatter:
     @staticmethod
     def _format_users_statistics(data: Dict) -> str:
         """Форматирует статистику по пользователям."""
-        text = "👥 **Статистика по пользователям**\n\n"
+        text = " **Статистика по пользователям**\n\n"
         if data.get("error"):
              return text + f"_{data['error']}_"
         
-        text += f"👤 **Всего пользователей:** {data.get('total_users', 'N/A')}\n"
-        text += f"🟢 **Активных сегодня:** {data.get('active_today', 'N/A')}\n"
-        text += f"🔵 **Активных за неделю:** {data.get('active_week', 'N/A')}\n"
+        text += f" **Всего пользователей:** {data.get('total_users', 'N/A')}\n"
+        text += f" **Активных сегодня:** {data.get('active_today', 'N/A')}\n"
+        text += f" **Активных за неделю:** {data.get('active_week', 'N/A')}\n"
         return text
 
     @staticmethod
     def _format_custom_statistics(data: List, query: str) -> str:
         """Форматирует пользовательскую статистику."""
-        text = "📊 **Результаты пользовательского запроса**\n\n"
+        text = " **Результаты пользовательского запроса**\n\n"
         if query:
             text += f"**Запрос:** `{query}`\n\n"
         if not data:
@@ -290,7 +290,7 @@ class EnhancedFormatter:
         formatted_text = re.sub(r'\n\n+', '\n\n', formatted_text)
         
         # Улучшаем форматирование источников
-        formatted_text = re.sub(r'📚 Источники?:\s*\n', '\n📚 <b>Источники:</b>\n', formatted_text)
+        formatted_text = re.sub(r' Источники?:\s*\n', '\n <b>Источники:</b>\n', formatted_text)
         
         # Экранируем HTML символы
         formatted_text = formatted_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
@@ -320,11 +320,11 @@ class EnhancedFormatter:
             return [text]
         
         # Разделяем по логическим блокам (источники отдельно)
-        sources_match = re.search(r'\n📚\s*\*?Источники?\*?:\s*\n(.+)', text, re.DOTALL | re.IGNORECASE)
+        sources_match = re.search(r'\n\s*\*?Источники?\*?:\s*\n(.+)', text, re.DOTALL | re.IGNORECASE)
         
         if sources_match:
             main_text = text[:sources_match.start()].strip()
-            sources_text = f"📚 *Источники:*\n{sources_match.group(1).strip()}"
+            sources_text = f" *Источники:*\n{sources_match.group(1).strip()}"
             
             # Разбиваем основной текст
             main_parts = EnhancedFormatter._split_text_by_length(main_text, max_length)

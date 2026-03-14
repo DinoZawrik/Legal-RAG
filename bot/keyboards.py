@@ -22,27 +22,27 @@ DOC_TYPE_PREFIX = "doc_type"
 
 # --- Тексты для кнопок (постоянные клавиатуры) ---
 class ReplyButtons:
-    SMART_SEARCH = "🔍 Умный поиск"
-    ALL_DOCS = "📚 Все документы"
-    REGULATORY = "📋 Регуляторные"
-    STATS = "📊 Статистика"
-    UPLOAD = "📁 Загрузить"
-    SETTINGS = "⚙️ Настройки"
-    HELP = "❓ Помощь"
-    CLEAR_CHAT = "🗑️ Очистить чат"
-    CANCEL_UPLOAD = "❌ Отменить загрузку"
-    MY_DOCS = "📄 Мои документы"
-    MAIN_MENU = "🏠 Главное меню"
-    VECTOR_SEARCH = "💡 Векторный поиск"
-    REGULATORY_SEARCH = "⚖️ Регуляторный поиск"
-    SQL_QUERY = "🗃️ SQL запрос"
-    SEARCH_SETTINGS = "⚙️ Настройки поиска"
-    BY_INDUSTRIES = "🏭 По отраслям"
-    BY_DOC_TYPE = "📄 По типу документа"
-    SEARCH_BY_CONTENT = "🔍 Поиск по содержанию"
-    STATS_BY_INDUSTRIES = "📈 Статистика по отраслям"
-    UPLOAD_DOCUMENT = "📥 Загрузить документ"
-    REQUEST_PERMISSION = "🔑 Запросить права"
+    SMART_SEARCH = " Умный поиск"
+    ALL_DOCS = " Все документы"
+    REGULATORY = " Регуляторные"
+    STATS = " Статистика"
+    UPLOAD = " Загрузить"
+    SETTINGS = " Настройки"
+    HELP = " Помощь"
+    CLEAR_CHAT = " Очистить чат"
+    CANCEL_UPLOAD = " Отменить загрузку"
+    MY_DOCS = " Мои документы"
+    MAIN_MENU = " Главное меню"
+    VECTOR_SEARCH = " Векторный поиск"
+    REGULATORY_SEARCH = " Регуляторный поиск"
+    SQL_QUERY = " SQL запрос"
+    SEARCH_SETTINGS = " Настройки поиска"
+    BY_INDUSTRIES = " По отраслям"
+    BY_DOC_TYPE = " По типу документа"
+    SEARCH_BY_CONTENT = " Поиск по содержанию"
+    STATS_BY_INDUSTRIES = " Статистика по отраслям"
+    UPLOAD_DOCUMENT = " Загрузить документ"
+    REQUEST_PERMISSION = " Запросить права"
 
 
 # --- Фабрика клавиатур ---
@@ -136,8 +136,8 @@ def create_document_management_keyboard():
     """Клавиатура для управления документами."""
     inline_keyboard = [
         [
-            InlineKeyboardButton(text="📁 Выбрать документы", callback_data=f"{DOC_MANAGE_PREFIX}:select"),
-            InlineKeyboardButton(text="🗑️ Очистить чат", callback_data=f"{DOC_MANAGE_PREFIX}:clear"),
+            InlineKeyboardButton(text=" Выбрать документы", callback_data=f"{DOC_MANAGE_PREFIX}:select"),
+            InlineKeyboardButton(text=" Очистить чат", callback_data=f"{DOC_MANAGE_PREFIX}:clear"),
         ],
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
@@ -147,8 +147,8 @@ def create_document_management_keyboard():
 def create_clear_chat_confirmation_keyboard():
     """Клавиатура подтверждения очистки чата."""
     inline_keyboard = [
-        [InlineKeyboardButton(text="❌ Да, очистить", callback_data=f"{DOC_MANAGE_PREFIX}:confirm_clear")],
-        [InlineKeyboardButton(text="✅ Нет, отменить", callback_data=f"{DOC_MANAGE_PREFIX}:cancel_clear")],
+        [InlineKeyboardButton(text=" Да, очистить", callback_data=f"{DOC_MANAGE_PREFIX}:confirm_clear")],
+        [InlineKeyboardButton(text=" Нет, отменить", callback_data=f"{DOC_MANAGE_PREFIX}:cancel_clear")],
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
     return _add_main_menu_button(keyboard)
@@ -161,12 +161,12 @@ def create_pagination_keyboard(current_page, total_pages, prefix=PAGINATION_PREF
 
     buttons = []
     if current_page > 1:
-        buttons.append(InlineKeyboardButton(text="⬅️", callback_data=f"{prefix}:{current_page-1}"))
+        buttons.append(InlineKeyboardButton(text="", callback_data=f"{prefix}:{current_page-1}"))
 
     buttons.append(InlineKeyboardButton(text=f"{current_page}/{total_pages}", callback_data="current_page"))
 
     if current_page < total_pages:
-        buttons.append(InlineKeyboardButton(text="➡️", callback_data=f"{prefix}:{current_page+1}"))
+        buttons.append(InlineKeyboardButton(text="", callback_data=f"{prefix}:{current_page+1}"))
 
     return InlineKeyboardMarkup(inline_keyboard=[buttons])
 
@@ -177,17 +177,17 @@ def create_selection_keyboard(
     """Универсальная клавиатура для выбора элементов."""
     inline_keyboard = []
     for item_id, item_name in items.items():
-        emoji = "✅" if item_id in selected_items else "⭕"
+        emoji = "" if item_id in selected_items else ""
         inline_keyboard.append(
             [InlineKeyboardButton(text=f"{emoji} {item_name}", callback_data=f"{prefix}:toggle:{item_id}")]
         )
 
     control_buttons = [
-        InlineKeyboardButton(text="✅ Выбрать все", callback_data=select_all_callback),
-        InlineKeyboardButton(text="❌ Очистить", callback_data=clear_all_callback),
+        InlineKeyboardButton(text=" Выбрать все", callback_data=select_all_callback),
+        InlineKeyboardButton(text=" Очистить", callback_data=clear_all_callback),
     ]
     inline_keyboard.append(control_buttons)
-    inline_keyboard.append([InlineKeyboardButton(text="✔️ Готово", callback_data=done_callback)])
+    inline_keyboard.append([InlineKeyboardButton(text=" Готово", callback_data=done_callback)])
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
     return _add_main_menu_button(keyboard)
@@ -227,15 +227,15 @@ def create_regulatory_document_type_keyboard():
         inline_keyboard.append(
             [
                 InlineKeyboardButton(
-                    text=f"📄 {doc_type.capitalize()}",
+                    text=f" {doc_type.capitalize()}",
                     callback_data=f"{REG_DOC_TYPE_PREFIX}:{doc_type}",
                 )
             ]
         )
     inline_keyboard.append(
         [
-            InlineKeyboardButton(text="🔍 Все типы", callback_data=f"{REG_DOC_TYPE_PREFIX}:all"),
-            InlineKeyboardButton(text="❌ Отмена", callback_data=f"{REG_DOC_TYPE_PREFIX}:cancel"),
+            InlineKeyboardButton(text=" Все типы", callback_data=f"{REG_DOC_TYPE_PREFIX}:all"),
+            InlineKeyboardButton(text=" Отмена", callback_data=f"{REG_DOC_TYPE_PREFIX}:cancel"),
         ]
     )
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
@@ -245,8 +245,8 @@ def create_regulatory_document_type_keyboard():
 def create_file_upload_keyboard():
     """Создает клавиатуру для загрузки файлов."""
     inline_keyboard = [
-        [InlineKeyboardButton(text="📎 Загрузить текстовый файл", callback_data=f"{FILE_UPLOAD_PREFIX}:text_file")],
-        [InlineKeyboardButton(text="❌ Отмена", callback_data=f"{FILE_UPLOAD_PREFIX}:cancel")],
+        [InlineKeyboardButton(text=" Загрузить текстовый файл", callback_data=f"{FILE_UPLOAD_PREFIX}:text_file")],
+        [InlineKeyboardButton(text=" Отмена", callback_data=f"{FILE_UPLOAD_PREFIX}:cancel")],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
@@ -255,12 +255,12 @@ def create_database_stats_keyboard():
     """Создает клавиатуру для статистики базы данных."""
     inline_keyboard = [
         [
-            InlineKeyboardButton(text="📊 Обновить статистику", callback_data=f"{DATABASE_PREFIX}:refresh"),
-            InlineKeyboardButton(text="📈 Детальная статистика", callback_data=f"{DATABASE_PREFIX}:detailed"),
+            InlineKeyboardButton(text=" Обновить статистику", callback_data=f"{DATABASE_PREFIX}:refresh"),
+            InlineKeyboardButton(text=" Детальная статистика", callback_data=f"{DATABASE_PREFIX}:detailed"),
         ],
         [
-            InlineKeyboardButton(text="🏭 По отраслям", callback_data=f"{DATABASE_PREFIX}:by_industry"),
-            InlineKeyboardButton(text="📄 По типам документов", callback_data=f"{DATABASE_PREFIX}:by_type"),
+            InlineKeyboardButton(text=" По отраслям", callback_data=f"{DATABASE_PREFIX}:by_industry"),
+            InlineKeyboardButton(text=" По типам документов", callback_data=f"{DATABASE_PREFIX}:by_type"),
         ],
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)

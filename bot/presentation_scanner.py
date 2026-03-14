@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🎯 ИНТЕГРИРОВАННЫЙ СКАНЕР ПРЕЗЕНТАЦИЙ
+ИНТЕГРИРОВАННЫЙ СКАНЕР ПРЕЗЕНТАЦИЙ
 Интеграция Universal Contextual Extraction v2.0 в основную систему
 """
 
@@ -51,14 +51,14 @@ class PresentationScanner:
                 data.add_field('document_type', 'presentation')
                 data.add_field('is_presentation', 'true')
                 data.add_field('presentation_supplement', 'true')
-                data.add_field('contextual_extraction', 'true')  # Включаем контекстное извлечение
-                data.add_field('force_reprocess', 'true')  # Принудительная переобработка
+                data.add_field('contextual_extraction', 'true') # Включаем контекстное извлечение
+                data.add_field('force_reprocess', 'true') # Принудительная переобработка
                 
                 # Отправляем запрос на обработку
                 async with session.post(
                     f"{self.api_gateway_url}/api/upload",
                     data=data,
-                    timeout=aiohttp.ClientTimeout(total=int(os.getenv('PRESENTATION_PROCESSING_TIMEOUT', '3600')))  # Увеличен до 1 часа
+                    timeout=aiohttp.ClientTimeout(total=int(os.getenv('PRESENTATION_PROCESSING_TIMEOUT', '3600'))) # Увеличен до 1 часа
                 ) as response:
                     
                     if response.status != 200:
@@ -218,7 +218,7 @@ class PresentationScanner:
 Результаты сканирования:
 - Страниц обработано: {scan_result['successful_pages']}/{scan_result['total_pages']} ({scan_result['success_rate']:.1f}%)
 - Найдено элементов: {scan_result['total_elements']}
-- Построено связей: {scan_result['total_relationships']}  
+- Построено связей: {scan_result['total_relationships']} 
 - Извлечено выводов: {scan_result['total_insights']}
 - Индексированного текста: {scan_result['total_text_length']} символов
 

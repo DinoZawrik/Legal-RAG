@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 Telegram Bot States
+Telegram Bot States
 FSM состояния для телеграм-бота.
 
 Содержит определения состояний для конечного автомата (FSM)

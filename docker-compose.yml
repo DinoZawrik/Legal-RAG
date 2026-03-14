@@ -17,9 +17,13 @@ services:
       POSTGRES_USER: legal_rag_user
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_env}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U legal_rag_user -d legal_rag_db"]
       interval: 30s
@@ -35,9 +39,13 @@ services:
     container_name: legal_rag_redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
@@ -53,12 +61,16 @@ services:
     container_name: legal_rag_chromadb
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - chroma_data:/chroma/chroma
+    deploy:
+      resources:
+        limits:
+          memory: 2G
     environment:
       IS_PERSISTENT: "TRUE"
-      ANONYMIZED_TELEMETRY: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
     healthcheck:
       test: ["CMD", "bash", "-c", "echo -e 'GET /api/v2/heartbeat HTTP/1.1\r\nHost: localhost:8000\r\nConnection: close\r\n\r\n' | timeout 5 bash -c 'exec 3<>/dev/tcp/localhost/8000; cat >&3; cat <&3' | grep -q 'nanosecond heartbeat'"]
       interval: 30s

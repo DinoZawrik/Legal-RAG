@@ -53,7 +53,7 @@ def get_structured_legal_user_prompt_template():
 JSON ответ:
 {{
   "reasoning": "Пользователь ищет правовую норму о финансовом участии концедента. В предоставленных фрагментах есть статья 10.1 из 115-ФЗ, которая напрямую регулирует этот вопрос. Формулирую ответ на основе этого фрагмента.",
-  "answer": "Статья 10.1 Федерального закона № 115-ФЗ регулирует финансовое участие концедента в создании объекта концессионного соглашения.",
+  "answer": "Статья 10.1 Федерального закона 115-ФЗ регулирует финансовое участие концедента в создании объекта концессионного соглашения.",
   "citations": [
     {{
       "law": "115-ФЗ",
@@ -120,9 +120,10 @@ class AdvancedStructuredPromptEngine:
         formatted_context = get_enhanced_context_formatter_structured(chunks)
 
         # Создаем пользовательский промпт
+        from core.prompt_sanitizer import sanitize_query, sanitize_context
         user_prompt = self.user_template.format(
-            context=formatted_context,
-            query=query
+            context=sanitize_context(formatted_context),
+            query=sanitize_query(query)
         )
 
         return self.system_prompt, user_prompt
@@ -184,4 +185,4 @@ if __name__ == '__main__':
     print("=== ТЕСТ ADVANCED STRUCTURED PROMPT ENGINE ===")
     print(f"System prompt length: {len(system_prompt)}")
     print(f"User prompt length: {len(user_prompt)}")
-    print("✓ Advanced Structured Prompt Engine готов к использованию")
+    print(" Advanced Structured Prompt Engine готов к использованию")

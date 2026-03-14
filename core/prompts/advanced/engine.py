@@ -35,7 +35,7 @@ class AdvancedPromptEngine:
         self, query: str, chunks: List[str], context: Optional[PromptContext] = None
     ) -> Tuple[str, str]:
         query_type = context.query_type if context and context.query_type else self.detect_query_type(query)
-        logger.info("🎯 Определен тип запроса: %s", query_type.value)
+        logger.info(" Определен тип запроса: %s", query_type.value)
 
         template = self.prompt_templates.get(query_type.value) or self.prompt_templates["casual_chat"]
         system_prompt = adapt_system_prompt(template.system_prompt, chunks, context, self.adaptation_config)
@@ -65,7 +65,7 @@ class AdvancedPromptEngine:
 
     def optimize_prompts(self) -> Dict[str, Any]:
         report = optimize_prompts(self.performance_history, self.prompt_templates)
-        logger.info("📊 Анализ промптов завершен: %d рекомендаций", len(report["optimizations"]))
+        logger.info(" Анализ промптов завершен: %d рекомендаций", len(report["optimizations"]))
         return report
 
     def get_prompt_stats(self) -> Dict[str, Any]:

@@ -65,7 +65,7 @@ def format_robust_context(chunks):
 
         formatted_context += f"""
 ДОКУМЕНТ {i}:
-Источник: Федеральный закон № {law_number}
+Источник: Федеральный закон {law_number}
 Статья: {article}
 {f"Глава: {chapter}" if chapter else ""}
 Текст: {text.strip()}
@@ -88,9 +88,10 @@ class RobustLegalPromptEngine:
         formatted_context = format_robust_context(chunks)
 
         # Создаем промпт
+        from core.prompt_sanitizer import sanitize_query, sanitize_context
         user_prompt = self.user_template.format(
-            context=formatted_context,
-            query=query
+            context=sanitize_context(formatted_context),
+            query=sanitize_query(query)
         )
 
         return self.system_prompt, user_prompt
@@ -172,9 +173,9 @@ if __name__ == '__main__':
     print(f"User prompt length: {len(user_prompt)}")
 
     # Тест анализа качества
-    test_response = "Статья 10.1 Федерального закона № 115-ФЗ регулирует финансовое участие концедента."
+    test_response = "Статья 10.1 Федерального закона 115-ФЗ регулирует финансовое участие концедента."
     quality = engine.analyze_response_quality(test_response, "test query")
     print(f"Quality score: {quality['score']:.2f}")
     print(f"Issues: {quality['issues']}")
 
-    print("✓ Robust Legal Prompt Engine готов к использованию")
+    print(" Robust Legal Prompt Engine готов к использованию")

@@ -34,34 +34,34 @@
 
 ```
                     +------------------+
-                    |   API Gateway    |
-                    |   (FastAPI)      |
+                    | API Gateway |
+                    | (FastAPI) |
                     +--------+---------+
                              |
         +--------------------+--------------------+
-        |                    |                    |
-+-------v-------+    +-------v-------+    +-------v-------+
-| Search Service|    |Inference Svc  |    | Storage Svc   |
-| (Hybrid BM25) |    | (Gemini/GPT)  |    | (Multi-DB)    |
-+-------+-------+    +-------+-------+    +-------+-------+
-        |                    |                    |
+        | | |
++-------v-------+ +-------v-------+ +-------v-------+
+| Search Service| |Inference Svc | | Storage Svc |
+| (Hybrid BM25) | | (Gemini/GPT) | | (Multi-DB) |
++-------+-------+ +-------+-------+ +-------+-------+
+        | | |
         +--------------------+--------------------+
                              |
               +--------------+--------------+
-              |              |              |
-        +-----v----+  +------v-----+  +-----v----+
-        | ChromaDB |  | PostgreSQL |  |  Neo4j   |
-        | (Vector) |  | (Metadata) |  | (Graph)  |
-        +----------+  +------------+  +----------+
+              | | |
+        +-----v----+ +------v-----+ +-----v----+
+        | ChromaDB | | PostgreSQL | | Neo4j |
+        | (Vector) | | (Metadata) | | (Graph) |
+        +----------+ +------------+ +----------+
 ```
 
 ### LangGraph Workflow
 
 ```
 retrieve_initial -> grade_documents -> repair_retrieve -> generate_answer -> critique_answer
-       |                  |                  |                  |                  |
-   Hybrid BM25      LLM Quality       Query Reform        Gemini Flash      Self-Check
-   + Graph Lookup    Assessment       + Web Search        Generation        Validation
+       | | | | |
+   Hybrid BM25 LLM Quality Query Reform Gemini Flash Self-Check
+   + Graph Lookup Assessment + Web Search Generation Validation
 ```
 
 ## Tech Stack
@@ -92,8 +92,8 @@ cd legal-rag-system
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or: venv\Scripts\activate  # Windows
+source venv/bin/activate # Linux/Mac
+# or: venv\Scripts\activate # Windows
 
 # Install dependencies
 pip install -r requirements.txt
@@ -104,8 +104,8 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 # Edit .env with your API keys:
-#   GEMINI_API_KEY=your_key_here
-#   TELEGRAM_BOT_TOKEN=your_token_here
+# GEMINI_API_KEY=your_key_here
+# TELEGRAM_BOT_TOKEN=your_token_here
 ```
 
 ### 3. Start Infrastructure
@@ -153,20 +153,20 @@ curl -X POST http://localhost:8080/api/query \
 
 ```
 legal-rag-system/
-├── core/                    # Core modules
-│   ├── hybrid_bm25_search.py    # Primary search engine
-│   ├── langgraph_rag_workflow.py # Agentic RAG workflow
-│   ├── reranker.py              # BGE Reranker
-│   └── settings.py              # Configuration
-├── services/                # Microservices
-│   ├── gateway/                 # API Gateway
-│   ├── search_service_core.py   # Search orchestration
-│   └── inference_service.py     # LLM inference
-├── bot/                     # Telegram bot
-├── admin_panel/             # Streamlit admin UI
-├── tools/                   # RAG tools (graph, web)
-├── docker-compose.yml       # Infrastructure
-└── start_microservices.py   # Entry point
+core/ # Core modules
+hybrid_bm25_search.py # Primary search engine
+langgraph_rag_workflow.py # Agentic RAG workflow
+reranker.py # BGE Reranker
+settings.py # Configuration
+services/ # Microservices
+gateway/ # API Gateway
+search_service_core.py # Search orchestration
+inference_service.py # LLM inference
+bot/ # Telegram bot
+admin_panel/ # Streamlit admin UI
+tools/ # RAG tools (graph, web)
+docker-compose.yml # Infrastructure
+start_microservices.py # Entry point
 ```
 
 ## Key Innovations

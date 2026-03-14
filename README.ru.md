@@ -18,7 +18,7 @@
 - **Гибридный BM25 + Семантический поиск** — комбинация 60/40 для оптимального поиска по юридической терминологии
 - **LangGraph Agentic Workflow** — 5-узловая CRAG-архитектура с самокритикой и автоматическим fallback
 - **Neo4j Graph RAG** — 95+ юридических определений со связями для расширенного контекста
-- **Многоуровневый Fallback** — Vector DB → Graph DB → Web Search автоматический переход
+- **Многоуровневый Fallback** — Vector DB Graph DB Web Search автоматический переход
 - **BGE Reranker v2-m3** — кросс-энкодер ререйнкинг для повышения точности
 - **Микросервисная архитектура** — 5 независимых сервисов с мониторингом и graceful shutdown
 - **Telegram бот + Админ-панель** — полноценный UI с JWT авторизацией
@@ -27,34 +27,34 @@
 
 ```
                     +------------------+
-                    |   API Gateway    |
-                    |   (FastAPI)      |
+                    | API Gateway |
+                    | (FastAPI) |
                     +--------+---------+
                              |
         +--------------------+--------------------+
-        |                    |                    |
-+-------v-------+    +-------v-------+    +-------v-------+
-| Search Service|    |Inference Svc  |    | Storage Svc   |
-| (Hybrid BM25) |    | (Gemini/GPT)  |    | (Multi-DB)    |
-+-------+-------+    +-------+-------+    +-------+-------+
-        |                    |                    |
+        | | |
++-------v-------+ +-------v-------+ +-------v-------+
+| Search Service| |Inference Svc | | Storage Svc |
+| (Hybrid BM25) | | (Gemini/GPT) | | (Multi-DB) |
++-------+-------+ +-------+-------+ +-------+-------+
+        | | |
         +--------------------+--------------------+
                              |
               +--------------+--------------+
-              |              |              |
-        +-----v----+  +------v-----+  +-----v----+
-        | ChromaDB |  | PostgreSQL |  |  Neo4j   |
-        | (Vector) |  | (Metadata) |  | (Graph)  |
-        +----------+  +------------+  +----------+
+              | | |
+        +-----v----+ +------v-----+ +-----v----+
+        | ChromaDB | | PostgreSQL | | Neo4j |
+        | (Vector) | | (Metadata) | | (Graph) |
+        +----------+ +------------+ +----------+
 ```
 
 ### LangGraph Workflow
 
 ```
 retrieve_initial -> grade_documents -> repair_retrieve -> generate_answer -> critique_answer
-       |                  |                  |                  |                  |
-   Гибридный         LLM Оценка        Реформуляция       Gemini Flash      Само-проверка
-   BM25 + Graph      качества          + Web Search       Генерация         Валидация
+       | | | | |
+   Гибридный LLM Оценка Реформуляция Gemini Flash Само-проверка
+   BM25 + Graph качества + Web Search Генерация Валидация
 ```
 
 ## Технологический стек
@@ -85,8 +85,8 @@ cd LegalRAG
 
 # Создание виртуального окружения
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# или: venv\Scripts\activate  # Windows
+source venv/bin/activate # Linux/Mac
+# или: venv\Scripts\activate # Windows
 
 # Установка зависимостей
 pip install -r requirements.txt
@@ -97,8 +97,8 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 # Отредактируйте .env с вашими ключами:
-#   GEMINI_API_KEY=your_key_here
-#   TELEGRAM_BOT_TOKEN=your_token_here
+# GEMINI_API_KEY=your_key_here
+# TELEGRAM_BOT_TOKEN=your_token_here
 ```
 
 ### 3. Запуск инфраструктуры
@@ -146,20 +146,20 @@ curl -X POST http://localhost:8080/api/query \
 
 ```
 LegalRAG/
-├── core/                    # Основные модули
-│   ├── hybrid_bm25_search.py    # Основной поисковый движок
-│   ├── langgraph_rag_workflow.py # Агентный RAG workflow
-│   ├── reranker.py              # BGE Reranker
-│   └── settings.py              # Конфигурация
-├── services/                # Микросервисы
-│   ├── gateway/                 # API Gateway
-│   ├── search_service_core.py   # Оркестрация поиска
-│   └── inference_service.py     # LLM инференс
-├── bot/                     # Telegram бот
-├── admin_panel/             # Streamlit админ-панель
-├── tools/                   # RAG инструменты (graph, web)
-├── docker-compose.yml       # Инфраструктура
-└── scripts/                 # Скрипты запуска
+core/ # Основные модули
+hybrid_bm25_search.py # Основной поисковый движок
+langgraph_rag_workflow.py # Агентный RAG workflow
+reranker.py # BGE Reranker
+settings.py # Конфигурация
+services/ # Микросервисы
+gateway/ # API Gateway
+search_service_core.py # Оркестрация поиска
+inference_service.py # LLM инференс
+bot/ # Telegram бот
+admin_panel/ # Streamlit админ-панель
+tools/ # RAG инструменты (graph, web)
+docker-compose.yml # Инфраструктура
+scripts/ # Скрипты запуска
 ```
 
 ## Ключевые инновации

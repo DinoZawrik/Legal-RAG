@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-🎯 Confidence Evaluator для RAG системы
+Confidence Evaluator для RAG системы
 Оценивает качество найденных результатов перед генерацией ответа
 
 Ключевая идея:
 - Не просто проверяем НАЛИЧИЕ результатов
 - Проверяем КАЧЕСТВО - содержат ли они ответ на вопрос
-- Если качество низкое → агент ищет в других источниках
+- Если качество низкое агент ищет в других источниках
 """
 
 import logging
@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ConfidenceResult:
     """Результат оценки уверенности"""
-    confidence: float  # 0.0 - 1.0
-    reasoning: str  # Объяснение оценки
-    missing_info: Optional[str] = None  # Что не хватает для полного ответа
-    answer_found: bool = False  # Найден ли прямой ответ
+    confidence: float # 0.0 - 1.0
+    reasoning: str # Объяснение оценки
+    missing_info: Optional[str] = None # Что не хватает для полного ответа
+    answer_found: bool = False # Найден ли прямой ответ
 
 
 class ConfidenceEvaluator:
@@ -46,15 +46,15 @@ class ConfidenceEvaluator:
         key_manager = get_key_manager()
         self.api_key = api_key or key_manager.get_next_key()
 
-        # LLM для оценки (используем Flash Lite - 15 RPM вместо 10 RPM)
+        # LLM для оценки (Gemini 3.1 Flash Lite — быстрая лёгкая модель)
         # Для критической оценки не нужна сложная модель
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash-lite-preview-09-2025",
+            model="gemini-3.1-flash-lite-preview",
             google_api_key=self.api_key,
-            temperature=0.1  # Низкая температура для консистентности
+            temperature=0.1 # Низкая температура для консистентности
         )
 
-        logger.info("🎯 Confidence Evaluator initialized (using Flash Lite for higher throughput)")
+        logger.info(" Confidence Evaluator initialized (using Gemini 3.1 Flash Lite)")
 
     async def evaluate_definition_quality(
         self,
@@ -89,7 +89,7 @@ class ConfidenceEvaluator:
         for i, r in enumerate(top_results, 1):
             law = r.get('metadata', {}).get('law_number', r.get('law', 'N/A'))
             article = r.get('metadata', {}).get('article_number', r.get('article', 'N/A'))
-            text = r.get('text', r.get('definition', ''))[:500]  # Первые 500 символов
+            text = r.get('text', r.get('definition', ''))[:500] # Первые 500 символов
 
             results_text.append(f"[{i}] Закон: {law}, Статья: {article}")
             results_text.append(f"Текст: {text}\n")
@@ -129,7 +129,7 @@ class ConfidenceEvaluator:
 Только JSON, без дополнительного текста:"""
 
         try:
-            # 🔄 Ротация ключа перед вызовом (пер-запрос)
+            # Ротация ключа перед вызовом (пер-запрос)
             key_manager = get_key_manager()
             rotated_key = key_manager.get_next_key()
             self.llm = ChatGoogleGenerativeAI(
@@ -162,12 +162,12 @@ class ConfidenceEvaluator:
                 answer_found=result.get('answer_found', False)
             )
 
-            logger.info(f"📊 Definition quality: confidence={confidence_result.confidence:.2f}, found={confidence_result.answer_found}")
+            logger.info(f" Definition quality: confidence={confidence_result.confidence:.2f}, found={confidence_result.answer_found}")
 
             return confidence_result
 
         except Exception as e:
-            logger.error(f"❌ Error evaluating definition quality: {e}")
+            logger.error(f" Error evaluating definition quality: {e}")
             # Fallback: простая эвристика
             return self._fallback_definition_check(term, results)
 
@@ -230,7 +230,7 @@ JSON ответ:
 }}"""
 
         try:
-            # 🔄 Ротация ключа перед вызовом (пер-запрос)
+            # Ротация ключа перед вызовом (пер-запрос)
             try:
                 key_manager = get_key_manager()
                 rotated_key = key_manager.get_next_key()
@@ -262,9 +262,9 @@ JSON ответ:
             )
 
         except Exception as e:
-            logger.error(f"❌ Error evaluating answer completeness: {e}")
+            logger.error(f" Error evaluating answer completeness: {e}")
             return ConfidenceResult(
-                confidence=0.5,  # Средняя уверенность при ошибке
+                confidence=0.5, # Средняя уверенность при ошибке
                 reasoning="Ошибка оценки, используем найденные результаты",
                 answer_found=len(results) >= 3
             )

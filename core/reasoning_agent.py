@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🧠 Reasoning Agent для юридических запросов
+Reasoning Agent для юридических запросов
 Использует Gemini 2.5 Flash с thinking mode для анализа запросов
 
 Функциональность:
@@ -28,24 +28,24 @@ logger = logging.getLogger(__name__)
 
 class QueryType(Enum):
     """Типы юридических запросов"""
-    DEFINITION = "definition"  # "Что такое X?"
-    PROCEDURE = "procedure"  # "Как происходит X?"
-    CONDITION = "condition"  # "При каких условиях X?"
-    CONSEQUENCE = "consequence"  # "Какие последствия X?"
-    REQUIREMENT = "requirement"  # "Какие требования к X?"
-    RIGHT = "right"  # "Кто имеет право на X?"
-    OBLIGATION = "obligation"  # "Какие обязанности X?"
-    COMPARISON = "comparison"  # "В чем разница между X и Y?"
-    GENERAL = "general"  # Общий вопрос
+    DEFINITION = "definition" # "Что такое X?"
+    PROCEDURE = "procedure" # "Как происходит X?"
+    CONDITION = "condition" # "При каких условиях X?"
+    CONSEQUENCE = "consequence" # "Какие последствия X?"
+    REQUIREMENT = "requirement" # "Какие требования к X?"
+    RIGHT = "right" # "Кто имеет право на X?"
+    OBLIGATION = "obligation" # "Какие обязанности X?"
+    COMPARISON = "comparison" # "В чем разница между X и Y?"
+    GENERAL = "general" # Общий вопрос
 
 
 class SearchStrategy(Enum):
     """Стратегии поиска"""
-    DEFINITION_FIRST = "definition_first"  # Сначала ищем в узлах Definition
-    ARTICLE_RANGE = "article_range"  # Поиск в диапазоне статей
-    GRAPH_TRAVERSAL = "graph_traversal"  # Обход графа связей
-    FULL_TEXT = "full_text"  # Полнотекстовый поиск
-    WEB_FALLBACK = "web_fallback"  # Поиск в интернете
+    DEFINITION_FIRST = "definition_first" # Сначала ищем в узлах Definition
+    ARTICLE_RANGE = "article_range" # Поиск в диапазоне статей
+    GRAPH_TRAVERSAL = "graph_traversal" # Обход графа связей
+    FULL_TEXT = "full_text" # Полнотекстовый поиск
+    WEB_FALLBACK = "web_fallback" # Поиск в интернете
 
 
 @dataclass
@@ -54,12 +54,12 @@ class QueryAnalysis:
     query_type: QueryType
     key_terms: List[str]
     search_strategy: SearchStrategy
-    article_range: Optional[tuple] = None  # (min, max) номера статей
-    laws: List[str] = None  # Упоминаемые законы (формат "XXX-ФЗ" и т.п.)
-    need_graph: bool = False  # Нужен ли графовый поиск
-    need_web: bool = False  # Нужен ли веб-поиск
-    confidence: float = 0.0  # Уверенность в анализе
-    reasoning: str = ""  # Объяснение от модели
+    article_range: Optional[tuple] = None # (min, max) номера статей
+    laws: List[str] = None # Упоминаемые законы (формат "XXX-ФЗ" и т.п.)
+    need_graph: bool = False # Нужен ли графовый поиск
+    need_web: bool = False # Нужен ли веб-поиск
+    confidence: float = 0.0 # Уверенность в анализе
+    reasoning: str = "" # Объяснение от модели
 
 
 class ReasoningAgent:
@@ -84,13 +84,13 @@ class ReasoningAgent:
             model=model_name,
             google_api_key=self.api_key,
             temperature=temperature,
-            # 🔥 CRITICAL: Включаем thinking mode для reasoning
+            # CRITICAL: Включаем thinking mode для reasoning
             model_kwargs={
-                "thinking": True  # Gemini 2.5 Flash поддерживает thinking
+                "thinking": True # Gemini 2.5 Flash поддерживает thinking
             }
         )
 
-        logger.info(f"🧠 Reasoning Agent initialized with {model_name} (thinking mode: ON)")
+        logger.info(f" Reasoning Agent initialized with {model_name} (thinking mode: ON)")
 
     async def analyze_query(self, query: str) -> QueryAnalysis:
         """
@@ -164,7 +164,7 @@ class ReasoningAgent:
 """
 
         try:
-            # 🔄 Ротация ключа перед каждым запросом (пер-ревест)
+            # Ротация ключа перед каждым запросом (пер-ревест)
             key_manager = get_key_manager()
             rotated_key = key_manager.get_next_key()
             self.llm = ChatGoogleGenerativeAI(
@@ -214,13 +214,13 @@ class ReasoningAgent:
                 reasoning=result.get("reasoning", "")
             )
 
-            logger.info(f"✅ Query analyzed: type={analysis.query_type.value}, strategy={analysis.search_strategy.value}")
+            logger.info(f" Query analyzed: type={analysis.query_type.value}, strategy={analysis.search_strategy.value}")
             logger.debug(f"Reasoning: {analysis.reasoning}")
 
             return analysis
 
         except Exception as e:
-            logger.error(f"❌ Error analyzing query: {e}")
+            logger.error(f" Error analyzing query: {e}")
             # Fallback: простой анализ без LLM
             return self._fallback_analysis(query)
 
@@ -256,12 +256,12 @@ class ReasoningAgent:
 
         return QueryAnalysis(
             query_type=query_type,
-            key_terms=[],  # Не извлекаем без LLM
+            key_terms=[], # Не извлекаем без LLM
             search_strategy=strategy,
             article_range=article_range,
             laws=laws,
             need_graph=False,
             need_web=False,
-            confidence=0.5,  # Низкая уверенность для fallback
+            confidence=0.5, # Низкая уверенность для fallback
             reasoning="Fallback analysis without LLM"
         )

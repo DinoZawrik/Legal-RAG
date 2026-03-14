@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 Legal Fact Verifier - Multi-layer Verification System
+Legal Fact Verifier - Multi-layer Verification System
 Критическая система верификации ответов для снижения hallucinations с 80% до 25-30%
 
 Исследования 2025:
@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 
 class VerificationSeverity(Enum):
     """Уровень строгости верификации"""
-    HIGH = "высокая"      # 0.8+ required
-    MEDIUM = "средняя"    # 0.6+ required
-    LOW = "низкая"        # 0.4+ required
+    HIGH = "высокая" # 0.8+ required
+    MEDIUM = "средняя" # 0.6+ required
+    LOW = "низкая" # 0.4+ required
 
 
 @dataclass
@@ -59,7 +59,7 @@ class VerificationResult:
     verified_citations: List[CitationVerification]
 
     issues_found: List[str]
-    recommendation: str  # НАДЕЖНЫЙ / ТРЕБУЕТ_УТОЧНЕНИЯ / НЕНАДЕЖНЫЙ
+    recommendation: str # НАДЕЖНЫЙ / ТРЕБУЕТ_УТОЧНЕНИЯ / НЕНАДЕЖНЫЙ
 
     def is_reliable(self, severity: VerificationSeverity = VerificationSeverity.MEDIUM) -> bool:
         """Проверка надежности по уровню строгости"""
@@ -90,7 +90,7 @@ class LegalFactVerifier:
             'article': r'(?:Статья|статья|ст\.)\s+(\d+(?:\.\d+)?)',
             'paragraph': r'(?:пункт|п\.)\s+(\d+)',
             'chapter': r'(?:Глава|глава)\s+([IVXLCDM]+|\d+)',
-            'full_reference': r'(?:согласно|в соответствии с|как указано в)\s+([^\.]+(?:Федеральный закон|кодекс|указ|постановление|ГОСТ)[^\.]*)',
+            'full_reference': r'(?:согласно|в соответствии с|как указано в)\s+([^\.]+(?:Федеральный закон|закон|кодекс|указ|постановление|ГОСТ)[^\.]*)',
         }
 
         # Маркеры неподтвержденных утверждений (red flags)
@@ -120,7 +120,7 @@ class LegalFactVerifier:
         Returns:
             VerificationResult с детальными метриками
         """
-        logger.info(f"[🔍 VERIFICATION] Starting multi-layer verification for answer ({len(answer)} chars)")
+        logger.info(f"[ VERIFICATION] Starting multi-layer verification for answer ({len(answer)} chars)")
 
         issues = []
 
@@ -132,7 +132,7 @@ class LegalFactVerifier:
         if citation_accuracy < 0.7:
             issues.append(f"Низкая точность цитирований: {citation_accuracy:.2f}")
 
-        logger.info(f"[📚 CITATIONS] Found {len(citations)} citations, accuracy: {citation_accuracy:.2f}")
+        logger.info(f"[ CITATIONS] Found {len(citations)} citations, accuracy: {citation_accuracy:.2f}")
 
         # LAYER 2: Извлечение и верификация утверждений
         claims = self._extract_claims(answer)
@@ -142,7 +142,7 @@ class LegalFactVerifier:
         if support_rate < 0.6:
             issues.append(f"Низкая поддержка утверждений: {support_rate:.2f}")
 
-        logger.info(f"[✓ CLAIMS] Found {len(claims)} claims, support rate: {support_rate:.2f}")
+        logger.info(f"[ CLAIMS] Found {len(claims)} claims, support rate: {support_rate:.2f}")
 
         # LAYER 3: Проверка правовой последовательности
         legal_consistency = await self._check_legal_consistency(answer, verified_citations)
@@ -172,7 +172,7 @@ class LegalFactVerifier:
         # Определение recommendation
         recommendation = self._determine_recommendation(overall_confidence, issues)
 
-        logger.info(f"[🎯 RESULT] Overall confidence: {overall_confidence:.2f}, Recommendation: {recommendation}")
+        logger.info(f"[ RESULT] Overall confidence: {overall_confidence:.2f}, Recommendation: {recommendation}")
 
         return VerificationResult(
             overall_confidence=overall_confidence,
@@ -189,13 +189,30 @@ class LegalFactVerifier:
         """Извлечение всех правовых ссылок из ответа"""
         citations = []
 
-        # Поиск полных ссылок
+        # Поиск полных ссылок ("согласно ... закон/кодекс/...")
         for match in re.finditer(self.legal_reference_patterns['full_reference'], answer, re.IGNORECASE):
             citations.append(match.group(1))
 
-        # Поиск упоминаний законов
+        # Поиск упоминаний ФЗ с номером
         for match in re.finditer(self.legal_reference_patterns['federal_law'], answer, re.IGNORECASE):
             citations.append(f"Федеральный закон {match.group(1)}")
+
+        # Поиск упоминаний законов без номера ФЗ ("Закон о защите прав потребителей" и т.д.)
+        for match in re.finditer(r'(?:Закон(?:у|а|ом)?\s+(?:РФ\s+)?(?:о|О)\s+[^,\.]{5,60})', answer):
+            text = match.group(0).strip()
+            if text not in citations:
+                citations.append(text)
+
+        # Поиск кодексов ("Трудовой кодекс", "Гражданский кодекс" и т.д.)
+        for match in re.finditer(r'(?:[А-Я][а-я]+\s+кодекс(?:а|у|ом|е)?(?:\s+РФ)?)', answer):
+            text = match.group(0).strip()
+            if text not in citations:
+                citations.append(text)
+
+        # Если ничего не нашли — ищем хотя бы ссылки на статьи
+        if not citations:
+            for match in re.finditer(self.legal_reference_patterns['article'], answer, re.IGNORECASE):
+                citations.append(f"Статья {match.group(1)}")
 
         return citations
 
@@ -224,34 +241,41 @@ class LegalFactVerifier:
             article_found = False
 
             for source in sources:
-                source_law = source.get('law_number', '')
-                source_article = source.get('article_number', '')
-                source_text = source.get('text', '')
+                # Поддержка обоих форматов: top-level и metadata
+                metadata = source.get('metadata', {})
+                source_law = source.get('law_number', '') or metadata.get('law', '') or metadata.get('law_number', '')
+                source_article = source.get('article_number', '') or metadata.get('article', '') or metadata.get('article_number', '')
+                source_text = source.get('text', source.get('document', ''))
 
-                # Проверка закона
+                # Проверка закона — по номеру ФЗ или по ключевым словам названия
                 if law_number and law_number in source_law:
                     law_found = True
+                elif not law_number and citation.lower():
+                    # Для законов без номера ФЗ — проверяем совпадение ключевых слов
+                    citation_key_words = [w for w in citation.lower().split() if len(w) > 3]
+                    if citation_key_words and any(w in source_law.lower() or w in source_text.lower()[:200] for w in citation_key_words[:3]):
+                        law_found = True
 
                 # Проверка статьи
-                if article_number and article_number in str(source_article):
+                if article_number and (article_number in str(source_article) or f"статья {article_number}" in source_text.lower() or f"ст. {article_number}" in source_text.lower()):
                     article_found = True
 
-                # Проверка текстового совпадения
+                # Проверка текстового совпадения (recall по словам цитирования)
                 citation_lower = citation.lower()
                 source_lower = source_text.lower()
 
-                # Простая similarity через общие слова
                 citation_words = set(citation_lower.split())
                 source_words = set(source_lower.split())
                 if citation_words and source_words:
                     overlap = len(citation_words & source_words)
-                    sim = overlap / max(len(citation_words), len(source_words))
+                    # Используем min — какая доля слов цитирования нашлась в источнике
+                    sim = overlap / min(len(citation_words), len(source_words)) if min(len(citation_words), len(source_words)) > 0 else 0
 
                     if sim > similarity:
                         similarity = sim
                         matching_source = source.get('chunk_id', source.get('id', 'unknown'))
 
-                    if sim > 0.3:  # Порог для "найдено"
+                    if sim > 0.3:
                         found = True
 
             verified.append(CitationVerification(
@@ -311,18 +335,19 @@ class LegalFactVerifier:
             best_evidence = None
 
             for source in sources:
-                source_text = source.get('text', '')
+                source_text = source.get('text', source.get('document', ''))
                 source_lower = source_text.lower()
                 source_words = set(source_lower.split())
 
-                # Рассчитываем overlap
+                # Рассчитываем overlap (recall — доля слов утверждения, найденных в источнике)
                 if claim_words and source_words:
                     overlap = len(claim_words & source_words)
-                    score = overlap / max(len(claim_words), len(source_words))
+                    score = overlap / len(claim_words) if len(claim_words) > 0 else 0
 
                     if score > best_score:
                         best_score = score
-                        best_match = source.get('law_number', 'unknown')
+                        metadata = source.get('metadata', {})
+                        best_match = source.get('law_number', '') or metadata.get('law', '') or metadata.get('law_number', 'unknown')
 
                         # Извлекаем наиболее релевантный фрагмент
                         sentences_in_source = source_text.split('.')
@@ -364,7 +389,7 @@ class LegalFactVerifier:
         if len(laws_mentioned) > 1:
             # Снижаем score если законы из разных областей (эвристика)
             # Проверяем совместимость законов (концессии/ГЧП - совместимы)
-            compatible_laws = {'115-ФЗ', '224-ФЗ'}  # Концессии и ГЧП
+            compatible_laws = {'115-ФЗ', '224-ФЗ'} # Концессии и ГЧП
             if laws_mentioned.issubset(compatible_laws) or len(laws_mentioned & compatible_laws) >= 1:
                 # Это ОК - законы о концессиях/ГЧП совместимы
                 pass
@@ -372,13 +397,13 @@ class LegalFactVerifier:
                 consistency_score *= 0.9
 
         # 2. Проверка логической структуры (наличие IRAC компонентов)
-        has_problem = any(marker in answer.lower() for marker in ['проблема', 'вопрос', 'issue'])
-        has_rule = any(marker in answer.lower() for marker in ['согласно', 'статья', 'закон', 'норма'])
-        has_analysis = any(marker in answer.lower() for marker in ['анализ', 'следовательно', 'таким образом'])
-        has_conclusion = any(marker in answer.lower() for marker in ['вывод', 'заключение', 'итого'])
+        has_problem = any(marker in answer.lower() for marker in ['проблема', 'вопрос', 'issue', 'суть', 'ситуация'])
+        has_rule = any(marker in answer.lower() for marker in ['согласно', 'статья', 'закон', 'норма', 'кодекс', 'предусмотрен', 'установлен', 'регулирует'])
+        has_analysis = any(marker in answer.lower() for marker in ['анализ', 'следовательно', 'таким образом', 'это означает', 'в данном случае', 'позволяет'])
+        has_conclusion = any(marker in answer.lower() for marker in ['вывод', 'заключение', 'итого', 'рекомендуется', 'подводя итог', 'следует'])
 
         irac_score = sum([has_problem, has_rule, has_analysis, has_conclusion]) / 4
-        consistency_score *= (0.7 + 0.3 * irac_score)  # IRAC влияет на 30%
+        consistency_score *= (0.7 + 0.3 * irac_score) # IRAC влияет на 30%
 
         # 3. Проверка на внутренние противоречия (эвристика)
         contradictory_phrases = [
@@ -389,7 +414,7 @@ class LegalFactVerifier:
 
         for phrase1, phrase2 in contradictory_phrases:
             if re.search(phrase1, answer.lower()) and re.search(phrase2, answer.lower()):
-                consistency_score *= 0.8  # Штраф за возможное противоречие
+                consistency_score *= 0.8 # Штраф за возможное противоречие
 
         return max(0.0, min(1.0, consistency_score))
 
@@ -427,16 +452,22 @@ class LegalFactVerifier:
     def _calculate_citation_accuracy(self, verified_citations: List[CitationVerification]) -> float:
         """Расчет точности цитирований"""
         if not verified_citations:
-            return 1.0  # Нет цитирований - не штрафуем
+            return 1.0 # Нет цитирований - не штрафуем
 
         total_score = 0.0
         for citation in verified_citations:
             # Полные баллы если найдено и закон+статья совпадают
             if citation.found_in_sources and citation.law_match and citation.article_match:
                 total_score += 1.0
-            # Частичные баллы если хотя бы закон совпадает
+            # Высокие баллы если найдено и хотя бы одно формальное совпадение
+            elif citation.found_in_sources and (citation.law_match or citation.article_match):
+                total_score += 0.8
+            # Хорошие баллы если закон совпадает (без текстового совпадения)
             elif citation.law_match:
                 total_score += 0.7
+            # Средние баллы если есть текстовое совпадение в источниках
+            elif citation.found_in_sources:
+                total_score += 0.6
             # Минимальные баллы если есть текстовое совпадение
             elif citation.similarity_score > 0.3:
                 total_score += 0.4
@@ -460,10 +491,10 @@ class LegalFactVerifier:
     ) -> float:
         """Расчет общего confidence score с весами"""
         overall = (
-            citation_accuracy * 0.35 +      # Точность цитирований - 35%
-            support_rate * 0.35 +            # Поддержка утверждений - 35%
-            legal_consistency * 0.20 +       # Правовая последовательность - 20%
-            completeness * 0.10              # Полнота - 10%
+            citation_accuracy * 0.25 + # Точность цитирований - 25%
+            support_rate * 0.35 + # Поддержка утверждений - 35%
+            legal_consistency * 0.25 + # Правовая последовательность - 25%
+            completeness * 0.15 # Полнота - 15%
         )
 
         return round(overall, 3)
@@ -480,29 +511,29 @@ class LegalFactVerifier:
     def generate_verification_report(self, result: VerificationResult) -> str:
         """Генерация человекочитаемого отчета о верификации"""
         report = f"""
-═══════════════════════════════════════════════════════════
-🔍 ОТЧЕТ О ВЕРИФИКАЦИИ ОТВЕТА
-═══════════════════════════════════════════════════════════
 
-📊 ОБЩАЯ ОЦЕНКА: {result.overall_confidence:.2%}
-✅ РЕКОМЕНДАЦИЯ: {result.recommendation}
+ОТЧЕТ О ВЕРИФИКАЦИИ ОТВЕТА
 
-📚 ДЕТАЛЬНЫЕ МЕТРИКИ:
+
+ОБЩАЯ ОЦЕНКА: {result.overall_confidence:.2%}
+РЕКОМЕНДАЦИЯ: {result.recommendation}
+
+ДЕТАЛЬНЫЕ МЕТРИКИ:
   • Точность цитирований: {result.citation_accuracy:.2%}
   • Поддержка утверждений: {result.support_rate:.2%}
   • Правовая последовательность: {result.legal_consistency_score:.2%}
 
-🔍 ВЕРИФИЦИРОВАНО:
+ВЕРИФИЦИРОВАНО:
   • Цитирований: {len(result.verified_citations)}
   • Утверждений: {len(result.verified_claims)}
 
 """
 
         if result.issues_found:
-            report += "\n⚠️ ОБНАРУЖЕННЫЕ ПРОБЛЕМЫ:\n"
+            report += "\n ОБНАРУЖЕННЫЕ ПРОБЛЕМЫ:\n"
             for i, issue in enumerate(result.issues_found, 1):
-                report += f"  {i}. {issue}\n"
+                report += f" {i}. {issue}\n"
 
-        report += "\n═══════════════════════════════════════════════════════════\n"
+        report += "\n\n"
 
         return report

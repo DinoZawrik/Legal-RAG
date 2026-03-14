@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔧 RAG Configuration Optimizer
+RAG Configuration Optimizer
 Модуль для оптимизации параметров RAG системы и A/B тестирования.
 
 Обеспечивает:
@@ -32,7 +32,7 @@ class RAGConfig:
     similarity_threshold: float = 0.7
     max_chunk_length: int = 1000
     
-    # Параметры чанкования  
+    # Параметры чанкования 
     chunk_size: int = 1000
     chunk_overlap: int = 200
     
@@ -98,9 +98,9 @@ class RAGOptimizer:
                     data = json.load(f)
                     for name, config_data in data.items():
                         self.configs[name] = RAGConfig(**config_data)
-                logger.info(f"✅ Загружено {len(self.configs)} конфигураций")
+                logger.info(f" Загружено {len(self.configs)} конфигураций")
         except Exception as e:
-            logger.warning(f"⚠️ Ошибка загрузки конфигураций: {e}")
+            logger.warning(f" Ошибка загрузки конфигураций: {e}")
     
     def _save_configs(self):
         """Сохранение конфигураций в файл."""
@@ -108,9 +108,9 @@ class RAGOptimizer:
             data = {name: config.__dict__ for name, config in self.configs.items()}
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
-            logger.info("💾 Конфигурации сохранены")
+            logger.info(" Конфигурации сохранены")
         except Exception as e:
-            logger.error(f"❌ Ошибка сохранения конфигураций: {e}")
+            logger.error(f" Ошибка сохранения конфигураций: {e}")
     
     def _create_default_configs(self):
         """Создание набора базовых конфигураций для тестирования."""
@@ -129,7 +129,7 @@ class RAGOptimizer:
             description="Консервативные настройки - высокое качество, меньше результатов"
         )
         
-        # Сбалансированная конфигурация  
+        # Сбалансированная конфигурация 
         self.configs["balanced"] = RAGConfig(
             max_chunks=7,
             similarity_threshold=0.65,
@@ -188,7 +188,7 @@ class RAGOptimizer:
             description="OptimalRAG настройки - для сложных запросов с фильтрами"
         )
         
-        logger.info("🔧 Созданы базовые конфигурации RAG")
+        logger.info(" Созданы базовые конфигурации RAG")
         self._save_configs()
     
     def get_config(self, name: str) -> Optional[RAGConfig]:
@@ -199,7 +199,7 @@ class RAGOptimizer:
         """Добавление новой конфигурации."""
         self.configs[config.name] = config
         self._save_configs()
-        logger.info(f"➕ Добавлена конфигурация: {config.name}")
+        logger.info(f" Добавлена конфигурация: {config.name}")
     
     def list_configs(self) -> Dict[str, str]:
         """Список всех конфигураций с описаниями."""
@@ -220,7 +220,7 @@ class RAGOptimizer:
         best_threshold = 0.7
         best_score = float('inf')
         
-        logger.info(f"🎯 Оптимизация порога для запроса: '{query[:50]}...'")
+        logger.info(f" Оптимизация порога для запроса: '{query[:50]}...'")
         
         for threshold in thresholds:
             try:
@@ -231,16 +231,16 @@ class RAGOptimizer:
                 # Оценка качества (чем ближе к expected_results, тем лучше)
                 score = abs(results_count - expected_results)
                 
-                logger.debug(f"  Порог {threshold}: {results_count} результатов (оценка: {score})")
+                logger.debug(f" Порог {threshold}: {results_count} результатов (оценка: {score})")
                 
                 if score < best_score:
                     best_score = score
                     best_threshold = threshold
                     
             except Exception as e:
-                logger.warning(f"⚠️ Ошибка тестирования порога {threshold}: {e}")
+                logger.warning(f" Ошибка тестирования порога {threshold}: {e}")
         
-        logger.info(f"✅ Оптимальный порог: {best_threshold}")
+        logger.info(f" Оптимальный порог: {best_threshold}")
         return best_threshold
     
     def _simulate_search(self, query: str, threshold: float) -> int:
@@ -254,7 +254,7 @@ class RAGOptimizer:
         noise = random.uniform(-2, 2)
         
         results = max(0, int(base_results + threshold_factor + noise))
-        return min(results, 20)  # Максимум 20 результатов
+        return min(results, 20) # Максимум 20 результатов
     
     async def run_ab_test(self, queries: List[str], config_names: List[str] = None) -> Dict[str, Any]:
         """
@@ -271,7 +271,7 @@ class RAGOptimizer:
         if config_names is None:
             config_names = list(self.configs.keys())
         
-        logger.info(f"🧪 Запуск A/B тестирования: {len(config_names)} конфигураций, {len(queries)} запросов")
+        logger.info(f" Запуск A/B тестирования: {len(config_names)} конфигураций, {len(queries)} запросов")
         
         results = {
             "timestamp": datetime.now().isoformat(),
@@ -284,10 +284,10 @@ class RAGOptimizer:
         for config_name in config_names:
             config = self.configs.get(config_name)
             if not config:
-                logger.warning(f"⚠️ Конфигурация '{config_name}' не найдена")
+                logger.warning(f" Конфигурация '{config_name}' не найдена")
                 continue
                 
-            logger.info(f"🔍 Тестирование конфигурации: {config_name}")
+            logger.info(f" Тестирование конфигурации: {config_name}")
             
             config_results = {
                 "config": config.__dict__,
@@ -339,7 +339,7 @@ class RAGOptimizer:
                     self.test_results.append(test_result)
                     
                 except Exception as e:
-                    logger.error(f"❌ Ошибка тестирования запроса '{query[:30]}...': {e}")
+                    logger.error(f" Ошибка тестирования запроса '{query[:30]}...': {e}")
             
             # Вычисление средних значений
             if len(queries) > 0:
@@ -358,7 +358,7 @@ class RAGOptimizer:
         # Сохранение результатов
         self._save_test_results(results)
         
-        logger.info("✅ A/B тестирование завершено")
+        logger.info(" A/B тестирование завершено")
         return results
     
     async def _test_config_query(self, config: RAGConfig, query: str) -> Tuple[int, float]:
@@ -457,18 +457,18 @@ class RAGOptimizer:
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(results, f, ensure_ascii=False, indent=2, default=str)
             
-            logger.info(f"💾 Результаты A/B тестирования сохранены в {filename}")
+            logger.info(f" Результаты A/B тестирования сохранены в {filename}")
         except Exception as e:
-            logger.error(f"❌ Ошибка сохранения результатов: {e}")
+            logger.error(f" Ошибка сохранения результатов: {e}")
     
     def generate_report(self) -> str:
         """Генерация отчета о конфигурациях и тестированиях."""
         
         report = [
-            "# 📊 Отчет RAG Optimizer",
+            "# Отчет RAG Optimizer",
             f"Дата: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             "",
-            "## 🔧 Доступные конфигурации:",
+            "## Доступные конфигурации:",
             ""
         ]
         
@@ -486,7 +486,7 @@ class RAGOptimizer:
         
         if self.test_results:
             report.extend([
-                "## 🧪 История тестирований:",
+                "## История тестирований:",
                 f"Всего тестов: {len(self.test_results)}",
                 ""
             ])
@@ -535,8 +535,8 @@ if __name__ == "__main__":
     # Демонстрация работы оптимизатора
     optimizer = get_rag_optimizer()
     
-    print("🔧 RAG Optimizer - Доступные конфигурации:")
+    print(" RAG Optimizer - Доступные конфигурации:")
     for name, desc in optimizer.list_configs().items():
-        print(f"  {name}: {desc}")
+        print(f" {name}: {desc}")
     
-    print(f"\n📊 Отчет:\n{optimizer.generate_report()}")
+    print(f"\n Отчет:\n{optimizer.generate_report()}")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔄 LangGraph RAG Workflow (CRAG-inspired) - МИГРАЦИЯ v2.0
+LangGraph RAG Workflow (CRAG-inspired) - МИГРАЦИЯ v2.0
 
 Многоступенчатый ретривел с оценкой качества и критикой ответа.
 1. Первичный сбор: граф + быстрий гибридный поиск
@@ -10,20 +10,21 @@
 5. Критика ответа (self-check) и при необходимости повторный цикл
 
 МИГРАЦИЯ v2.0 (13.10.2025):
-- ✅ ChatGoogleGenerativeAI → ChatOpenAI
-- ✅ Gemini API key manager → OpenAI API key manager
-- ✅ Удалена зависимость от GeminiRateLimiter
+- ChatGoogleGenerativeAI ChatOpenAI
+- Gemini API key manager OpenAI API key manager
+- Удалена зависимость от GeminiRateLimiter
 """
 
 import asyncio
 import json
 import logging
+import os
 from dataclasses import asdict, is_dataclass
 from typing import Any, Dict, List, Optional, Tuple, TypedDict
 
 from langgraph.graph import StateGraph, END
 
-# МИГРАЦИЯ v2.0: OpenAI вместо Gemini
+# МИГРАЦИЯ v3.0: OpenRouter (Nemotron) вместо OpenAI GPT-4
 from langchain_openai import ChatOpenAI
 # LEGACY: from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -247,26 +248,21 @@ class LangGraphRAGWorkflow:
             use_reranker: Enable BGE reranker (default True)
         """
         self.api_key = api_key or _key_manager.get_next_key()
-        answer_key = _key_manager.get_next_key()
 
-        # МИГРАЦИЯ v2.0: OpenAI GPT-4 Turbo (готов к GPT-5 когда доступен)
-        # TODO: Когда GPT-5 станет доступен, изменить на "gpt-5"
-        model = "gpt-4-turbo"
+        # МИГРАЦИЯ v3.0: OpenRouter Nemotron (бесплатный, 120B параметров)
+        # Используем OpenRouter API (совместим с OpenAI SDK)
+        openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
+        openrouter_base = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+        openrouter_model = os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
+
         self.answer_llm = ChatOpenAI(
-            model=model,
-            openai_api_key=answer_key,
+            model=openrouter_model,
+            openai_api_key=openrouter_key,
+            openai_api_base=openrouter_base,
             temperature=0.2,
             max_tokens=2048,
             max_retries=3
         )
-
-        # LEGACY: Gemini 2.5 Flash
-        # model = "gemini-2.5-flash-preview-09-2025"
-        # self.answer_llm = ChatGoogleGenerativeAI(
-        #     model=model,
-        #     google_api_key=answer_key,
-        #     temperature=0.2,
-        # )
 
         # Reranker (BGE v2-m3, бесплатный open-source)
         self.use_reranker = use_reranker
@@ -345,8 +341,8 @@ class LangGraphRAGWorkflow:
                     reranked = await self.reranker.rerank(
                         query=query,
                         documents=primary_results,
-                        top_k=10,  # Берем top-10 после rerank
-                        combine_weight=0.6  # 60% rerank score, 40% original hybrid score
+                        top_k=10, # Берем top-10 после rerank
+                        combine_weight=0.6 # 60% rerank score, 40% original hybrid score
                     )
 
                     # Convert back to dict format
@@ -479,7 +475,7 @@ class LangGraphRAGWorkflow:
         last_error: Optional[Exception] = None
 
         # OpenAI не требует такой частой ротации как Gemini
-        for retry in range(3):  # 3 попытки при ошибках
+        for retry in range(3): # 3 попытки при ошибках
             try:
                 # OpenAI SDK имеет встроенный retry, поэтому не нужен GeminiRateLimiter
                 response = await self.answer_llm.ainvoke(prompt)
@@ -494,7 +490,7 @@ class LangGraphRAGWorkflow:
 
                 # Retry только для network/timeout ошибок
                 if "timeout" in message or "connection" in message:
-                    await asyncio.sleep(2 ** retry)  # Exponential backoff
+                    await asyncio.sleep(2 ** retry) # Exponential backoff
                     continue
                 else:
                     # Другие ошибки - сразу прерываем
@@ -502,30 +498,30 @@ class LangGraphRAGWorkflow:
 
         # LEGACY: Gemini ротация ключей
         # for _ in range(len(_key_manager.API_KEYS)):
-        #     answer_key = _key_manager.get_next_key()
-        #     self.answer_llm = ChatGoogleGenerativeAI(
-        #         model="gemini-2.5-flash-preview-09-2025",
-        #         google_api_key=answer_key,
-        #         temperature=0.2,
-        #     )
-        #     try:
-        #         await GeminiRateLimiter.wait("flash")
-        #         response = await self.answer_llm.ainvoke(prompt)
-        #         final_answer = response.content
-        #         last_error = None
-        #         break
-        #     except Exception as exc:
-        #         last_error = exc
-        #         message = str(exc).lower()
-        #         quota_error = "quota" in message or "429" in message
-        #         _key_manager.report_error(answer_key, is_quota_error=quota_error)
-        #         state["reasoning_trace"].append(
-        #             "Answer generation quota hit, rotating key" if quota_error else f"Answer generation error: {exc}"
-        #         )
-        #         if quota_error:
-        #             await asyncio.sleep(2)
-        #             continue
-        #         raise
+        # answer_key = _key_manager.get_next_key()
+        # self.answer_llm = ChatGoogleGenerativeAI(
+        # model="gemini-2.5-flash-preview-09-2025",
+        # google_api_key=answer_key,
+        # temperature=0.2,
+        # )
+        # try:
+        # await GeminiRateLimiter.wait("flash")
+        # response = await self.answer_llm.ainvoke(prompt)
+        # final_answer = response.content
+        # last_error = None
+        # break
+        # except Exception as exc:
+        # last_error = exc
+        # message = str(exc).lower()
+        # quota_error = "quota" in message or "429" in message
+        # _key_manager.report_error(answer_key, is_quota_error=quota_error)
+        # state["reasoning_trace"].append(
+        # "Answer generation quota hit, rotating key" if quota_error else f"Answer generation error: {exc}"
+        # )
+        # if quota_error:
+        # await asyncio.sleep(2)
+        # continue
+        # raise
 
         if last_error:
             raise last_error

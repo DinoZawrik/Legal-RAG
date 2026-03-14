@@ -15,14 +15,14 @@ from core.russian_legal_prompts import RussianLegalPrompts
 
 class CritiqueDecision(Enum):
     """Решения критики Self-RAG"""
-    RETRIEVE_MORE = "RETRIEVE_MORE"  # Нужны дополнительные документы
-    SUFFICIENT = "SUFFICIENT"        # Достаточно документов
-    RELEVANT = "RELEVANT"           # Документ релевантен
-    IRRELEVANT = "IRRELEVANT"       # Документ не релевантен
-    SUPPORTED = "SUPPORTED"         # Утверждение поддержано
+    RETRIEVE_MORE = "RETRIEVE_MORE" # Нужны дополнительные документы
+    SUFFICIENT = "SUFFICIENT" # Достаточно документов
+    RELEVANT = "RELEVANT" # Документ релевантен
+    IRRELEVANT = "IRRELEVANT" # Документ не релевантен
+    SUPPORTED = "SUPPORTED" # Утверждение поддержано
     NOT_SUPPORTED = "NOT_SUPPORTED" # Утверждение не поддержано
-    USEFUL = "USEFUL"               # Ответ полезен
-    NOT_USEFUL = "NOT_USEFUL"       # Ответ не полезен
+    USEFUL = "USEFUL" # Ответ полезен
+    NOT_USEFUL = "NOT_USEFUL" # Ответ не полезен
 
 
 @dataclass
@@ -57,10 +57,10 @@ class SelfRAGInferenceEngine:
 
         # Пороги для принятия решений
         self.thresholds = {
-            'retrieve_more': 0.6,     # Порог для дополнительного поиска
-            'relevance': 0.7,         # Порог релевантности документа
-            'support': 0.75,          # Порог поддержки утверждения
-            'usefulness': 0.8         # Порог полезности ответа
+            'retrieve_more': 0.6, # Порог для дополнительного поиска
+            'relevance': 0.7, # Порог релевантности документа
+            'support': 0.75, # Порог поддержки утверждения
+            'usefulness': 0.8 # Порог полезности ответа
         }
 
     async def generate_with_self_critique(self, query: str, initial_docs: List[str]) -> SelfRAGResult:
@@ -147,7 +147,7 @@ class SelfRAGInferenceEngine:
 Если НУЖНО_БОЛЬШЕ - укажи, какие именно аспекты не покрыты.
 """
 
-        # 🔧 ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
+        # ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
         response_data = await self.inference_service.inference_system.generate_response(
             prompt=coverage_prompt,
             temperature=0.1,
@@ -181,10 +181,10 @@ class SelfRAGInferenceEngine:
 3. Помогает ли ответить на конкретный вопрос?
 
 ОТВЕТ: РЕЛЕВАНТНОСТЬ: [0-10] - [обоснование]
-Если оценка ≥7 - документ РЕЛЕВАНТЕН, иначе НЕ_РЕЛЕВАНТЕН.
+Если оценка 7 - документ РЕЛЕВАНТЕН, иначе НЕ_РЕЛЕВАНТЕН.
 """
 
-        # 🔧 ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
+        # ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
         response_data = await self.inference_service.inference_system.generate_response(
             prompt=relevance_prompt,
             temperature=0.1,
@@ -228,7 +228,7 @@ class SelfRAGInferenceEngine:
 ИТОГОВАЯ ОЦЕНКА: ПОДДЕРЖАНО / НЕ_ПОДДЕРЖАНО / ЧАСТИЧНО_ПОДДЕРЖАНО
 """
 
-        # 🔧 ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
+        # ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
         response_data = await self.inference_service.inference_system.generate_response(
             prompt=support_prompt,
             temperature=0.1,
@@ -268,7 +268,7 @@ class SelfRAGInferenceEngine:
 ОЦЕНКА: [0-10] - ПОЛЕЗЕН / НЕ_ПОЛЕЗЕН
 """
 
-        # 🔧 ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
+        # ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
         response_data = await self.inference_service.inference_system.generate_response(
             prompt=usefulness_prompt,
             temperature=0.1,
@@ -298,7 +298,7 @@ class SelfRAGInferenceEngine:
         # Используем систему промптов для структурированного ответа
         full_prompt = f"{system_prompt}\n\n{irac_prompt}"
 
-        # 🔧 ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
+        # ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
         response_data = await self.inference_service.inference_system.generate_response(
             prompt=full_prompt,
             temperature=0.05,
@@ -326,7 +326,7 @@ class SelfRAGInferenceEngine:
 ОТВЕТ должен начинаться с: "ОГРАНИЧЕННЫЙ АНАЛИЗ (недостаточно данных):"
 """
 
-        # 🔧 ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
+        # ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
         response_data = await self.inference_service.inference_system.generate_response(
             prompt=cautious_prompt,
             temperature=0.1,
@@ -344,10 +344,10 @@ class SelfRAGInferenceEngine:
         additional_results = await self.storage_manager.search_documents(
             expanded_query,
             k=5,
-            similarity_threshold=0.5  # Более низкий порог для расширения
+            similarity_threshold=0.5 # Более низкий порог для расширения
         )
 
-        # 🔧 FIX: storage_manager returns 'text' key, not 'content'
+        # FIX: storage_manager returns 'text' key, not 'content'
         return [result.get('text', result.get('content', '')) for result in additional_results]
 
     async def _detailed_verification(self, answer: str, documents: List[str]) -> Dict:
@@ -355,7 +355,7 @@ class SelfRAGInferenceEngine:
 
         verification_prompt = self.legal_prompts.get_verification_prompt(answer, documents)
 
-        # 🔧 ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
+        # ИСПРАВЛЕНИЕ: Правильный вызов через inference_system
         response_data = await self.inference_service.inference_system.generate_response(
             prompt=verification_prompt,
             temperature=0.1,
@@ -378,10 +378,10 @@ class SelfRAGInferenceEngine:
         """Расчет общего confidence score"""
 
         weights = {
-            'retrieve': 0.1,      # Меньший вес для решения о поиске
-            'relevance': 0.3,     # Высокий вес для релевантности
-            'support': 0.4,       # Максимальный вес для поддержки
-            'usefulness': 0.2     # Средний вес для полезности
+            'retrieve': 0.1, # Меньший вес для решения о поиске
+            'relevance': 0.3, # Высокий вес для релевантности
+            'support': 0.4, # Максимальный вес для поддержки
+            'usefulness': 0.2 # Средний вес для полезности
         }
 
         total_confidence = 0.0

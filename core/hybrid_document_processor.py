@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔄 Hybrid Document Processor
+Hybrid Document Processor
 Интегрированная система обработки документов с автоматической индексацией в граф.
 
 Процесс обработки:
@@ -23,7 +23,7 @@ from typing import Dict, List, Optional, Union, Any
 
 # Core components
 from core.processing_pipeline import IngestionPipeline
-# MIGRATED: core.universal_legal_ner (deprecated) → core.ner
+# MIGRATED: core.universal_legal_ner (deprecated) core.ner
 from core.ner import UniversalLegalNER
 try:
     from core.ner.ner import LegalEntity, EntityType
@@ -53,7 +53,7 @@ class HybridDocumentProcessor:
 
         # Конфигурация
         self.graph_enabled = True
-        self.min_entities_for_graph = 3  # Минимум сущностей для создания графа
+        self.min_entities_for_graph = 3 # Минимум сущностей для создания графа
 
     async def initialize(self):
         """Инициализация всех компонентов"""
@@ -113,7 +113,7 @@ class HybridDocumentProcessor:
 
                     logger.info(f"[STEP 2] Legal entity extraction: {Path(file_path).name}")
                     entities_collection = self.legal_ner.extract_entities(full_text)
-                    entities = entities_collection.get_all_entities()  # Получаем список всех сущностей
+                    entities = entities_collection.get_all_entities() # Получаем список всех сущностей
                     graph_result["entities_extracted"] = len(entities)
 
                     if len(entities) >= self.min_entities_for_graph:

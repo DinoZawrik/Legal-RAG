@@ -13,11 +13,11 @@ from langchain_core.output_parsers import StrOutputParser
 from ..common import logger
 from ..errors import ProcessingPipelineError
 
-if TYPE_CHECKING:  # pragma: no cover - type hints only
+if TYPE_CHECKING: # pragma: no cover - type hints only
     from .pipeline import ExtractedData, RegulatoryPipeline
 else:
-    ExtractedData = Any  # type: ignore
-    RegulatoryPipeline = Any  # type: ignore
+    ExtractedData = Any # type: ignore
+    RegulatoryPipeline = Any # type: ignore
 
 
 async def process_presentation_with_pages(
@@ -28,14 +28,14 @@ async def process_presentation_with_pages(
     from core.infrastructure_suite import SystemUtilities
 
     try:
-        logger.info("🔄 Начинаем сложную обработку презентации: %s", Path(file_path).name)
+        logger.info(" Начинаем сложную обработку презентации: %s", Path(file_path).name)
         start_time = datetime.now()
 
         pages = SystemUtilities.extract_text_from_pdf_pages(file_path)
         if pages:
             content_pages = [page for page in pages if page["has_content"]]
             logger.info(
-                "📊 Презентация содержит %s страниц, из них %s с содержимым",
+                " Презентация содержит %s страниц, из них %s с содержимым",
                 len(pages),
                 len(content_pages),
             )
@@ -46,7 +46,7 @@ async def process_presentation_with_pages(
         processed_pages: List[Dict[str, Any]] = []
         for page_info in pages:
             if not page_info["has_content"]:
-                logger.debug("⏭️ Пропущена пустая страница %s", page_info["page_number"])
+                logger.debug(" Пропущена пустая страница %s", page_info["page_number"])
                 continue
 
             page_result = await process_single_page(pipeline, page_info, metadata)
@@ -69,12 +69,12 @@ async def process_presentation_with_pages(
         )
 
         logger.info(
-            "✅ Обработано %s страниц из %s за %.1fс",
+            " Обработано %s страниц из %s за %.1fс",
             successful_pages,
             len(pages),
             processing_time,
         )
-        logger.info("📊 Статистика: ✅%s ❌%s 🔄%s повторов", successful_pages, failed_pages, retries_count)
+        logger.info(" Статистика: %s %s %s повторов", successful_pages, failed_pages, retries_count)
 
         final_result = await aggregate_page_results(pipeline, processed_pages, metadata)
 
@@ -91,8 +91,8 @@ async def process_presentation_with_pages(
 
         return final_result
 
-    except Exception as exc:  # pragma: no cover - defensive logging
-        logger.error("❌ Ошибка сложной обработки презентации: %s", exc)
+    except Exception as exc: # pragma: no cover - defensive logging
+        logger.error(" Ошибка сложной обработки презентации: %s", exc)
         raise ProcessingPipelineError(f"Presentation processing failed: {exc}") from exc
 
 
@@ -105,7 +105,7 @@ async def process_single_page(
     total_pages = page_info["total_pages"]
     page_text = page_info["text"]
 
-    logger.info("🔍 Обработка страницы %s/%s", page_number, total_pages)
+    logger.info(" Обработка страницы %s/%s", page_number, total_pages)
 
     scanning_chain = pipeline.presentation_page_scanning_prompt | pipeline.llm | StrOutputParser()
 
@@ -122,7 +122,7 @@ async def process_single_page(
         quality_result = await check_page_quality(pipeline, page_text, extracted_data, page_number)
 
         if quality_result.get("retry_needed", False):
-            logger.info("🔄 Повторное сканирование страницы %s", page_number)
+            logger.info(" Повторное сканирование страницы %s", page_number)
             extracted_data = await retry_page_scanning(
                 pipeline,
                 page_info,
@@ -138,7 +138,7 @@ async def process_single_page(
         }
 
     except Exception as exc:
-        logger.error("❌ Ошибка обработки страницы %s: %s", page_number, exc)
+        logger.error(" Ошибка обработки страницы %s: %s", page_number, exc)
         return {
             "page_number": page_number,
             "total_pages": total_pages,
@@ -167,7 +167,7 @@ async def check_page_quality(
         quality_score = quality_result.get("quality_score", "НЕОПРЕДЕЛЕНО")
         retry_needed = quality_result.get("retry_needed", False)
         logger.info(
-            "📊 Качество страницы %s: %s (повтор: %s)",
+            " Качество страницы %s: %s (повтор: %s)",
             page_number,
             quality_score,
             retry_needed,
@@ -175,7 +175,7 @@ async def check_page_quality(
         return quality_result
 
     except Exception as exc:
-        logger.warning("⚠️ Ошибка проверки качества для страницы %s: %s", page_number, exc)
+        logger.warning(" Ошибка проверки качества для страницы %s: %s", page_number, exc)
         return {
             "quality_score": "ОШИБКА",
             "retry_needed": False,
@@ -204,13 +204,13 @@ async def retry_page_scanning(
             "повторного сканирования",
         )
         logger.info(
-            "✅ Повторное сканирование страницы %s завершено",
+            " Повторное сканирование страницы %s завершено",
             page_info["page_number"],
         )
         return improved_data
 
     except Exception as exc:
-        logger.error("❌ Ошибка повторного сканирования страницы %s: %s", page_info["page_number"], exc)
+        logger.error(" Ошибка повторного сканирования страницы %s: %s", page_info["page_number"], exc)
         return {"error": str(exc)}
 
 
@@ -221,7 +221,7 @@ async def aggregate_page_results(
 ) -> "ExtractedData":
     try:
         processed_pages = list(processed_pages)
-        logger.info("🔗 Агрегация результатов %s страниц", len(processed_pages))
+        logger.info(" Агрегация результатов %s страниц", len(processed_pages))
 
         aggregation_chain = pipeline.presentation_aggregation_prompt | pipeline.llm | StrOutputParser()
         aggregation_input = json.dumps(processed_pages, ensure_ascii=False, indent=2)
@@ -241,7 +241,7 @@ async def aggregate_page_results(
         )
 
     except Exception as exc:
-        logger.error("❌ Ошибка агрегации результатов презентации: %s", exc)
+        logger.error(" Ошибка агрегации результатов презентации: %s", exc)
         raise ProcessingPipelineError(f"Presentation aggregation failed: {exc}") from exc
 
 
@@ -255,7 +255,7 @@ def _parse_json_response(response: str, page_number: int, context: str) -> Dict[
         if json_match:
             return json.loads(json_match.group())
 
-        logger.warning("⚠️ Не удалось распарсить JSON для %s (%s)", context, page_number)
+        logger.warning(" Не удалось распарсить JSON для %s (%s)", context, page_number)
         return {"raw_response": response}
 
 

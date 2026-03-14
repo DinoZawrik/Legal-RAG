@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-📄 Legal Document Chunker
+Legal Document Chunker
 Улучшенная система чанкинга с учетом правовой структуры документов.
 
 Обеспечивает:
 - Сохранение целостности правовых норм
-- Понимание иерархии (статья → пункт → подпункт)
+- Понимание иерархии (статья пункт подпункт)
 - Контекстуальные связи между элементами
 - Метаданные структуры для каждого чанка
 """
@@ -101,7 +101,7 @@ class LegalDocumentChunker:
         # Паттерны критически важных числовых ограничений
         self.critical_numerical_patterns = self._load_critical_numerical_patterns()
 
-        logger.info("✅ Legal Document Chunker инициализирован")
+        logger.info(" Legal Document Chunker инициализирован")
 
     def _load_structure_patterns(self) -> Dict[StructureLevel, List[str]]:
         """Загрузка паттернов для распознавания структуры."""
@@ -121,7 +121,7 @@ class LegalDocumentChunker:
             StructureLevel.ARTICLE: [
                 r"^Статья\s+(\d+(?:\.\d+)*)\.?\s*(.*)$",
                 r"^Ст\.\s*(\d+(?:\.\d+)*)\.?\s*(.*)$",
-                r"^(\d+(?:\.\d+)*)\.?\s+(.+)$"  # Простая нумерация
+                r"^(\d+(?:\.\d+)*)\.?\s+(.+)$" # Простая нумерация
             ],
 
             StructureLevel.PARAGRAPH: [
@@ -140,7 +140,7 @@ class LegalDocumentChunker:
                 r"^-\s+(.+)$",
                 r"^\*\s+(.+)$",
                 r"^•\s+(.+)$",
-                r"^(\w+)\s*:\s*(.+)$"  # Определения
+                r"^(\w+)\s*:\s*(.+)$" # Определения
             ]
         }
 
@@ -186,7 +186,7 @@ class LegalDocumentChunker:
         Returns:
             Список чанков с метаданными
         """
-        logger.info(f"🔄 Чанкинг документа {filename}, тип: {document_type.value}")
+        logger.info(f" Чанкинг документа {filename}, тип: {document_type.value}")
 
         # 1. Определение правовой отрасли
         legal_domain, _ = self.legal_ontology.get_legal_domain(text)
@@ -239,7 +239,7 @@ class LegalDocumentChunker:
         # 6. Оптимизация размеров чанков
         optimized_chunks = self._optimize_chunk_sizes(chunks)
 
-        logger.info(f"✅ Создано {len(optimized_chunks)} чанков для документа {filename}")
+        logger.info(f" Создано {len(optimized_chunks)} чанков для документа {filename}")
         return optimized_chunks
 
     def _analyze_document_structure(self, text: str) -> Dict[int, Dict[str, Any]]:
@@ -452,7 +452,7 @@ class LegalDocumentChunker:
         current_length = 0
 
         for word in words:
-            word_length = len(word) + 1  # +1 для пробела
+            word_length = len(word) + 1 # +1 для пробела
 
             if current_length + word_length <= self.base_chunk_size:
                 current_segment.append(word)
@@ -488,7 +488,7 @@ class LegalDocumentChunker:
         min_distance = float('inf')
 
         for line_num, structure_info in structure_map.items():
-            distance = abs(position - line_num * 50)  # Приблизительная позиция строки
+            distance = abs(position - line_num * 50) # Приблизительная позиция строки
             if distance < min_distance:
                 min_distance = distance
                 closest_structure = structure_info
@@ -669,7 +669,7 @@ class LegalDocumentChunker:
                         )
 
                         optimized.append(merged_chunk)
-                        i += 2  # Пропускаем следующий чанк
+                        i += 2 # Пропускаем следующий чанк
                         continue
 
             optimized.append(current_chunk)
@@ -727,7 +727,7 @@ def get_legal_chunker() -> LegalDocumentChunker:
 
 if __name__ == "__main__":
     # Демонстрация возможностей чанкера
-    print("📄 Legal Document Chunker - Демонстрация")
+    print(" Legal Document Chunker - Демонстрация")
     print("=" * 50)
 
     chunker = LegalDocumentChunker()
@@ -759,18 +759,18 @@ if __name__ == "__main__":
         filename="test_law.txt"
     )
 
-    print(f"\n✅ Создано {len(legal_chunks)} чанков")
+    print(f"\n Создано {len(legal_chunks)} чанков")
 
     for i, chunk in enumerate(legal_chunks):
-        print(f"\n🔍 Чанк {i + 1}:")
-        print(f"   Уровень структуры: {chunk.structure_metadata.structure_level.value}")
+        print(f"\n Чанк {i + 1}:")
+        print(f" Уровень структуры: {chunk.structure_metadata.structure_level.value}")
         if chunk.structure_metadata.article_number:
-            print(f"   Статья: {chunk.structure_metadata.article_number}")
-        print(f"   Размер: {len(chunk.content)} символов")
-        print(f"   Ключевые термины: {chunk.key_terms}")
-        print(f"   Ссылки: {chunk.references}")
-        print(f"   Содержимое: {chunk.content[:100]}...")
+            print(f" Статья: {chunk.structure_metadata.article_number}")
+        print(f" Размер: {len(chunk.content)} символов")
+        print(f" Ключевые термины: {chunk.key_terms}")
+        print(f" Ссылки: {chunk.references}")
+        print(f" Содержимое: {chunk.content[:100]}...")
 
     # Конвертация в TextChunk
     text_chunks = chunker.convert_to_text_chunks(legal_chunks)
-    print(f"\n🔄 Конвертировано в {len(text_chunks)} TextChunk объектов")
+    print(f"\n Конвертировано в {len(text_chunks)} TextChunk объектов")

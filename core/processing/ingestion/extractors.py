@@ -41,7 +41,7 @@ def extract_enhanced_docx_content(file_path: Union[str, Path]) -> str:
 
         return "\n".join(content_parts)
 
-    except Exception as exc:  # pragma: no cover - fallbacks rely on optional deps
+    except Exception as exc: # pragma: no cover - fallbacks rely on optional deps
         logger.warning(
             "Ошибка улучшенного извлечения DOCX %s: %s, используем простое извлечение",
             file_path,
@@ -52,7 +52,7 @@ def extract_enhanced_docx_content(file_path: Union[str, Path]) -> str:
 
             doc = docx.Document(file_path)
             return "\n".join(paragraph.text for paragraph in doc.paragraphs)
-        except Exception as fallback_error:  # pragma: no cover - defensive branch
+        except Exception as fallback_error: # pragma: no cover - defensive branch
             raise ProcessingPipelineError(
                 f"DOCX extraction failed: {fallback_error}"
             ) from fallback_error
@@ -78,7 +78,7 @@ def extract_doc_content(file_path: Union[str, Path]) -> str:
                 return content.strip()
         except ImportError:
             logger.warning("textract не установлен")
-        except Exception as exc:  # pragma: no cover - textract optional
+        except Exception as exc: # pragma: no cover - textract optional
             logger.warning("Ошибка textract для DOC: %s", exc)
 
         try:
@@ -116,7 +116,7 @@ def extract_rtf_content(file_path: Union[str, Path]) -> str:
                 return text_content.strip()
         except ImportError:
             logger.warning("striprtf не установлен, пробуем альтернативные методы")
-        except Exception as exc:  # pragma: no cover - optional dependency
+        except Exception as exc: # pragma: no cover - optional dependency
             logger.warning("Ошибка striprtf: %s", exc)
 
         try:
@@ -127,7 +127,7 @@ def extract_rtf_content(file_path: Union[str, Path]) -> str:
                 return content.strip()
         except ImportError:
             logger.warning("textract не установлен")
-        except Exception as exc:  # pragma: no cover - optional dependency
+        except Exception as exc: # pragma: no cover - optional dependency
             logger.warning("Ошибка textract для RTF: %s", exc)
 
         try:
@@ -181,7 +181,7 @@ def extract_spreadsheet_content(file_path: Union[str, Path], extension: str) -> 
             raise ProcessingPipelineError(f"No content extracted from {extension} file")
 
         logger.info(
-            "✅ Извлечено %s символов из %s файла %s",
+            " Извлечено %s символов из %s файла %s",
             len(result),
             extension,
             resolved_path.name,
@@ -192,7 +192,7 @@ def extract_spreadsheet_content(file_path: Union[str, Path], extension: str) -> 
         logger.warning("pandas не доступен, используем базовый метод извлечения")
         return _extract_spreadsheet_without_pandas(file_path, extension)
     except Exception as exc:
-        logger.error("❌ Ошибка извлечения из %s файла: %s", extension, exc)
+        logger.error(" Ошибка извлечения из %s файла: %s", extension, exc)
         raise ProcessingPipelineError(
             f"Spreadsheet extraction failed: {exc}"
         ) from exc
@@ -205,7 +205,7 @@ def _extract_csv_content(path: Path, content_parts: list[str], pd) -> None:
     for encoding in encodings:
         try:
             dataframe = pd.read_csv(path, encoding=encoding)
-            logger.info("✅ CSV файл успешно прочитан с кодировкой %s", encoding)
+            logger.info(" CSV файл успешно прочитан с кодировкой %s", encoding)
             break
         except UnicodeDecodeError:
             continue
@@ -275,7 +275,7 @@ def _extract_excel_content(path: Path, extension: str, content_parts: list[str],
             content_parts.append("")
 
     except Exception as exc:
-        logger.warning("⚠️ Ошибка pandas для Excel: %s", exc)
+        logger.warning(" Ошибка pandas для Excel: %s", exc)
         if extension == ".xlsx":
             _extract_excel_with_openpyxl(path, content_parts)
         else:
@@ -303,7 +303,7 @@ def _extract_excel_with_openpyxl(path: Path, content_parts: list[str]) -> None:
 
             content_parts.append("")
 
-    except Exception as exc:  # pragma: no cover - fallbacks optional
+    except Exception as exc: # pragma: no cover - fallbacks optional
         raise ProcessingPipelineError(f"Excel processing failed: {exc}") from exc
 
 
@@ -344,7 +344,7 @@ def _extract_spreadsheet_without_pandas(file_path: Union[str, Path], extension: 
                         text_parts.append(row_text)
 
             return "\n".join(text_parts)
-        except Exception as exc:  # pragma: no cover - defensive fallback
+        except Exception as exc: # pragma: no cover - defensive fallback
             raise ProcessingPipelineError(f"CSV processing failed: {exc}") from exc
 
     raise ProcessingPipelineError(f"No fallback available for {extension} without pandas")

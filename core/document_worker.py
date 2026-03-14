@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔄 Document Processing Worker
+Document Processing Worker
 Background worker для обработки документов через Task Queue
 """
 
@@ -38,7 +38,7 @@ class DocumentProcessor:
         self.task_queue.register_handler("document_processing", self.process_document)
         self.task_queue.register_handler("document_upload", self.process_document_upload)
         
-        logger.info("🔄 DocumentProcessor initialized")
+        logger.info(" DocumentProcessor initialized")
     
     async def _call_microservice(self, endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Вызов микросервиса через HTTP API."""
@@ -127,11 +127,11 @@ class DocumentProcessor:
             # Финальное обновление прогресса
             await self.task_queue.update_progress(task.task_id, 100, "Task completed successfully")
             
-            logger.info(f"✅ Document processing completed for task {task.task_id}")
+            logger.info(f" Document processing completed for task {task.task_id}")
             return result
             
         except Exception as e:
-            logger.error(f"❌ Document processing failed for task {task.task_id}: {e}")
+            logger.error(f" Document processing failed for task {task.task_id}: {e}")
             await self.task_queue.update_progress(task.task_id, 0, f"Error: {str(e)}")
             raise
     
@@ -200,7 +200,7 @@ class DocumentProcessor:
             return result
             
         except Exception as e:
-            logger.error(f"❌ Document upload processing failed for task {task.task_id}: {e}")
+            logger.error(f" Document upload processing failed for task {task.task_id}: {e}")
             await self.task_queue.update_progress(task.task_id, 0, f"Error: {str(e)}")
             raise
         finally:
@@ -208,9 +208,9 @@ class DocumentProcessor:
             if temp_file_path and os.path.exists(temp_file_path):
                 try:
                     os.unlink(temp_file_path)
-                    logger.debug(f"🗑️ Temporary file {temp_file_path} deleted")
+                    logger.debug(f" Temporary file {temp_file_path} deleted")
                 except Exception as e:
-                    logger.warning(f"⚠️ Failed to delete temporary file {temp_file_path}: {e}")
+                    logger.warning(f" Failed to delete temporary file {temp_file_path}: {e}")
     
     async def start_worker(self, worker_id: str = None):
         """Запуск worker'а для обработки задач."""
@@ -220,7 +220,7 @@ class DocumentProcessor:
     async def shutdown(self):
         """Завершение работы worker'а."""
         await self.task_queue.disconnect()
-        logger.info("🔌 DocumentProcessor shutdown completed")
+        logger.info(" DocumentProcessor shutdown completed")
 
 
 async def start_document_worker(worker_id: str = None):
@@ -233,9 +233,9 @@ async def start_document_worker(worker_id: str = None):
     try:
         await processor.start_worker(worker_id)
     except KeyboardInterrupt:
-        logger.info("🛑 Worker interrupted by user")
+        logger.info(" Worker interrupted by user")
     except Exception as e:
-        logger.error(f"❌ Worker failed: {e}")
+        logger.error(f" Worker failed: {e}")
     finally:
         await processor.shutdown()
 

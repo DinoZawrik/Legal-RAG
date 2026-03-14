@@ -49,7 +49,7 @@ def create_chunks(
                     )
                 )
 
-            logger.info("✅ Создано %s legal chunks с улучшенным анализом", len(text_chunks))
+            logger.info(" Создано %s legal chunks с улучшенным анализом", len(text_chunks))
             return text_chunks
     except Exception:
         # Fallback на упрощённый legal-aware chunking по границам статей
@@ -85,7 +85,7 @@ def create_chunks(
                         )
                     )
 
-                logger.info("✅ Создано %s legal-aware article chunks", len(chunks))
+                logger.info(" Создано %s legal-aware article chunks", len(chunks))
                 return chunks
 
         chunks = pipeline.text_splitter.split_text(text)
@@ -103,11 +103,11 @@ def create_chunks(
             for i, chunk_text in enumerate(chunks)
         ]
 
-        logger.info("✅ Создано %s текстовых чанков", len(text_chunks))
+        logger.info(" Создано %s текстовых чанков", len(text_chunks))
         return text_chunks
 
     except Exception as exc:
-        logger.error("❌ Ошибка создания чанков: %s", exc)
+        logger.error(" Ошибка создания чанков: %s", exc)
         raise ProcessingPipelineError(f"Chunk creation failed: {exc}") from exc
 
 

@@ -67,36 +67,36 @@ class ContextAwareChunker:
             base_chunk_size=base_chunk_size,
         )
 
-        logger.info("🧩 Context-Aware Universal Chunker инициализирован")
+        logger.info(" Context-Aware Universal Chunker инициализирован")
 
     def chunk_document(
         self,
         text: str,
         document_metadata: Optional[Dict[str, Any]] = None,
     ) -> List[SmartChunk]:
-        logger.info("🧩 Начало умного чанкинга документа длиной %s символов", len(text))
+        logger.info(" Начало умного чанкинга документа длиной %s символов", len(text))
 
         try:
             entities = self.ner_engine.extract_entities(text, document_metadata)
-            logger.info("🧠 Извлечено %s правовых сущностей", len(entities.get_all_entities()))
+            logger.info(" Извлечено %s правовых сущностей", len(entities.get_all_entities()))
 
             protected_zones = self.zone_analyzer.identify_protected_zones(text, entities)
-            logger.info("🛡️ Определено %s защищенных зон", len(protected_zones))
+            logger.info(" Определено %s защищенных зон", len(protected_zones))
 
             boundaries = self.boundary_optimizer.find_optimal_boundaries(text, protected_zones)
-            logger.info("📏 Найдено %s оптимальных границ", len(boundaries))
+            logger.info(" Найдено %s оптимальных границ", len(boundaries))
 
             chunks = self.chunk_builder.create_smart_chunks(text, boundaries, entities, protected_zones)
-            logger.info("📦 Создано %s умных чанков", len(chunks))
+            logger.info(" Создано %s умных чанков", len(chunks))
 
             chunks = self.chunk_builder.add_chunk_overlaps(text, chunks)
             self.chunk_builder.validate_chunking_quality(chunks, protected_zones)
 
-            logger.info("✅ Умный чанкинг завершен: %s чанков", len(chunks))
+            logger.info(" Умный чанкинг завершен: %s чанков", len(chunks))
             return chunks
 
-        except Exception as exc:  # noqa: BLE001
-            logger.error("❌ Ошибка умного чанкинга: %s", exc)
+        except Exception as exc: # noqa: BLE001
+            logger.error(" Ошибка умного чанкинга: %s", exc)
             return self.chunk_builder.fallback_chunking(text)
 
     def convert_to_text_chunks(self, smart_chunks: List[SmartChunk]) -> List[TextChunk]:
@@ -116,7 +116,7 @@ def get_context_aware_chunker() -> ContextAwareChunker:
 
 
 if __name__ == "__main__":
-    print("🧩 Context-Aware Universal Chunker - Демонстрация")
+    print(" Context-Aware Universal Chunker - Демонстрация")
     print("=" * 60)
 
     chunker = ContextAwareChunker()
@@ -145,17 +145,17 @@ if __name__ == "__main__":
     """
 
     demo_chunks = chunker.chunk_document(demo_text)
-    print(f"📦 Создано {len(demo_chunks)} умных чанков")
+    print(f" Создано {len(demo_chunks)} умных чанков")
 
     for idx, chunk in enumerate(demo_chunks):
-        print(f"\n🔍 Чанк {idx + 1}:")
-        print(f"   Размер: {len(chunk.content)} символов")
-        print(f"   Приоритет: {chunk.priority.value}")
-        print(f"   Критичность: {chunk.criticality_score:.2f}")
-        print(f"   Качество границ: {chunk.boundary_quality:.2f}")
-        print(f"   Сущностей: {len(chunk.entities.get_all_entities())}")
-        print(f"   Защищенных зон: {len(chunk.protected_zones)}")
+        print(f"\n Чанк {idx + 1}:")
+        print(f" Размер: {len(chunk.content)} символов")
+        print(f" Приоритет: {chunk.priority.value}")
+        print(f" Критичность: {chunk.criticality_score:.2f}")
+        print(f" Качество границ: {chunk.boundary_quality:.2f}")
+        print(f" Сущностей: {len(chunk.entities.get_all_entities())}")
+        print(f" Защищенных зон: {len(chunk.protected_zones)}")
 
     demo_text_chunks = chunker.convert_to_text_chunks(demo_chunks)
-    print(f"\n🔄 Конвертировано в {len(demo_text_chunks)} TextChunk объектов")
-    print("\n✅ Демонстрация завершена")
+    print(f"\n Конвертировано в {len(demo_text_chunks)} TextChunk объектов")
+    print("\n Демонстрация завершена")

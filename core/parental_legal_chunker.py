@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🧬 Parental Legal Document Chunker
+Parental Legal Document Chunker
 Система чанкинга с иерархическими parent-child связями для правовых документов.
 
 МИГРАЦИЯ v3.0
@@ -14,7 +14,7 @@ Parental chunking техника:
 Architecture:
 - Родительские чанки (статьи) содержат метаданные о детях
 - Дочерние чанки (пункты) ссылаются на родителя
-- Поддержка многоуровневой иерархии (глава → статья → пункт → подпункт)
+- Поддержка многоуровневой иерархии (глава статья пункт подпункт)
 - Семантическая связность через hierarchy_path
 
 Usage:
@@ -47,11 +47,11 @@ logger = logging.getLogger(__name__)
 
 class ChunkRelationType(Enum):
     """Типы связей между чанками."""
-    PARENT_CHILD = "parent_child"      # Статья → Пункт
-    SIBLING = "sibling"               # Пункт 1 ↔ Пункт 2
-    CROSS_REFERENCE = "cross_reference"  # Ссылки между статьями
-    SEQUENTIAL = "sequential"         # Последовательные части
-    CONTEXTUAL = "contextual"         # Контекстуальная связь
+    PARENT_CHILD = "parent_child" # Статья Пункт
+    SIBLING = "sibling" # Пункт 1 Пункт 2
+    CROSS_REFERENCE = "cross_reference" # Ссылки между статьями
+    SEQUENTIAL = "sequential" # Последовательные части
+    CONTEXTUAL = "contextual" # Контекстуальная связь
 
 
 @dataclass
@@ -68,7 +68,7 @@ class ParentalChunk(EnhancedLegalChunk):
     related_chunk_ids: List[str] = field(default_factory=list)
     
     # Структурная иерархия
-    hierarchy_level: int = 0  # 0=документ, 1=раздел, 2=глава, 3=статья, 4=пункт, 5=подпункт
+    hierarchy_level: int = 0 # 0=документ, 1=раздел, 2=глава, 3=статья, 4=пункт, 5=подпункт
     full_hierarchy_path: List[str] = field(default_factory=list)
     
     # Метаданные для связей
@@ -171,7 +171,7 @@ class ParentalLegalChunker:
         # Структурные паттерны для определения parent-child связей
         self.structure_patterns = self._load_structure_patterns()
 
-        self.logger.info("🧬 Parental Legal Chunker инициализирован")
+        self.logger.info(" Parental Legal Chunker инициализирован")
 
     def _load_structure_patterns(self) -> Dict[str, List[re.Pattern]]:
         """Паттерны для определения структурных связей."""
@@ -343,7 +343,7 @@ class ParentalLegalChunker:
         
         # Создаем связи для каждого уровня
         for level in sorted(level_groups.keys()):
-            if level == 0:  # Уровень документа - нет родителя
+            if level == 0: # Уровень документа - нет родителя
                 continue
                 
             parent_level = level - 1
@@ -373,7 +373,7 @@ class ParentalLegalChunker:
         best_score = 0.0
         
         # Критерии для выбора родителя:
-        # 1. Статья → пункт/часть
+        # 1. Статья пункт/часть
         # 2. Ближайшая позиция в тексте
         # 3. Совпадающий контекст
         
@@ -416,7 +416,7 @@ class ParentalLegalChunker:
         
         # Близость в тексте (чем ближе, тем лучше)
         distance = abs(child_pos - parent_pos)
-        proximity_score = max(0, 1.0 - (distance / 10000))  # Нормализация
+        proximity_score = max(0, 1.0 - (distance / 10000)) # Нормализация
         score += proximity_score * 0.2
         
         return score
@@ -457,11 +457,11 @@ class ParentalLegalChunker:
                     )
         
         if validation_errors:
-            self.logger.warning(f"⚠️ Relationship validation errors: {len(validation_errors)}")
+            self.logger.warning(f" Relationship validation errors: {len(validation_errors)}")
             for error in validation_errors:
-                self.logger.warning(f"  - {error}")
+                self.logger.warning(f" - {error}")
         else:
-            self.logger.info("✅ All relationships validated successfully")
+            self.logger.info(" All relationships validated successfully")
 
     def _has_cycle(self, chunk_id: str, chunks: List[ParentalChunk], visited: Set[str]) -> bool:
         """Проверка циклических ссылок."""
@@ -532,7 +532,7 @@ class ParentalLegalChunker:
         # Подсчет связей
         total_parents = sum(1 for c in chunks if c.parent_chunk_id)
         total_children = sum(len(c.child_chunk_ids) for c in chunks)
-        total_siblings = sum(len(c.sibling_chunk_ids) for c in chunks) // 2  # Избегаем двойного счета
+        total_siblings = sum(len(c.sibling_chunk_ids) for c in chunks) // 2 # Избегаем двойного счета
         avg_family_size = sum(c.family_size for c in chunks) / len(chunks) if chunks else 0
         
         return {
@@ -560,13 +560,13 @@ def get_parental_chunker() -> ParentalLegalChunker:
 # Пример использования
 if __name__ == "__main__":
     async def main():
-        print("🧬 Parental Legal Chunker - Демонстрация")
+        print(" Parental Legal Chunker - Демонстрация")
         print("=" * 60)
 
         chunker = ParentalLegalChunker()
 
         demo_text = """
-        Федеральный закон № 115-ФЗ "О концессионных соглашениях"
+        Федеральный закон 115-ФЗ "О концессионных соглашениях"
 
         Глава 1. ОБЩИЕ ПОЛОЖЕНИЯ
 
@@ -597,27 +597,27 @@ if __name__ == "__main__":
             document_id="demo_law_115fz"
         )
 
-        print(f"\n✅ Создано {len(parental_chunks)} parental chunks")
+        print(f"\n Создано {len(parental_chunks)} parental chunks")
 
         # Анализ семейных связей
         for chunk in parental_chunks:
-            if chunk.article_number:  # Показываем только статьи
+            if chunk.article_number: # Показываем только статьи
                 family = chunk.get_family_tree()
-                print(f"\n🔍 Статья {chunk.article_number}:")
-                print(f"   Уровень: {family['level']}")
-                print(f"   Путь: {' → '.join(family['path'])}")
-                print(f"   Родитель: {family['parent']}")
-                print(f"   Дети: {family['children']}")
-                print(f"   Сиблинги: {family['siblings']}")
+                print(f"\n Статья {chunk.article_number}:")
+                print(f" Уровень: {family['level']}")
+                print(f" Путь: {' '.join(family['path'])}")
+                print(f" Родитель: {family['parent']}")
+                print(f" Дети: {family['children']}")
+                print(f" Сиблинги: {family['siblings']}")
 
         # Статистика иерархии
         stats = chunker.get_hierarchy_statistics()
-        print(f"\n📊 Статистика иерархии:")
-        print(f"   Всего чанков: {stats['total_chunks']}")
-        print(f"   Parent-связи: {stats['parent_relationships']}")
-        print(f"   Child-связи: {stats['child_relationships']}")
-        print(f"   Sibling-связи: {stats['sibling_relationships']}")
+        print(f"\n Статистика иерархии:")
+        print(f" Всего чанков: {stats['total_chunks']}")
+        print(f" Parent-связи: {stats['parent_relationships']}")
+        print(f" Child-связи: {stats['child_relationships']}")
+        print(f" Sibling-связи: {stats['sibling_relationships']}")
 
-        print("\n✅ Демонстрация завершена")
+        print("\n Демонстрация завершена")
 
     asyncio.run(main())

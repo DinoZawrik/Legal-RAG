@@ -1,4 +1,4 @@
-from ..common import *  # noqa: F401,F403
+from ..common import * # noqa: F401,F403
 from ..errors import ProcessingPipelineError
 from .chunking import create_chunks as build_chunks
 from .document_processing import (
@@ -41,7 +41,7 @@ class RegulatoryPipeline:
     async def check_document_exists_by_filename(self, filename: str) -> Optional[str]:
         """Проверка существования документа по имени файла в PostgreSQL."""
         try:
-            logger.info(f"🔍 Запрос к базе данных для файла: {filename}")
+            logger.info(f" Запрос к базе данных для файла: {filename}")
             from core.storage_coordinator import create_storage_coordinator
             storage = await create_storage_coordinator()
             
@@ -51,18 +51,18 @@ class RegulatoryPipeline:
                     filename
                 )
                 if row:
-                    logger.info(f"✅ Найден существующий документ с ID: {row['id']}")
+                    logger.info(f" Найден существующий документ с ID: {row['id']}")
                     return str(row['id'])
                 else:
-                    logger.info(f"❌ Документ с именем '{filename}' не найден в базе")
+                    logger.info(f" Документ с именем '{filename}' не найден в базе")
                     return None
                 
             
-            logger.info(f"✅ Агрегация завершена: обработано {len(processed_pages)} страниц")
+            logger.info(f" Агрегация завершена: обработано {len(processed_pages)} страниц")
             return extracted_data
             
         except Exception as e:
-            logger.error(f"❌ Ошибка агрегации результатов: {e}")
+            logger.error(f" Ошибка агрегации результатов: {e}")
             # Возвращаем минимальный результат
             return ExtractedData(
                 document_type="presentation",

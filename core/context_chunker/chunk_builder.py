@@ -123,12 +123,12 @@ class SmartChunkBuilder:
                 )
 
         if issues:
-            logger.warning("⚠️ Найдены проблемы качества чанкинга: %s", "; ".join(issues))
+            logger.warning(" Найдены проблемы качества чанкинга: %s", "; ".join(issues))
         else:
-            logger.info("✅ Валидация чанкинга прошла успешно")
+            logger.info(" Валидация чанкинга прошла успешно")
 
     def fallback_chunking(self, text: str) -> List[SmartChunk]:
-        logger.warning("🔄 Использование fallback чанкинга")
+        logger.warning(" Использование fallback чанкинга")
         chunks: List[SmartChunk] = []
 
         for index, start in enumerate(range(0, len(text), self.base_chunk_size)):

@@ -56,9 +56,9 @@ def extract_law_number(text: str, metadata: Dict[str, Any] | None = None) -> Opt
 
     if text:
         patterns = [
-            r"федеральный закон.*?№\s*(\d+)-фз",
-            r"фз.*?№\s*(\d+)-фз",
-            r"№\s*(\d+)-фз",
+            r"федеральный закон.*?\s*(\d+)-фз",
+            r"фз.*?\s*(\d+)-фз",
+            r"\s*(\d+)-фз",
             r"(\d+)-фз",
         ]
 

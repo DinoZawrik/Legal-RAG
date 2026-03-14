@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-🔄 Processing Pipeline Suite
+Processing Pipeline Suite
 Объединенный модуль для обработки документов и данных.
 
 Включает функциональность из:
 - ingestion_pipeline.py
-- regulatory_pipeline.py  
+- regulatory_pipeline.py 
 - document_manager.py (частично)
 
 Объединяет различные pipeline для обработки документов:

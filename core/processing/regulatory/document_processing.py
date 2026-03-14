@@ -33,14 +33,14 @@ async def process_document(
 
     try:
         filename = metadata.get("original_filename") or Path(document_path).name
-        logger.info("🔄 Начинаем обработку файла '%s'", filename)
+        logger.info(" Начинаем обработку файла '%s'", filename)
 
         if task_id:
             update_task_status(task_id, "processing", "Начало обработки документа", 10)
 
         text = extract_text_from_pdf(str(document_path))
         if not text.strip():
-            logger.warning("⚠️ PDF файл %s существует, но не содержит извлекаемого текста", filename)
+            logger.warning(" PDF файл %s существует, но не содержит извлекаемого текста", filename)
 
         if task_id:
             update_task_status(task_id, "processing", "Текст извлечен", 30)
@@ -79,9 +79,9 @@ async def process_document(
 
         if pipeline.vector_store and text_chunks:
             await add_documents_to_vector_store(pipeline.vector_store, text_chunks)
-            logger.info("✅ %s чанков добавлено в векторное хранилище", len(text_chunks))
+            logger.info(" %s чанков добавлено в векторное хранилище", len(text_chunks))
         else:
-            logger.warning("⚠️ Векторное хранилище недоступно или чанки отсутствуют")
+            logger.warning(" Векторное хранилище недоступно или чанки отсутствуют")
 
         regulatory_document = RegulatoryDocument(
             raw_text=text,
@@ -103,7 +103,7 @@ async def process_document(
         return regulatory_document
 
     except Exception as exc:
-        logger.error("❌ Ошибка обработки %s: %s", document_path, exc)
+        logger.error(" Ошибка обработки %s: %s", document_path, exc)
         if task_id:
             update_task_status(task_id, "failed", f"Ошибка: {exc}", 100)
 
@@ -139,7 +139,7 @@ async def extract_regulatory_data(
             if file_path:
                 return await process_presentation_with_pages(pipeline, file_path, metadata)
 
-            logger.warning("📊 Используется упрощенная обработка презентации - нет пути к файлу")
+            logger.warning(" Используется упрощенная обработка презентации - нет пути к файлу")
             extraction_chain = pipeline.presentation_extraction_prompt | pipeline.llm | StrOutputParser()
             extracted_text = await extraction_chain.ainvoke({"document_text": text[:4000]})
         else:
@@ -160,11 +160,11 @@ async def extract_regulatory_data(
             metadata=extracted_json,
         )
 
-        logger.info("✅ Извлечены данные: %s", extracted_data.document_type)
+        logger.info(" Извлечены данные: %s", extracted_data.document_type)
         return extracted_data
 
     except Exception as exc:
-        logger.error("❌ Ошибка извлечения регулятивных данных: %s", exc)
+        logger.error(" Ошибка извлечения регулятивных данных: %s", exc)
         return ExtractedData(
             document_type="unknown",
             document_number="",
@@ -185,11 +185,11 @@ async def validate_extracted_data(
         validation_chain = pipeline.validation_prompt | pipeline.llm | StrOutputParser()
         data_text = json.dumps(extracted_data.metadata, ensure_ascii=False, indent=2)
         await validation_chain.ainvoke({"extracted_data": data_text})
-        logger.info("✅ Данные прошли валидацию")
+        logger.info(" Данные прошли валидацию")
         return extracted_data
 
     except Exception as exc:
-        logger.warning("⚠️ Ошибка валидации данных: %s", exc)
+        logger.warning(" Ошибка валидации данных: %s", exc)
         return extracted_data
 
 

@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-🎯 Advanced Legal Document Chunker
+Advanced Legal Document Chunker
 Решает проблему 33% error rate через структурно-осведомленное разбиение.
 
 Ключевые улучшения:
-- Распознавание российской правовой структуры (статья → часть → пункт)
+- Распознавание российской правовой структуры (статья часть пункт)
 - Сохранение численных ограничений (80%, сроки, суммы)
 - Обнаружение запретов и ограничений
 - Создание rich metadata для точного поиска
 - Контекстные связи между нормами
 
 Решает выявленные проблемы:
-✅ Статья 10.1 не найдена → Точное распознавание структуры статей
-✅ 80% лимит потерян → Специальная обработка численных данных
-✅ Запреты не обнаружены → Детекция модальности (можно/нельзя/должен)
-✅ Уклончивые ответы → Rich metadata для точного сопоставления
+Статья 10.1 не найдена Точное распознавание структуры статей
+80% лимит потерян Специальная обработка численных данных
+Запреты не обнаружены Детекция модальности (можно/нельзя/должен)
+Уклончивые ответы Rich metadata для точного сопоставления
 """
 
 import logging
@@ -29,49 +29,49 @@ logger = logging.getLogger(__name__)
 
 class LegalElementType(Enum):
     """Типы правовых элементов в российском законодательстве."""
-    FEDERAL_LAW = "federal_law"         # Федеральный закон
-    ARTICLE = "article"                 # Статья
-    PART = "part"                       # Часть
-    POINT = "point"                     # Пункт
-    SUBPOINT = "subpoint"               # Подпункт
-    CHAPTER = "chapter"                 # Глава
-    SECTION = "section"                 # Раздел
-    DEFINITION = "definition"           # Определение
-    PROHIBITION = "prohibition"         # Запрет
-    PERMISSION = "permission"           # Разрешение
-    OBLIGATION = "obligation"           # Обязанность
-    NUMERICAL_CONSTRAINT = "numerical_constraint"  # Численное ограничение
+    FEDERAL_LAW = "federal_law" # Федеральный закон
+    ARTICLE = "article" # Статья
+    PART = "part" # Часть
+    POINT = "point" # Пункт
+    SUBPOINT = "subpoint" # Подпункт
+    CHAPTER = "chapter" # Глава
+    SECTION = "section" # Раздел
+    DEFINITION = "definition" # Определение
+    PROHIBITION = "prohibition" # Запрет
+    PERMISSION = "permission" # Разрешение
+    OBLIGATION = "obligation" # Обязанность
+    NUMERICAL_CONSTRAINT = "numerical_constraint" # Численное ограничение
 
 
 class ModalityType(Enum):
     """Типы правовой модальности."""
-    PROHIBITION = "prohibition"         # не может, не вправе, запрещено
-    PERMISSION = "permission"           # может, вправе, разрешено
-    OBLIGATION = "obligation"           # должен, обязан, необходимо
-    CONDITIONAL = "conditional"         # если, в случае, при условии
-    NEUTRAL = "neutral"                 # описательные нормы
+    PROHIBITION = "prohibition" # не может, не вправе, запрещено
+    PERMISSION = "permission" # может, вправе, разрешено
+    OBLIGATION = "obligation" # должен, обязан, необходимо
+    CONDITIONAL = "conditional" # если, в случае, при условии
+    NEUTRAL = "neutral" # описательные нормы
 
 
 @dataclass
 class NumericalConstraint:
     """Численное ограничение в правовой норме."""
-    value: str                          # "80", "три года"
-    unit: str                          # "%", "лет", "рублей"
-    operator: str                      # "не более", "не менее", "до"
-    context: str                       # контекст ограничения
-    constraint_type: str               # "размер", "срок", "количество"
-    full_expression: str               # полное выражение
+    value: str # "80", "три года"
+    unit: str # "%", "лет", "рублей"
+    operator: str # "не более", "не менее", "до"
+    context: str # контекст ограничения
+    constraint_type: str # "размер", "срок", "количество"
+    full_expression: str # полное выражение
 
 
 @dataclass
 class LegalReference:
     """Ссылка на другую правовую норму."""
-    law_number: Optional[str] = None    # "115-ФЗ"
-    article: Optional[str] = None       # "10.1"
-    part: Optional[str] = None          # "1"
-    point: Optional[str] = None         # "1"
-    full_reference: str = ""            # полная ссылка
-    reference_type: str = "internal"    # internal, external
+    law_number: Optional[str] = None # "115-ФЗ"
+    article: Optional[str] = None # "10.1"
+    part: Optional[str] = None # "1"
+    point: Optional[str] = None # "1"
+    full_reference: str = "" # полная ссылка
+    reference_type: str = "internal" # internal, external
 
 
 @dataclass
@@ -159,7 +159,7 @@ class AdvancedLegalChunker:
         # Паттерны для российского законодательства
         self.law_patterns = {
             "federal_law": re.compile(
-                r'Федеральный\s+закон\s+.*?№\s*(\d+)-ФЗ',
+                r'Федеральный\s+закон\s+.*?\s*(\d+)-ФЗ',
                 re.IGNORECASE
             ),
             "article": re.compile(
@@ -695,7 +695,7 @@ class AdvancedLegalChunker:
             if term not in terms and len(term) > 4:
                 terms.append(term)
 
-        return terms[:10]  # Ограничиваем количество
+        return terms[:10] # Ограничиваем количество
 
     def _extract_legal_references(self, content: str) -> List[LegalReference]:
         """Извлечение ссылок на другие правовые нормы."""
@@ -762,4 +762,4 @@ class AdvancedLegalChunker:
             if concept in important_concepts:
                 score += 0.2
 
-        return min(score, 2.0)  # Максимальный score 2.0
+        return min(score, 2.0) # Максимальный score 2.0

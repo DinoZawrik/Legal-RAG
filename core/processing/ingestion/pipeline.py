@@ -1,4 +1,4 @@
-from ..common import *  # noqa: F401,F403
+from ..common import * # noqa: F401,F403
 from ..errors import ProcessingPipelineError
 from .extractors import (
     extract_doc_content,
@@ -28,9 +28,9 @@ class IngestionPipeline:
         try:
             # Vector store будет инициализирован асинхронно при первом использовании
             self.vector_store = None
-            logger.info("✅ Ingestion pipeline инициализирован")
+            logger.info(" Ingestion pipeline инициализирован")
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации ingestion pipeline: {e}")
+            logger.error(f" Ошибка инициализации ingestion pipeline: {e}")
             raise ProcessingPipelineError(f"Initialization failed: {e}")
     
     def extract_text_from_file(self, file_path: Union[str, Path]) -> str:
@@ -62,7 +62,7 @@ class IngestionPipeline:
                 raise ProcessingPipelineError(f"Unsupported file type: {extension}")
                 
         except Exception as e:
-            logger.error(f"❌ Ошибка извлечения текста из {file_path}: {e}")
+            logger.error(f" Ошибка извлечения текста из {file_path}: {e}")
             raise ProcessingPipelineError(f"Text extraction failed: {e}")
     
     
@@ -85,11 +85,11 @@ class IngestionPipeline:
                 )
                 text_chunks.append(chunk)
             
-            logger.info(f"✅ Создано {len(text_chunks)} текстовых чанков")
+            logger.info(f" Создано {len(text_chunks)} текстовых чанков")
             return text_chunks
             
         except Exception as e:
-            logger.error(f"❌ Ошибка создания чанков: {e}")
+            logger.error(f" Ошибка создания чанков: {e}")
             raise ProcessingPipelineError(f"Chunk creation failed: {e}")
     
     async def process_document(self, file_path: Union[str, Path], 
@@ -130,12 +130,12 @@ class IngestionPipeline:
                 )
                 
                 if storage_result and storage_result.get('duplicate'):
-                    logger.info(f"📋 Документ '{Path(file_path).name}' уже существовал в системе")
+                    logger.info(f" Документ '{Path(file_path).name}' уже существовал в системе")
                 else:
-                    logger.info(f"✅ Документ '{Path(file_path).name}' полностью сохранен (PostgreSQL + ChromaDB + Redis)")
+                    logger.info(f" Документ '{Path(file_path).name}' полностью сохранен (PostgreSQL + ChromaDB + Redis)")
                 
             except Exception as e:
-                logger.warning(f"⚠️ Не удалось сохранить документ: {e}")
+                logger.warning(f" Не удалось сохранить документ: {e}")
             
             # Формирование результата с учетом дедупликации
             result = {
@@ -156,11 +156,11 @@ class IngestionPipeline:
                 if storage_result.get('duplicate'):
                     result["message"] = storage_result.get("message", "Документ является дубликатом")
             
-            logger.info(f"✅ Документ {Path(file_path).name} успешно обработан")
+            logger.info(f" Документ {Path(file_path).name} успешно обработан")
             return result
             
         except Exception as e:
-            logger.error(f"❌ Ошибка обработки документа {file_path}: {e}")
+            logger.error(f" Ошибка обработки документа {file_path}: {e}")
             return {
                 "success": False,
                 "file_path": str(file_path),

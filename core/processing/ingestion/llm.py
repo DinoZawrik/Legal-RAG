@@ -28,7 +28,7 @@ def get_api_key() -> str | None:
 
     if not api_key:
         logger.error(
-            "❌ Google/Gemini API ключ не найден! "
+            " Google/Gemini API ключ не найден! "
             "Установите GEMINI_API_KEY или GOOGLE_API_KEY в .env файле"
         )
         return None
@@ -65,7 +65,7 @@ def get_backup_api_keys() -> list[str]:
 
     if not api_keys:
         logger.error(
-            "❌ Нет доступных API ключей для ротации! "
+            " Нет доступных API ключей для ротации! "
             "Установите GEMINI_API_KEY и/или GEMINI_API_KEY_1-5 в .env файле"
         )
 
@@ -84,21 +84,21 @@ def retry_with_key_rotation(
 
         try:
             if hasattr(func, "__self__") and hasattr(func.__self__, "google_api_key"):
-                func.__self__.google_api_key = current_key  # type: ignore[attr-defined]
+                func.__self__.google_api_key = current_key # type: ignore[attr-defined]
 
             logger.info(
-                "🔑 Attempt %s/%s with API key #%s",
+                " Attempt %s/%s with API key #%s",
                 retry_count + 1,
                 max_retries,
                 current_key_index + 1,
             )
             return func(*args, **kwargs)
 
-        except Exception as exc:  # pragma: no cover - rely on runtime
+        except Exception as exc: # pragma: no cover - rely on runtime
             error_message = str(exc).lower()
             if any(token in error_message for token in ("429", "quota", "rate limit")):
                 logger.warning(
-                    "⚠️ API quota error on key #%s, rotating to next key...",
+                    " API quota error on key #%s, rotating to next key...",
                     current_key_index + 1,
                 )
                 if retry_count < max_retries - 1:
@@ -106,7 +106,7 @@ def retry_with_key_rotation(
                 continue
             raise
 
-    raise RuntimeError(f"❌ All {max_retries} API keys exhausted, unable to complete request")
+    raise RuntimeError(f" All {max_retries} API keys exhausted, unable to complete request")
 
 
 api_key = get_api_key()

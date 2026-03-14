@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 Simple Google Search (через requests, без Crawl4AI)
+Simple Google Search (через requests, без Crawl4AI)
 Идеален для поиска определений - Google показывает их в featured snippets
 """
 
@@ -53,14 +53,14 @@ def search_google_simple(query: str, max_results: int = 5) -> List[Dict[str, Any
         featured = soup.find('div', class_=re.compile(r'kp-wholepage|kno-rdesc'))
         if featured and len(results) < max_results:
             snippet_text = featured.get_text(strip=True, separator=' ')
-            if len(snippet_text) > 50:  # Valid snippet
+            if len(snippet_text) > 50: # Valid snippet
                 results.append({
                     'title': 'Определение (Google Featured Snippet)',
-                    'snippet': snippet_text[:500],  # First 500 chars
+                    'snippet': snippet_text[:500], # First 500 chars
                     'url': 'https://www.google.com/search?q=' + encoded_query,
                     'source': 'google_featured'
                 })
-                logger.info("[GOOGLE] ✅ Found featured snippet")
+                logger.info("[GOOGLE] Found featured snippet")
         
         # 2. Extract organic results - FLEXIBLE APPROACH
         # Try multiple selectors since Google changes structure frequently
@@ -99,16 +99,16 @@ def search_google_simple(query: str, max_results: int = 5) -> List[Dict[str, Any
             # Extract snippet (any text in parent div)
             snippet = parent.get_text(strip=True, separator=' ')
             # Clean up snippet
-            snippet = re.sub(r'\s+', ' ', snippet)  # Multiple spaces to one
-            snippet = snippet.replace(title, '', 1)  # Remove title from snippet
+            snippet = re.sub(r'\s+', ' ', snippet) # Multiple spaces to one
+            snippet = snippet.replace(title, '', 1) # Remove title from snippet
             
-            if len(snippet) < 20:  # Too short
+            if len(snippet) < 20: # Too short
                 continue
             
             # Filter: prefer consultant.ru, garant.ru, gov.ru
             priority = any(domain in href.lower() for domain in ['consultant.ru', 'garant.ru', '.gov.ru'])
             
-            if priority or len(results) < 3:  # Always take first 3 results
+            if priority or len(results) < 3: # Always take first 3 results
                 results.append({
                     'title': title[:200],
                     'snippet': snippet[:400],
@@ -117,7 +117,7 @@ def search_google_simple(query: str, max_results: int = 5) -> List[Dict[str, Any
                 })
                 logger.info(f"[GOOGLE] Found: {title[:50]}... from {href[:50]}...")
         
-        logger.info(f"[GOOGLE] ✅ Found {len(results)} results")
+        logger.info(f"[GOOGLE] Found {len(results)} results")
         return results
         
     except Exception as e:
@@ -144,5 +144,5 @@ if __name__ == "__main__":
     print(f"\nНайдено {len(results)} результатов:\n")
     for i, r in enumerate(results, 1):
         print(f"{i}. {r['title']}")
-        print(f"   {r['snippet'][:150]}...")
-        print(f"   {r['url']}\n")
+        print(f" {r['snippet'][:150]}...")
+        print(f" {r['url']}\n")

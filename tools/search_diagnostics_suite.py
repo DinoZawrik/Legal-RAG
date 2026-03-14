@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-🔍 Search & Content Diagnostics Suite
+Search & Content Diagnostics Suite
 Объединенный инструмент для диагностики поиска и анализа контента.
 
 Включает функциональность из:
-- search_diagnostics.py  
+- search_diagnostics.py 
 - advanced_search_diagnostics.py
 - quick_content_audit.py
 
 Использование:
     python -m tools.search_diagnostics_suite --mode=basic
-    python -m tools.search_diagnostics_suite --mode=advanced  
+    python -m tools.search_diagnostics_suite --mode=advanced 
     python -m tools.search_diagnostics_suite --mode=content
     python -m tools.search_diagnostics_suite --mode=full
 """
@@ -29,7 +29,7 @@ try:
     from core.storage_coordinator import create_storage_coordinator, StorageCoordinator
     from core.logging_config import configure_logging
 except ImportError:
-    print("❌ Не удается импортировать core модули")
+    print(" Не удается импортировать core модули")
     sys.exit(1)
 
 # Logging setup
@@ -69,9 +69,9 @@ class SearchDiagnosticsSuite:
         """Инициализирует менеджер хранилища."""
         try:
             self.storage_manager = await create_storage_coordinator()
-            logger.info("✅ Менеджер хранилища инициализирован")
+            logger.info(" Менеджер хранилища инициализирован")
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации менеджера хранилища: {e}")
+            logger.error(f" Ошибка инициализации менеджера хранилища: {e}")
             raise
     
     # === БАЗОВАЯ ДИАГНОСТИКА ===
@@ -81,7 +81,7 @@ class SearchDiagnosticsSuite:
         if not self.storage_manager:
             await self.initialize_storage_manager()
         
-        logger.info(f"🔍 Поиск контента: {search_text}")
+        logger.info(f" Поиск контента: {search_text}")
         
         try:
             search_result = await self.storage_manager.search_documents(search_text, limit=5)
@@ -126,7 +126,7 @@ class SearchDiagnosticsSuite:
     
     async def comprehensive_search_analysis(self) -> Dict[str, Any]:
         """Комплексный анализ поисковых возможностей."""
-        logger.info("🚀 Запуск комплексного анализа поиска...")
+        logger.info(" Запуск комплексного анализа поиска...")
         
         analysis = {
             "document_coverage": await self.analyze_document_coverage(),
@@ -159,7 +159,7 @@ class SearchDiagnosticsSuite:
         }
         
         for phrase in self.critical_phrases:
-            logger.info(f"📊 Анализируем покрытие: {phrase}")
+            logger.info(f" Анализируем покрытие: {phrase}")
             
             try:
                 # Прямой поиск
@@ -239,7 +239,7 @@ class SearchDiagnosticsSuite:
                     if variation not in variations:
                         variations.append(variation)
         
-        return variations[:10]  # Ограничиваем количество вариаций
+        return variations[:10] # Ограничиваем количество вариаций
     
     async def analyze_missing_critical_content(self) -> Dict[str, Any]:
         """Анализирует отсутствующий критический контент."""
@@ -250,7 +250,7 @@ class SearchDiagnosticsSuite:
         }
         
         for phrase in self.critical_phrases:
-            logger.info(f"🔍 Проверяем наличие: {phrase}")
+            logger.info(f" Проверяем наличие: {phrase}")
             
             exact_matches = await self.find_exact_content_matches(phrase)
             phrase_variations = await self.find_phrase_variations_search(phrase)
@@ -296,7 +296,7 @@ class SearchDiagnosticsSuite:
             "performance_summary": {}
         }
         
-        test_phrase = self.critical_phrases  # Тестируем на первой фразе
+        test_phrase = self.critical_phrases # Тестируем на первой фразе
         
         # Точный поиск
         exact_results = await self.find_document_content(test_phrase)
@@ -334,7 +334,7 @@ class SearchDiagnosticsSuite:
     
     async def quick_content_audit(self) -> Dict[str, Any]:
         """Быстрый аудит контента."""
-        logger.info("⚡ Запуск быстрого аудита контента...")
+        logger.info(" Запуск быстрого аудита контента...")
         
         audit_results = {
             "corpus_analysis": await self.analyze_document_corpus(),
@@ -378,7 +378,7 @@ class SearchDiagnosticsSuite:
         if successful_searches > len(test_terms) * 0.8:
             corpus_analysis["document_availability"] = "good"
         elif successful_searches > len(test_terms) * 0.5:
-            corpus_analysis["document_availability"] = "moderate"  
+            corpus_analysis["document_availability"] = "moderate" 
         else:
             corpus_analysis["document_availability"] = "poor"
         
@@ -421,8 +421,8 @@ class SearchDiagnosticsSuite:
             "recommendations": []
         }
         
-        for phrase in self.critical_phrases[:3]:  # Ограничиваем для скорости
-            logger.info(f"🔬 Детальный анализ: {phrase}")
+        for phrase in self.critical_phrases[:3]: # Ограничиваем для скорости
+            logger.info(f" Детальный анализ: {phrase}")
             
             # Основной поиск
             main_results = await self.find_document_content(phrase)
@@ -446,15 +446,15 @@ class SearchDiagnosticsSuite:
             # Рекомендации
             if not main_results and not any(alternative_results.values()):
                 phrase_analysis["recommendations"].append(
-                    f"❌ Фраза '{phrase}' требует добавления контента"
+                    f" Фраза '{phrase}' требует добавления контента"
                 )
             elif not main_results and any(alternative_results.values()):
                 phrase_analysis["recommendations"].append(
-                    f"⚠️ Фраза '{phrase}' найдена только через альтернативы"
+                    f" Фраза '{phrase}' найдена только через альтернативы"
                 )
             else:
                 phrase_analysis["recommendations"].append(
-                    f"✅ Фраза '{phrase}' найдена успешно"
+                    f" Фраза '{phrase}' найдена успешно"
                 )
         
         return phrase_analysis
@@ -483,7 +483,7 @@ class SearchDiagnosticsSuite:
         if phrase in synonyms:
             alternatives.extend(synonyms[phrase])
         
-        return list(set(alternatives))  # Удаляем дубликаты
+        return list(set(alternatives)) # Удаляем дубликаты
     
     async def analyze_segmentation_issues(self) -> Dict[str, Any]:
         """Анализирует проблемы сегментации."""
@@ -556,7 +556,7 @@ class SearchDiagnosticsSuite:
     
     async def run_basic_diagnostics(self) -> Dict[str, Any]:
         """Запускает базовую диагностику."""
-        logger.info("🔍 Запуск базовой диагностики поиска...")
+        logger.info(" Запуск базовой диагностики поиска...")
         
         results = {
             "content_search": {}
@@ -582,7 +582,7 @@ class SearchDiagnosticsSuite:
     
     async def run_full_diagnostics(self) -> Dict[str, Any]:
         """Запускает полную диагностику."""
-        logger.info("🚀 Запуск полной диагностики...")
+        logger.info(" Запуск полной диагностики...")
         
         return {
             "basic_diagnostics": await self.run_basic_diagnostics(),
@@ -594,14 +594,14 @@ class SearchDiagnosticsSuite:
     def generate_diagnostic_report(self, results: Dict[str, Any], 
                                  output_file: str = "search_diagnostics_report.json"):
         """Генерирует отчет по диагностике."""
-        logger.info(f"📊 Сохраняем отчет в {output_file}")
+        logger.info(f" Сохраняем отчет в {output_file}")
         
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
         
         # Краткий отчет в консоль
         print("\n" + "="*60)
-        print("🔍 ОТЧЕТ ПО ДИАГНОСТИКЕ ПОИСКА")
+        print(" ОТЧЕТ ПО ДИАГНОСТИКЕ ПОИСКА")
         print("="*60)
         
         # Статистика по базовой диагностике
@@ -609,24 +609,24 @@ class SearchDiagnosticsSuite:
             basic = results["basic_diagnostics"]
             if "keyword_search" in basic:
                 keyword_stats = basic["keyword_search"]["summary"]
-                print(f"🔑 Найдено ключевых слов: {keyword_stats.get('found_keywords', 0)}")
-                print(f"📄 Всего документов: {keyword_stats.get('total_documents', 0)}")
+                print(f" Найдено ключевых слов: {keyword_stats.get('found_keywords', 0)}")
+                print(f" Всего документов: {keyword_stats.get('total_documents', 0)}")
         
         # Статистика по продвинутой диагностике
         if "advanced_diagnostics" in results:
             advanced = results["advanced_diagnostics"]
             if "document_coverage" in advanced:
                 coverage = advanced["document_coverage"]["coverage_statistics"]
-                print(f"📊 Покрытие контента: {coverage.get('coverage_percentage', 0):.1f}%")
+                print(f" Покрытие контента: {coverage.get('coverage_percentage', 0):.1f}%")
         
         # Рекомендации
         if "advanced_diagnostics" in results and "recommendations" in results["advanced_diagnostics"]:
             recommendations = results["advanced_diagnostics"]["recommendations"]
-            print(f"\n💡 Рекомендации ({len(recommendations)}):")
+            print(f"\n Рекомендации ({len(recommendations)}):")
             for rec in recommendations[:3]:
-                print(f"  • {rec.get('title', 'Без названия')}")
+                print(f" • {rec.get('title', 'Без названия')}")
         
-        print(f"\n💾 Полный отчет сохранен в: {output_file}")
+        print(f"\n Полный отчет сохранен в: {output_file}")
         print("="*60)
 
 
@@ -656,14 +656,14 @@ async def main():
             results = await suite.run_advanced_diagnostics()
         elif args.mode == "content":
             results = await suite.run_content_audit()
-        else:  # full
+        else: # full
             results = await suite.run_full_diagnostics()
         
         suite.generate_diagnostic_report(results, args.output)
         
     except Exception as e:
-        logger.error(f"❌ Ошибка диагностики: {e}")
-        print(f"❌ Ошибка: {e}")
+        logger.error(f" Ошибка диагностики: {e}")
+        print(f" Ошибка: {e}")
 
 
 if __name__ == "__main__":

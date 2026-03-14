@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📊 System Monitoring & Database Utilities
+System Monitoring & Database Utilities
 Объединенные утилиты для мониторинга системы и работы с базой данных.
 
 Включает функциональность из:
@@ -30,7 +30,7 @@ try:
     from core.data_storage_suite import postgres_manager
     from core.logging_config import configure_logging
 except ImportError:
-    print("❌ Не удается импортировать core модули")
+    print(" Не удается импортировать core модули")
     sys.exit(1)
 
 # Logging setup
@@ -48,14 +48,14 @@ class SystemMonitoringSuite:
     def print_header(self, title: str):
         """Печать заголовка."""
         print("\n" + "="*60)
-        print(f"📊 {title}")
+        print(f" {title}")
         print("="*60)
 
     # === ПРОВЕРКА СТАТУСА СИСТЕМЫ ===
 
     def check_database_legacy(self) -> Dict[str, Any]:
         """Проверка базы данных (legacy SQLite - DEPRECATED)."""
-        logger.warning("⚠️ SQLite проверка устарела - используется PostgreSQL в Docker")
+        logger.warning(" SQLite проверка устарела - используется PostgreSQL в Docker")
 
         status = {
             "type": "sqlite_legacy",
@@ -84,7 +84,7 @@ class SystemMonitoringSuite:
         try:
             # Пытаемся подключиться к ChromaDB HTTP API
             chroma_url = self.config.CHROMA_HOST
-            logger.info(f"🔍 Проверяем ChromaDB: {chroma_url}")
+            logger.info(f" Проверяем ChromaDB: {chroma_url}")
 
             # Проверка health endpoint
             health_response = requests.get(f"http://{chroma_url}:{self.config.CHROMA_PORT}/api/v1/heartbeat", timeout=5)
@@ -165,7 +165,7 @@ class SystemMonitoringSuite:
                 "modified": str(datetime.fromtimestamp(file_path.stat().st_mtime)) if file_path.exists() else None
             }
 
-            if not file_path.exists() and file_name != ".env":  # .env опционален
+            if not file_path.exists() and file_name != ".env": # .env опционален
                 file_status["issues"].append(f"Отсутствует файл: {file_name}")
 
         return file_status
@@ -200,7 +200,7 @@ class SystemMonitoringSuite:
                 }
 
                 # Проверяем последние строки на ошибки
-                if stat.st_size > 0 and stat.st_size < 1024 * 1024:  # Только небольшие файлы
+                if stat.st_size > 0 and stat.st_size < 1024 * 1024: # Только небольшие файлы
                     try:
                         with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
                             lines = f.readlines()
@@ -443,7 +443,7 @@ class SystemMonitoringSuite:
 
     async def run_status_check(self) -> Dict[str, Any]:
         """Запускает проверку статуса системы."""
-        logger.info("🔍 Запуск проверки статуса системы...")
+        logger.info(" Запуск проверки статуса системы...")
 
         status_report = {
             "timestamp": datetime.now().isoformat(),
@@ -458,7 +458,7 @@ class SystemMonitoringSuite:
 
     async def run_database_check(self) -> Dict[str, Any]:
         """Запускает проверку базы данных."""
-        logger.info("🗄️ Запуск проверки базы данных...")
+        logger.info(" Запуск проверки базы данных...")
 
         database_report = {
             "timestamp": datetime.now().isoformat(),
@@ -470,7 +470,7 @@ class SystemMonitoringSuite:
 
     async def run_full_monitoring(self) -> Dict[str, Any]:
         """Запускает полный мониторинг системы."""
-        logger.info("🚀 Запуск полного мониторинга системы...")
+        logger.info(" Запуск полного мониторинга системы...")
 
         full_report = {
             "timestamp": datetime.now().isoformat(),
@@ -483,7 +483,7 @@ class SystemMonitoringSuite:
     def generate_monitoring_report(self, results: Dict[str, Any],
                                  output_file: str = "system_monitoring_report.json"):
         """Генерирует отчет по мониторингу."""
-        logger.info(f"📊 Сохраняем отчет в {output_file}")
+        logger.info(f" Сохраняем отчет в {output_file}")
 
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
@@ -494,34 +494,34 @@ class SystemMonitoringSuite:
         # Статус ChromaDB
         if "system_status" in results and "chromadb" in results["system_status"]:
             chromadb = results["system_status"]["chromadb"]
-            status_icon = "✅" if chromadb["status"] == "running" else "❌"
+            status_icon = "" if chromadb["status"] == "running" else ""
             print(f"{status_icon} ChromaDB: {chromadb['status']}")
 
         # Статус базы данных
         if "database_status" in results and "connection" in results["database_status"]:
             db_conn = results["database_status"]["connection"]
-            status_icon = "✅" if db_conn["connection"] == "OK" else "❌"
+            status_icon = "" if db_conn["connection"] == "OK" else ""
             print(f"{status_icon} База данных: {db_conn['connection']}")
 
             if "statistics" in db_conn:
                 stats = db_conn["statistics"]
-                print(f"📄 Документов: {stats.get('documents_count', 0)}")
-                print(f"📊 Задач обработки: {stats.get('processing_tasks_count', 0)}")
+                print(f" Документов: {stats.get('documents_count', 0)}")
+                print(f" Задач обработки: {stats.get('processing_tasks_count', 0)}")
 
         # Статус файловой системы
         if "system_status" in results and "files" in results["system_status"]:
             files = results["system_status"]["files"]
             issues_count = len(files.get("issues", []))
-            status_icon = "✅" if issues_count == 0 else "⚠️"
+            status_icon = "" if issues_count == 0 else ""
             print(f"{status_icon} Файловая система: {issues_count} проблем")
 
         # Производительность
         if "database_status" in results and "performance" in results["database_status"]:
             perf = results["database_status"]["performance"]
             performance = perf.get("performance", "unknown")
-            print(f"⚡ Производительность БД: {performance}")
+            print(f" Производительность БД: {performance}")
 
-        print(f"\n💾 Полный отчет сохранен в: {output_file}")
+        print(f"\n Полный отчет сохранен в: {output_file}")
         print("="*60)
 
 
@@ -554,14 +554,14 @@ async def main():
             results = await suite.run_status_check()
         elif args.mode == "database":
             results = await suite.run_database_check()
-        else:  # full
+        else: # full
             results = await suite.run_full_monitoring()
 
         suite.generate_monitoring_report(results, args.output)
 
     except Exception as e:
-        logger.error(f"❌ Ошибка мониторинга: {e}")
-        print(f"❌ Ошибка: {e}")
+        logger.error(f" Ошибка мониторинга: {e}")
+        print(f" Ошибка: {e}")
     finally:
         if postgres_manager:
             await postgres_manager.close()

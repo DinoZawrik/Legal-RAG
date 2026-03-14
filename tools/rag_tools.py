@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔧 LangChain Tools для RAG системы
+LangChain Tools для RAG системы
 Обертки вокруг существующих функций hybrid_search, graph_search и т.д.
 """
 
@@ -37,9 +37,9 @@ async def get_chroma_collection():
             _chroma_collection = await client.get_collection(
                 name=os.getenv("COLLECTION_NAME", "documents")
             )
-            logger.info("✅ ChromaDB collection connected")
+            logger.info(" ChromaDB collection connected")
         except Exception as e:
-            logger.error(f"❌ Error connecting to ChromaDB: {e}")
+            logger.error(f" Error connecting to ChromaDB: {e}")
             raise
 
     return _chroma_collection
@@ -53,9 +53,9 @@ async def get_graph_search_engine():
         try:
             _graph_search_engine = GraphEnhancedHybridSearch()
             await _graph_search_engine.connect()
-            logger.info("✅ Neo4j graph search connected")
+            logger.info(" Neo4j graph search connected")
         except Exception as e:
-            logger.error(f"❌ Error connecting to Neo4j: {e}")
+            logger.error(f" Error connecting to Neo4j: {e}")
             # Не падаем - просто будем работать без графа
             return None
 
@@ -85,7 +85,7 @@ async def hybrid_rag_search_tool(
 
         # Выполняем hybrid search
         results = await hybrid_search(
-            chromadb_collection=collection,
+            chroma_collection=collection,
             query=query,
             k=max_results
         )
@@ -102,13 +102,13 @@ async def hybrid_rag_search_tool(
                 "score": round(result['hybrid_score'], 3),
                 "law": result['metadata'].get('law_number', 'N/A'),
                 "article": result['metadata'].get('article_number', 'N/A'),
-                "text": result['text'][:500]  # Первые 500 символов
+                "text": result['text'][:500] # Первые 500 символов
             })
 
         return json.dumps(formatted_results, ensure_ascii=False, indent=2)
 
     except Exception as e:
-        logger.error(f"❌ Error in hybrid_rag_search_tool: {e}")
+        logger.error(f" Error in hybrid_rag_search_tool: {e}")
         return json.dumps({"error": str(e)})
 
 
@@ -142,7 +142,7 @@ async def graph_traversal_search_tool(
         return json.dumps(related_articles, ensure_ascii=False, indent=2)
 
     except Exception as e:
-        logger.error(f"❌ Error in graph_traversal_search_tool: {e}")
+        logger.error(f" Error in graph_traversal_search_tool: {e}")
         return json.dumps({"error": str(e)})
 
 
@@ -182,7 +182,7 @@ async def definition_lookup_tool(term: str) -> str:
         all_results = []
         for query in search_queries:
             results = await hybrid_search(
-                chromadb_collection=collection,
+                chroma_collection=collection,
                 query=query,
                 k=20
             )

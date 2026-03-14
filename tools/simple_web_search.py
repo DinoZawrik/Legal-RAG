@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🕸️ Lightweight web search fallback (DuckDuckGo, Bing scraping)
+Lightweight web search fallback (DuckDuckGo, Bing scraping)
 """
 
 import asyncio
@@ -140,7 +140,7 @@ async def search_google(query: str, max_results: int = 5) -> List[Dict[str, Any]
                                 'extraction_method': 'llm'
                             })
 
-                    logger.info(f"[GOOGLE] ✅ Found {len(results)} results")
+                    logger.info(f"[GOOGLE] Found {len(results)} results")
                     return results
 
                 except Exception as e:
@@ -237,7 +237,7 @@ async def search_duckduckgo(query: str, max_results: int = 5) -> List[Dict[str, 
                                 'extraction_method': 'llm'
                             })
 
-                    logger.info(f"[DUCKDUCKGO] ✅ Found {len(results)} results")
+                    logger.info(f"[DUCKDUCKGO] Found {len(results)} results")
                     return results
 
                 except Exception as e:
@@ -273,7 +273,7 @@ async def simple_web_search(query: str, max_results: int = 3) -> List[Dict[str, 
                 timeout=12,
             )
             if results and len(results) > 0:
-                logger.info(f"[WEB SEARCH] ✅ Google found {len(results)} results")
+                logger.info(f"[WEB SEARCH] Google found {len(results)} results")
                 return results
             else:
                 logger.info("[WEB SEARCH] Google returned no results, trying DuckDuckGo...")
@@ -291,7 +291,7 @@ async def simple_web_search(query: str, max_results: int = 3) -> List[Dict[str, 
             timeout=12,
         )
         if results:
-            logger.info(f"[WEB SEARCH] ✅ DuckDuckGo found {len(results)} results")
+            logger.info(f"[WEB SEARCH] DuckDuckGo found {len(results)} results")
             return results
         else:
             logger.warning("[WEB SEARCH] No results found")
@@ -315,8 +315,8 @@ if __name__ == "__main__":
         print(f"\nFound {len(results)} results:\n")
         for i, r in enumerate(results, 1):
             print(f"{i}. {r.get('title', 'NO TITLE')}")
-            print(f"   URL: {r.get('url', 'N/A')}")
-            print(f"   Snippet: {r.get('snippet', 'NO SNIPPET')[:150]}...")
+            print(f" URL: {r.get('url', 'N/A')}")
+            print(f" Snippet: {r.get('snippet', 'NO SNIPPET')[:150]}...")
             print()
 
     asyncio.run(test())

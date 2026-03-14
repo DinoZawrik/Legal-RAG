@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 PDF Analysis Suite
+PDF Analysis Suite
 Объединенный инструмент для анализа PDF файлов и их извлечения.
 
 Включает функциональность из:
@@ -26,11 +26,11 @@ from core.logging_config import configure_logging
 # PDF extraction libraries
 try:
     import PyPDF2
-    import fitz  # PyMuPDF
+    import fitz # PyMuPDF
     import pdfplumber
 except ImportError as e:
-    print(f"❌ Необходимые библиотеки не установлены: {e}")
-    print("📦 Установите: pip install PyPDF2 PyMuPDF pdfplumber")
+    print(f" Необходимые библиотеки не установлены: {e}")
+    print(" Установите: pip install PyPDF2 PyMuPDF pdfplumber")
     sys.exit(1)
 
 # Core imports
@@ -39,7 +39,7 @@ try:
     from core.infrastructure_suite import get_settings
     from core.data_storage_suite import UnifiedStorageManager, TextChunk
 except ImportError:
-    print("❌ Не удается импортировать core модули")
+    print(" Не удается импортировать core модули")
     sys.exit(1)
 
 # Logging setup
@@ -126,7 +126,7 @@ class PDFAnalysisSuite:
         }
         
         for method_name, extraction_func in methods.items():
-            logger.info(f"🔍 Тестируем {method_name} для {pdf_path.name}")
+            logger.info(f" Тестируем {method_name} для {pdf_path.name}")
             
             text = extraction_func(pdf_path)
             
@@ -168,11 +168,11 @@ class PDFAnalysisSuite:
             found_in_methods = [m for m, found in phrase_results.items() if found]
             if found_in_methods:
                 analysis["recommendations"].append(
-                    f"✅ '{phrase}' найдена в: {', '.join(found_in_methods)}"
+                    f" '{phrase}' найдена в: {', '.join(found_in_methods)}"
                 )
             else:
                 analysis["recommendations"].append(
-                    f"❌ '{phrase}' не найдена ни в одном методе"
+                    f" '{phrase}' не найдена ни в одном методе"
                 )
         
         # Анализ производительности методов
@@ -190,7 +190,7 @@ class PDFAnalysisSuite:
     
     async def audit_pdf_files(self) -> Dict[str, Any]:
         """Проводит аудит всех PDF файлов."""
-        logger.info("🔍 Начинаем аудит PDF файлов...")
+        logger.info(" Начинаем аудит PDF файлов...")
         
         pdf_files = self.find_pdf_files()
         if not pdf_files:
@@ -209,7 +209,7 @@ class PDFAnalysisSuite:
         method_scores = {"pypdf2": 0, "pymupdf": 0, "pdfplumber": 0}
         
         for pdf_path in pdf_files:
-            logger.info(f"📄 Анализируем: {pdf_path.name}")
+            logger.info(f" Анализируем: {pdf_path.name}")
             
             extraction_results = self.test_extraction_methods(pdf_path)
             phrase_analysis = self.analyze_phrases_in_extractions(
@@ -274,7 +274,7 @@ class PDFAnalysisSuite:
     
     async def run_full_analysis(self) -> Dict[str, Any]:
         """Запускает полный анализ PDF файлов."""
-        logger.info("🚀 Запуск полного анализа PDF...")
+        logger.info(" Запуск полного анализа PDF...")
         
         # Аудит файлов
         audit_results = await self.audit_pdf_files()
@@ -286,7 +286,7 @@ class PDFAnalysisSuite:
             pdf_files = self.find_pdf_files()
             
             database_comparisons = []
-            for pdf_path in pdf_files[:3]:  # Ограничиваем для скорости
+            for pdf_path in pdf_files[:3]: # Ограничиваем для скорости
                 comparison = await self.compare_with_database(pdf_path, qa_service)
                 database_comparisons.append(comparison)
             
@@ -301,27 +301,27 @@ class PDFAnalysisSuite:
     
     def generate_report(self, results: Dict[str, Any], output_file: str = "pdf_analysis_report.json"):
         """Генерирует отчет по анализу."""
-        logger.info(f"📊 Сохраняем отчет в {output_file}")
+        logger.info(f" Сохраняем отчет в {output_file}")
         
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
         
         # Краткий отчет в консоль
         print("\n" + "="*60)
-        print("📊 ОТЧЕТ ПО АНАЛИЗУ PDF ФАЙЛОВ")
+        print(" ОТЧЕТ ПО АНАЛИЗУ PDF ФАЙЛОВ")
         print("="*60)
         
         if "total_files" in results:
-            print(f"📄 Всего файлов: {results['total_files']}")
+            print(f" Всего файлов: {results['total_files']}")
             summary = results.get("summary", {})
-            print(f"✅ Успешные извлечения: {summary.get('successful_extractions', 0)}")
-            print(f"❌ Неудачные извлечения: {summary.get('failed_extractions', 0)}")
+            print(f" Успешные извлечения: {summary.get('successful_extractions', 0)}")
+            print(f" Неудачные извлечения: {summary.get('failed_extractions', 0)}")
             
             best_method = summary.get("best_method")
             if best_method:
-                print(f"🏆 Лучший метод: {best_method['name']} (очки: {best_method['score']:.1f})")
+                print(f" Лучший метод: {best_method['name']} (очки: {best_method['score']:.1f})")
         
-        print(f"💾 Полный отчет сохранен в: {output_file}")
+        print(f" Полный отчет сохранен в: {output_file}")
         print("="*60)
 
 
@@ -354,14 +354,14 @@ async def main():
                 results = suite.test_extraction_methods(pdf_files[0])
             else:
                 results = {"error": "PDF файлы не найдены"}
-        else:  # full
+        else: # full
             results = await suite.run_full_analysis()
         
         suite.generate_report(results, args.output)
         
     except Exception as e:
-        logger.error(f"❌ Ошибка анализа: {e}")
-        print(f"❌ Ошибка: {e}")
+        logger.error(f" Ошибка анализа: {e}")
+        print(f" Ошибка: {e}")
 
 
 if __name__ == "__main__":

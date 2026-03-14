@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🌐 Web Search Tools for Legal Document Search
+Web Search Tools for Legal Document Search
 Fallback search in external legal databases (КонсультантПлюс, Гарант)
 Uses Crawl4AI for LLM-friendly web scraping
 """
@@ -28,6 +28,28 @@ if sys.platform == 'win32':
         pass
 
 logger = logging.getLogger(__name__)
+
+# Allowed domains for web crawling (SSRF protection)
+_ALLOWED_CRAWL_DOMAINS = {
+    "consultant.ru",
+    "www.consultant.ru",
+    "garant.ru",
+    "www.garant.ru",
+    "publication.pravo.gov.ru",
+    "pravo.gov.ru",
+    "base.garant.ru",
+}
+
+
+def _is_url_allowed(url: str) -> bool:
+    """Check that a URL belongs to an allowed domain."""
+    from urllib.parse import urlparse
+    try:
+        parsed = urlparse(url)
+        hostname = (parsed.hostname or "").lower()
+        return any(hostname == d or hostname.endswith("." + d) for d in _ALLOWED_CRAWL_DOMAINS)
+    except Exception:
+        return False
 
 # Import Crawl4AI
 try:
@@ -168,7 +190,7 @@ def retry_with_backoff(max_retries: int = 3, initial_delay: float = 1.0):
                     logger.warning(f"[RETRY] Attempt {attempt + 1}/{max_retries} failed: {e}")
                     logger.info(f"[RETRY] Retrying in {delay}s...")
                     await asyncio.sleep(delay)
-                    delay *= 2  # Exponential backoff
+                    delay *= 2 # Exponential backoff
 
         return wrapper
     return decorator
@@ -182,6 +204,9 @@ _search_cache = WebSearchCache(ttl_hours=24)
 @retry_with_backoff(max_retries=3, initial_delay=2.0)
 async def _crawl_consultant_plus(search_url: str, query: str, max_results: int, extraction_strategy) -> List[Dict[str, Any]]:
     """Internal function with retry logic for КонсультантПлюс crawling"""
+    if not _is_url_allowed(search_url):
+        logger.warning(f"[SSRF] Blocked crawl to non-whitelisted URL: {search_url}")
+        return []
     async with AsyncWebCrawler(verbose=False) as crawler:
         # Import CrawlerRunConfig
         from crawl4ai import CrawlerRunConfig, CacheMode
@@ -189,8 +214,8 @@ async def _crawl_consultant_plus(search_url: str, query: str, max_results: int, 
         # Create crawler config with extraction strategy
         crawl_config = CrawlerRunConfig(
             extraction_strategy=extraction_strategy,
-            cache_mode=CacheMode.BYPASS,  # Bypass cache for fresh results
-            delay_before_return_html=3.0  # Wait for JS
+            cache_mode=CacheMode.BYPASS, # Bypass cache for fresh results
+            delay_before_return_html=3.0 # Wait for JS
         )
 
         # Full page crawl with config
@@ -233,11 +258,11 @@ async def _crawl_consultant_plus(search_url: str, query: str, max_results: int, 
                             'law_number': item.get('law_number', ''),
                             'relevance': item.get('relevance', 'medium'),
                             'source': 'consultant_plus',
-                            'extraction_method': 'llm'  # Mark as LLM extracted
+                            'extraction_method': 'llm' # Mark as LLM extracted
                         })
 
                 if results:
-                    logger.info(f"[CONSULTANT+] ✅ LLM extracted {len(results)} results")
+                    logger.info(f"[CONSULTANT+] LLM extracted {len(results)} results")
                     return results
                 else:
                     logger.warning("[CONSULTANT+] LLM extraction returned 0 results")
@@ -266,13 +291,13 @@ async def _crawl_consultant_plus(search_url: str, query: str, max_results: int, 
 
             results.append({
                 'title': title.strip(),
-                'snippet': snippet[:300],  # Limit snippet length
+                'snippet': snippet[:300], # Limit snippet length
                 'url': url,
                 'source': 'consultant_plus',
-                'extraction_method': 'regex'  # Mark as regex extracted
+                'extraction_method': 'regex' # Mark as regex extracted
             })
 
-        logger.info(f"[CONSULTANT+] ⚠️ Regex extracted {len(results)} results (LLM fallback)")
+        logger.info(f"[CONSULTANT+] Regex extracted {len(results)} results (LLM fallback)")
         return results
 
 
@@ -449,8 +474,8 @@ async def search_garant(query: str, max_results: int = 3, use_llm: bool = True) 
             # Full page crawl with optional LLM extraction
             result = await crawler.arun(
                 url=search_url,
-                delay_before_return_html=3.0,  # Wait for JS to load results
-                wait_for="css:.result,.b-result",  # Wait for result elements
+                delay_before_return_html=3.0, # Wait for JS to load results
+                wait_for="css:.result,.b-result", # Wait for result elements
                 extraction_strategy=extraction_strategy,
                 screenshot=False
             )
@@ -505,7 +530,7 @@ async def search_garant(query: str, max_results: int = 3, use_llm: bool = True) 
 
                 results.append({
                     'title': title.strip(),
-                    'snippet': snippet[:300],  # Limit snippet length
+                    'snippet': snippet[:300], # Limit snippet length
                     'url': url,
                     'source': 'garant'
                 })
@@ -550,7 +575,7 @@ async def search_legal_web(query: str, max_results: int = 5) -> List[Dict[str, A
         results = await simple_web_search(query, max_results=max_results)
 
         if results:
-            logger.info(f"[WEB SEARCH] ✅ Found {len(results)} results via web")
+            logger.info(f"[WEB SEARCH] Found {len(results)} results via web")
             return results
 
         logger.warning("[WEB SEARCH] No results from web search")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 Graph-based search tools for Neo4j
+Graph-based search tools for Neo4j
 Tools for searching definitions and relationships in legal knowledge graph
 """
 

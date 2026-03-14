@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🦆 DuckDuckGo Search (без Crawl4AI)
+DuckDuckGo Search (без Crawl4AI)
 Использует requests + BeautifulSoup для надежного веб-поиска
 """
 
@@ -34,7 +34,7 @@ def search_duckduckgo_simple(query: str, max_results: int = 5) -> List[Dict[str,
         }
         data = {
             'q': enhanced_query,
-            'kl': 'ru-ru'  # Russian results
+            'kl': 'ru-ru' # Russian results
         }
         
         logger.info(f"[DDG] Searching: {enhanced_query}")
@@ -79,7 +79,7 @@ def search_duckduckgo_simple(query: str, max_results: int = 5) -> List[Dict[str,
                 'source': 'duckduckgo'
             })
         
-        logger.info(f"[DDG] ✅ Found {len(results)} results")
+        logger.info(f"[DDG] Found {len(results)} results")
         return results
         
     except Exception as e:
@@ -106,5 +106,5 @@ if __name__ == "__main__":
     print(f"\nНайдено {len(results)} результатов:\n")
     for i, r in enumerate(results, 1):
         print(f"{i}. {r['title']}")
-        print(f"   {r['snippet'][:100]}...")
-        print(f"   {r['url']}\n")
+        print(f" {r['snippet'][:100]}...")
+        print(f" {r['url']}\n")

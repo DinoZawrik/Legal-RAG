@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🎯 Universal Legal Intelligence System
+Universal Legal Intelligence System
 Полноценная интеграция всех универсальных компонентов для решения проблем RAG
 
 Решает ключевые проблемы:
@@ -19,7 +19,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 
-# MIGRATED FROM: deprecated wrappers → NEW: modular structure
+# MIGRATED FROM: deprecated wrappers NEW: modular structure
 from core.ner import UniversalLegalNER
 try:
     from core.ner.ner import LegalEntity, EntityType
@@ -99,7 +99,7 @@ class UniversalLegalSystem:
             "avg_processing_time": 0.0
         }
 
-        self.logger.info("🎯 Universal Legal System initialized")
+        self.logger.info(" Universal Legal System initialized")
 
     async def process_query(
         self,
@@ -124,10 +124,10 @@ class UniversalLegalSystem:
         self.stats["total_queries"] += 1
 
         try:
-            self.logger.info(f"🔍 Processing universal query: {query[:100]}...")
+            self.logger.info(f" Processing universal query: {query[:100]}...")
 
             # Шаг 1: Анализ запроса через Universal Smart Search
-            self.logger.info("📊 Step 1: Query analysis with Universal Smart Search")
+            self.logger.info(" Step 1: Query analysis with Universal Smart Search")
             # TODO: Implement analyze_query method in UniversalSmartSearch
             # search_analysis = await self.search_engine.analyze_query(query)
             # self.logger.info(f"Query type: {search_analysis.query_type}, confidence: {search_analysis.confidence}")
@@ -151,16 +151,16 @@ class UniversalLegalSystem:
             self.logger.info("Using default query analysis")
 
             # Шаг 2: Поиск релевантных документов
-            self.logger.info("🔎 Step 2: Finding relevant documents")
+            self.logger.info(" Step 2: Finding relevant documents")
             search_results = self.search_engine.search(
                 query=query,
                 source_chunks=context_documents or [],
-                max_results=max_chunks * 2  # Берем больше для лучшей фильтрации
+                max_results=max_chunks * 2 # Берем больше для лучшей фильтрации
             )
             self.logger.info(f"Found {len(search_results.results)} search results")
 
             # Шаг 3: Извлечение правовых сущностей из найденных результатов
-            self.logger.info("🏛️ Step 3: Legal entity extraction")
+            self.logger.info(" Step 3: Legal entity extraction")
             all_entities = []
             relevant_chunks = []
 
@@ -184,7 +184,7 @@ class UniversalLegalSystem:
             self.logger.info(f"Extracted {len(all_entities)} legal entities")
 
             # Шаг 4: Генерация адаптивного промпта
-            self.logger.info("📝 Step 4: Adaptive prompt generation")
+            self.logger.info(" Step 4: Adaptive prompt generation")
 
             # Создаем ограничения на основе найденных сущностей
             constraints = PromptConstraints(
@@ -204,7 +204,7 @@ class UniversalLegalSystem:
             })()
 
             # Шаг 5: Генерация ответа (здесь нужно интегрироваться с inference service)
-            self.logger.info("🧠 Step 5: AI response generation")
+            self.logger.info(" Step 5: AI response generation")
 
             # Формируем финальный промпт для AI
             final_prompt = prompt_config.system_prompt + "\n\n" + prompt_config.user_prompt
@@ -219,7 +219,7 @@ class UniversalLegalSystem:
             )
 
             # Шаг 6: Верификация фактов против галлюцинаций
-            self.logger.info("✅ Step 6: Fact verification")
+            self.logger.info(" Step 6: Fact verification")
 
             verification_results = []
             if strict_verification:
@@ -235,12 +235,12 @@ class UniversalLegalSystem:
 
                     if not verification.is_verified:
                         self.stats["hallucinations_prevented"] += 1
-                        self.logger.warning(f"⚠️ Potential hallucination detected: {claim.claim_text}")
+                        self.logger.warning(f" Potential hallucination detected: {claim.claim_text}")
 
             self.stats["facts_verified"] += len(verification_results)
 
             # Шаг 7: Финальная проверка и корректировка ответа
-            self.logger.info("🔧 Step 7: Final answer validation and correction")
+            self.logger.info(" Step 7: Final answer validation and correction")
 
             # Проверяем, что ответ содержит обязательные ссылки на источники
             if constraints.require_source_attribution and not self._has_source_citations(answer):
@@ -279,12 +279,12 @@ class UniversalLegalSystem:
                 source_documents=list(set(chunk.source_document for chunk in relevant_chunks if chunk.source_document))
             )
 
-            self.logger.info(f"✅ Query processed successfully in {processing_time:.2f}s")
+            self.logger.info(f" Query processed successfully in {processing_time:.2f}s")
             return result
 
         except Exception as e:
             processing_time = (datetime.now() - start_time).total_seconds()
-            self.logger.error(f"❌ Query processing failed: {e}")
+            self.logger.error(f" Query processing failed: {e}")
 
             return UniversalQueryResult(
                 success=False,
@@ -311,7 +311,7 @@ class UniversalLegalSystem:
         Returns:
             Список SmartChunk объектов готовых для индексации
         """
-        self.logger.info(f"📚 Processing {len(documents)} documents for indexing")
+        self.logger.info(f" Processing {len(documents)} documents for indexing")
 
         all_chunks = []
 
@@ -340,10 +340,10 @@ class UniversalLegalSystem:
                 all_chunks.extend(chunks)
 
             except Exception as e:
-                self.logger.error(f"❌ Error processing document {doc.get('id', 'unknown')}: {e}")
+                self.logger.error(f" Error processing document {doc.get('id', 'unknown')}: {e}")
                 continue
 
-        self.logger.info(f"✅ Created {len(all_chunks)} smart chunks for indexing")
+        self.logger.info(f" Created {len(all_chunks)} smart chunks for indexing")
         return all_chunks
 
     async def _generate_structured_answer(
@@ -431,7 +431,7 @@ class UniversalLegalSystem:
         sources = list(set(chunk.source_document for chunk in chunks if chunk.source_document))
 
         if sources:
-            citation = f"\n\n📖 Источники: {', '.join(sources)}"
+            citation = f"\n\n Источники: {', '.join(sources)}"
             return answer + citation
 
         return answer
@@ -451,7 +451,7 @@ class UniversalLegalSystem:
 
             # Добавляем отсутствующие численные значения
             if missing_values:
-                addition = f"\n\n📊 Важные численные требования: {', '.join(missing_values)}"
+                addition = f"\n\n Важные численные требования: {', '.join(missing_values)}"
                 return answer + addition
 
         return answer
@@ -514,7 +514,7 @@ async def get_universal_legal_system() -> UniversalLegalSystem:
 if __name__ == "__main__":
     # Тестирование Universal Legal System
     async def test_universal_system():
-        print("🎯 Testing Universal Legal System")
+        print(" Testing Universal Legal System")
 
         system = UniversalLegalSystem()
 
@@ -538,19 +538,19 @@ if __name__ == "__main__":
                 strict_verification=True
             )
 
-            print(f"✅ Query processed successfully")
-            print(f"📊 Entities found: {len(result.entities_found)}")
-            print(f"🔍 Chunks used: {len(result.chunks_used)}")
-            print(f"✅ Facts verified: {len(result.verification_results)}")
-            print(f"⏱️ Processing time: {result.processing_time:.2f}s")
-            print(f"🎯 Confidence: {result.confidence_score:.2f}")
-            print(f"📝 Answer: {result.answer}")
+            print(f" Query processed successfully")
+            print(f" Entities found: {len(result.entities_found)}")
+            print(f" Chunks used: {len(result.chunks_used)}")
+            print(f" Facts verified: {len(result.verification_results)}")
+            print(f" Processing time: {result.processing_time:.2f}s")
+            print(f" Confidence: {result.confidence_score:.2f}")
+            print(f" Answer: {result.answer}")
 
         except Exception as e:
-            print(f"❌ Test failed: {e}")
+            print(f" Test failed: {e}")
 
         # Статистика системы
         stats = system.get_system_stats()
-        print(f"\n📈 System stats: {stats}")
+        print(f"\n System stats: {stats}")
 
     asyncio.run(test_universal_system())

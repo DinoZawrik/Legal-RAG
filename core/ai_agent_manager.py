@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 AI Agent Manager
+AI Agent Manager
 Менеджер для управления ИИ-агентами.
 
 Включает функциональность:
@@ -42,7 +42,7 @@ class AgentManager:
             "conversation_count": 0
         }
 
-        logger.info(f"🤖 Агент {agent_id} зарегистрирован")
+        logger.info(f" Агент {agent_id} зарегистрирован")
 
     async def chat_with_agent(self, agent_id: str, message: str,
                             conversation_id: Optional[str] = None) -> Dict[str, Any]:
@@ -102,7 +102,7 @@ class AgentManager:
             return response
 
         except Exception as e:
-            logger.error(f"❌ Ошибка общения с агентом {agent_id}: {e}")
+            logger.error(f" Ошибка общения с агентом {agent_id}: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -148,7 +148,7 @@ class AgentManager:
         for conv_id in to_remove:
             del self.active_conversations[conv_id]
 
-        logger.info(f"🧹 Очищено {len(to_remove)} старых разговоров")
+        logger.info(f" Очищено {len(to_remove)} старых разговоров")
 
     def get_manager_stats(self) -> Dict[str, Any]:
         """Статистика менеджера агентов."""

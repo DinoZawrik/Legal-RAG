@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 AI QA Pipeline
+AI QA Pipeline
 Система вопрос-ответ для работы с документами.
 
 Включает функциональность:
@@ -23,7 +23,7 @@ try:
     RAG_OPTIMIZER_AVAILABLE = True
 except ImportError:
     RAG_OPTIMIZER_AVAILABLE = False
-    logging.warning("⚠️ RAG Optimizer недоступен")
+    logging.warning(" RAG Optimizer недоступен")
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class QAPipeline:
         self.inference_engine = inference_engine
         self.vector_store = None
         self.retrieval_config = {
-            "max_chunks": 10,  # Увеличено с 5 до 10 для лучшего покрытия
+            "max_chunks": 10, # Увеличено с 5 до 10 для лучшего покрытия
             "similarity_threshold": 0.7,
             "max_chunk_length": 1000
         }
@@ -57,9 +57,9 @@ class QAPipeline:
                 self.current_rag_config = self.rag_optimizer.get_config("balanced")
                 if self.current_rag_config:
                     self._apply_rag_config(self.current_rag_config)
-                    logger.info(f"✅ RAG конфигурация '{self.current_rag_config.name}' применена")
+                    logger.info(f" RAG конфигурация '{self.current_rag_config.name}' применена")
             except Exception as e:
-                logger.warning(f"⚠️ Ошибка инициализации RAG Optimizer: {e}")
+                logger.warning(f" Ошибка инициализации RAG Optimizer: {e}")
 
     def _apply_rag_config(self, config: RAGConfig):
         """Применение конфигурации RAG к системе поиска."""
@@ -80,21 +80,21 @@ class QAPipeline:
             True если конфигурация применена успешно
         """
         if not self.rag_optimizer:
-            logger.warning("⚠️ RAG Optimizer недоступен")
+            logger.warning(" RAG Optimizer недоступен")
             return False
 
         config = self.rag_optimizer.get_config(config_name)
         if not config:
-            logger.error(f"❌ Конфигурация '{config_name}' не найдена")
+            logger.error(f" Конфигурация '{config_name}' не найдена")
             return False
 
         try:
             self._apply_rag_config(config)
             self.current_rag_config = config
-            logger.info(f"✅ RAG конфигурация изменена на '{config_name}'")
+            logger.info(f" RAG конфигурация изменена на '{config_name}'")
             return True
         except Exception as e:
-            logger.error(f"❌ Ошибка применения конфигурации '{config_name}': {e}")
+            logger.error(f" Ошибка применения конфигурации '{config_name}': {e}")
             return False
 
     def get_available_configs(self) -> Dict[str, str]:
@@ -123,7 +123,7 @@ class QAPipeline:
     async def initialize(self, vector_store):
         """Инициализация QA pipeline с vector store."""
         self.vector_store = vector_store
-        logger.info("✅ QA Pipeline инициализирован")
+        logger.info(" QA Pipeline инициализирован")
 
     async def retrieve_relevant_chunks(self, query: str) -> List[Dict[str, Any]]:
         """
@@ -134,7 +134,7 @@ class QAPipeline:
         """
         try:
             if not self.vector_store:
-                logger.warning("❌ Vector store не инициализирован - нет доступа к документам БД")
+                logger.warning(" Vector store не инициализирован - нет доступа к документам БД")
                 return []
 
             # Поиск похожих документов через similarity_search
@@ -151,7 +151,7 @@ class QAPipeline:
                     results.append({
                         "text": doc.page_content,
                         "metadata": doc.metadata,
-                        "similarity": 1.0  # Chroma не возвращает оценку схожести напрямую
+                        "similarity": 1.0 # Chroma не возвращает оценку схожести напрямую
                     })
 
             elif hasattr(self.vector_store, 'search_similar'):
@@ -189,11 +189,11 @@ class QAPipeline:
                 if len(result["text"]) > self.retrieval_config["max_chunk_length"]:
                     result["text"] = result["text"][:self.retrieval_config["max_chunk_length"]] + "..."
 
-            logger.info(f"🔍 Найдено {len(filtered_results)} релевантных чанков из БД")
+            logger.info(f" Найдено {len(filtered_results)} релевантных чанков из БД")
             return filtered_results
 
         except Exception as e:
-            logger.error(f"❌ Ошибка поиска релевантных чанков: {e}")
+            logger.error(f" Ошибка поиска релевантных чанков: {e}")
             return []
 
     async def answer_question(self, question: str,
@@ -218,7 +218,7 @@ class QAPipeline:
 
             # Проверка наличия контекста из БД
             if not context and use_context:
-                logger.warning("❌ Нет контекста из БД - невозможно дать точный ответ")
+                logger.warning(" Нет контекста из БД - невозможно дать точный ответ")
                 return {
                     "success": False,
                     "error": "Нет релевантных документов в БД",
@@ -239,10 +239,10 @@ class QAPipeline:
                 1. Внимательно изучите ВСЕ предоставленные выдержки из документов БД
                 2. Найдите релевантную информацию и синтезируйте полный ответ
                 3. ДЛЯ КАЖДОГО ФАКТА ОБЯЗАТЕЛЬНО указывайте ПОЛНОЕ название документа:
-                   ✅ ПРАВИЛЬНО: "согласно Постановлению Правительства РФ от 22.10.2012 N 1075"
-                   ✅ ПРАВИЛЬНО: "в соответствии с Федеральным законом от 27.07.2010 N 190-ФЗ"
-                   ❌ НЕПРАВИЛЬНО: "согласно постановлению" (без номера и даты)
-                   ❌ НЕПРАВИЛЬНО: "согласно параграфу 70" (без названия документа)
+                   ПРАВИЛЬНО: "согласно Постановлению Правительства РФ от 22.10.2012 N 1075"
+                   ПРАВИЛЬНО: "в соответствии с Федеральным законом от 27.07.2010 N 190-ФЗ"
+                   НЕПРАВИЛЬНО: "согласно постановлению" (без номера и даты)
+                   НЕПРАВИЛЬНО: "согласно параграфу 70" (без названия документа)
                 4. НЕ используйте слова "пункт", "фрагмент", "чанк" в ссылках
                 5. Указывайте полное название документа с номером и датой для каждой ссылки
                 6. Если некоторая информация отсутствует в БД - укажите это в конце ответа
@@ -289,7 +289,7 @@ class QAPipeline:
             # Проверка на пустой ответ и диагностика
             response_text = response.get("response", "")
 
-            # ✅ НОВОЕ: Answer Verification Layer
+            # НОВОЕ: Answer Verification Layer
             # Проверяем корректность ответа (цитирования, галлюцинации)
             if response_text and retrieved_chunks:
                 try:
@@ -308,7 +308,7 @@ class QAPipeline:
                         warning_msg = verifier.format_warning_message(verification)
                         response_text += warning_msg
                         response["response"] = response_text
-                        logger.warning(f"⚠️ Answer verification failed: confidence={verification.confidence:.2f}")
+                        logger.warning(f" Answer verification failed: confidence={verification.confidence:.2f}")
 
                     # Добавляем метаданные о верификации
                     response["verification"] = {
@@ -319,16 +319,16 @@ class QAPipeline:
                     }
 
                 except Exception as e:
-                    logger.warning(f"⚠️ Answer verification error: {e}")
+                    logger.warning(f" Answer verification error: {e}")
                     # Продолжаем без верификации если ошибка
             if not response_text or response_text.strip() == "":
-                logger.warning(f"❌ ПУСТОЙ ОТВЕТ для вопроса: {question}")
-                logger.warning(f"   - Контекст из БД предоставлен: {len(context) > 0}")
-                logger.warning(f"   - Количество чанков из БД: {len(context)}")
-                logger.warning(f"   - Успешность LLM: {response.get('success', False)}")
-                logger.warning(f"   - Ошибка LLM: {response.get('error', 'Нет ошибки')}")
+                logger.warning(f" ПУСТОЙ ОТВЕТ для вопроса: {question}")
+                logger.warning(f" - Контекст из БД предоставлен: {len(context) > 0}")
+                logger.warning(f" - Количество чанков из БД: {len(context)}")
+                logger.warning(f" - Успешность LLM: {response.get('success', False)}")
+                logger.warning(f" - Ошибка LLM: {response.get('error', 'Нет ошибки')}")
                 if context:
-                    logger.warning(f"   - Первый чанк из БД: {context[0][:200]}...")
+                    logger.warning(f" - Первый чанк из БД: {context[0][:200]}...")
 
                 # Fallback НЕ используем собственные знания - только БД
                 return {
@@ -345,15 +345,15 @@ class QAPipeline:
                 "question": question,
                 "context_used": len(context) > 0,
                 "context_chunks_count": len(context),
-                "retrieved_chunks": retrieved_chunks[:3],  # Первые 3 для показа
+                "retrieved_chunks": retrieved_chunks[:3], # Первые 3 для показа
                 "confidence": self._calculate_confidence(response, context),
-                "source": "database_documents"  # Указываем что источник - БД
+                "source": "database_documents" # Указываем что источник - БД
             })
 
             return response
 
         except Exception as e:
-            logger.error(f"❌ Ошибка ответа на вопрос: {e}")
+            logger.error(f" Ошибка ответа на вопрос: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -366,7 +366,7 @@ class QAPipeline:
     def _calculate_confidence(self, response: Dict[str, Any], context: List[str]) -> float:
         """Расчет уверенности в ответе на основе контекста БД."""
         try:
-            confidence = 0.5  # Базовая уверенность
+            confidence = 0.5 # Базовая уверенность
 
             # Увеличение уверенности при наличии контекста из БД
             if context:
@@ -400,7 +400,7 @@ class QAPipeline:
         results = []
 
         for i, question in enumerate(questions):
-            logger.info(f"🤔 Обработка вопроса {i+1}/{len(questions)} (только на основе БД)")
+            logger.info(f" Обработка вопроса {i+1}/{len(questions)} (только на основе БД)")
 
             result = await self.answer_question(question)
             result["question_index"] = i

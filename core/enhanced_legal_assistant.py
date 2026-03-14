@@ -118,7 +118,7 @@ class EnhancedLegalAssistant:
             logger.info("Enhanced Legal Assistant инициализирован")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации: {e}")
+            logger.error(f" Ошибка инициализации: {e}")
             raise
 
     def _get_default_config(self) -> Dict[str, Any]:
@@ -148,36 +148,36 @@ class EnhancedLegalAssistant:
         request_id = f"req_{int(start_time.timestamp())}_{hash(request.query) % 10000}"
 
         try:
-            logger.info(f"🚀 Начало обработки консультации {request_id}")
+            logger.info(f" Начало обработки консультации {request_id}")
 
             # 1. ФАЗА АНАЛИЗА ЗАПРОСА
-            logger.info("📋 Фаза 1: Анализ запроса")
+            logger.info(" Фаза 1: Анализ запроса")
             query_analysis = await self._analyze_query(request)
 
             # 2. ФАЗА ПОИСКА ИНФОРМАЦИИ
-            logger.info("🔍 Фаза 2: Поиск релевантной информации")
+            logger.info(" Фаза 2: Поиск релевантной информации")
             search_results, search_metadata = await self._search_legal_information(
                 request, query_analysis
             )
 
             # 3. ФАЗА ОБРАБОТКИ ИСТОРИИ
-            logger.info("💭 Фаза 3: Обработка истории разговора")
+            logger.info(" Фаза 3: Обработка истории разговора")
             conversation_context = await self._process_conversation_history(request)
 
             # 4. ФАЗА ПРАВОВОГО АНАЛИЗА
-            logger.info("⚖️ Фаза 4: Правовой анализ и выводы")
+            logger.info(" Фаза 4: Правовой анализ и выводы")
             legal_analysis, inference_metadata = await self._perform_legal_analysis(
                 request, query_analysis, search_results
             )
 
             # 5. ФАЗА ГЕНЕРАЦИИ ОТВЕТА
-            logger.info("📝 Фаза 5: Генерация структурированного ответа")
+            logger.info(" Фаза 5: Генерация структурированного ответа")
             structured_response = await self._generate_structured_response(
                 request, query_analysis, search_results, conversation_context, legal_analysis
             )
 
             # 6. ФАЗА ВАЛИДАЦИИ КАЧЕСТВА
-            logger.info("✅ Фаза 6: Валидация качества")
+            logger.info(" Фаза 6: Валидация качества")
             validation_report = await self._validate_response_quality(
                 structured_response, search_results, request.query
             )
@@ -200,13 +200,13 @@ class EnhancedLegalAssistant:
             # Обновление статистики
             await self._update_usage_stats(response)
 
-            logger.info(f"✅ Консультация {request_id} завершена за {processing_time:.2f}с "
+            logger.info(f" Консультация {request_id} завершена за {processing_time:.2f}с "
                        f"(качество: {validation_report.quality_grade.value})")
 
             return response
 
         except Exception as e:
-            logger.error(f"❌ Ошибка при обработке консультации {request_id}: {e}")
+            logger.error(f" Ошибка при обработке консультации {request_id}: {e}")
             self.usage_stats['error_count'] += 1
             return await self._create_error_response(request_id, str(e), start_time)
 
@@ -428,7 +428,7 @@ class EnhancedLegalAssistant:
         factors.append(validation_report.overall_score)
 
         # Количество источников
-        source_score = min(len(response.sources) / 3, 1.0)  # Максимум за 3 источника
+        source_score = min(len(response.sources) / 3, 1.0) # Максимум за 3 источника
         factors.append(source_score)
 
         # Наличие инференсов
@@ -436,7 +436,7 @@ class EnhancedLegalAssistant:
             avg_confidence = sum(inf.confidence for inf in response.inferences) / len(response.inferences)
             factors.append(avg_confidence)
         else:
-            factors.append(0.5)  # Средняя уверенность без инференсов
+            factors.append(0.5) # Средняя уверенность без инференсов
 
         # Критические проблемы снижают уверенность
         if validation_report.critical_issues > 0:
@@ -647,7 +647,7 @@ class EnhancedLegalAssistant:
             'component_usage': self.usage_stats['component_usage'],
             'system_health': {
                 'operational_status': 'healthy' if self.usage_stats['error_count'] < 10 else 'degraded',
-                'quality_trend': 'stable',  # TODO: реализовать анализ трендов
+                'quality_trend': 'stable', # TODO: реализовать анализ трендов
                 'performance_score': min(self.usage_stats['average_quality_score'] * 100, 100)
             },
             'export_timestamp': datetime.now().isoformat()

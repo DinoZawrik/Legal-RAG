@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 OpenAI Inference Client
+OpenAI Inference Client
 Unified client для взаимодействия с OpenAI GPT-4/GPT-5 через OpenAI API.
 
 МИГРАЦИЯ v2.0 (13.10.2025):
@@ -53,7 +53,7 @@ class OpenAIInferenceClient:
         "gpt-4-turbo-preview",
         "gpt-4o",
         "gpt-4o-mini",
-        "gpt-5",  # Placeholder для будущего
+        "gpt-5", # Placeholder для будущего
     ]
 
     def __init__(
@@ -98,10 +98,10 @@ class OpenAIInferenceClient:
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             timeout=self.timeout,
-            max_retries=3  # Автоматический retry
+            max_retries=3 # Автоматический retry
         )
 
-        logger.info(f"✅ OpenAI client initialized: model={self.model}, temperature={self.temperature}")
+        logger.info(f" OpenAI client initialized: model={self.model}, temperature={self.temperature}")
 
     async def generate(
         self,
@@ -140,11 +140,11 @@ class OpenAIInferenceClient:
             # Извлечение текста из response
             answer = response.content if hasattr(response, 'content') else str(response)
 
-            logger.info(f"✅ Generated response ({len(answer)} chars)")
+            logger.info(f" Generated response ({len(answer)} chars)")
             return answer
 
         except Exception as e:
-            logger.error(f"❌ OpenAI generation error: {e}", exc_info=True)
+            logger.error(f" OpenAI generation error: {e}", exc_info=True)
             raise
 
     async def generate_batch(
@@ -165,7 +165,7 @@ class OpenAIInferenceClient:
             List[str]: Список ответов (в том же порядке)
         """
         try:
-            logger.info(f"🔄 Batch generation for {len(prompts)} prompts")
+            logger.info(f" Batch generation for {len(prompts)} prompts")
 
             # Параллельная генерация через asyncio.gather
             tasks = [
@@ -175,20 +175,20 @@ class OpenAIInferenceClient:
 
             responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-            # Обработка ошибок (exceptions → пустые строки)
+            # Обработка ошибок (exceptions пустые строки)
             results = []
             for idx, response in enumerate(responses):
                 if isinstance(response, Exception):
-                    logger.error(f"❌ Batch item {idx} failed: {response}")
+                    logger.error(f" Batch item {idx} failed: {response}")
                     results.append("")
                 else:
                     results.append(response)
 
-            logger.info(f"✅ Batch generation completed: {len(results)} responses")
+            logger.info(f" Batch generation completed: {len(results)} responses")
             return results
 
         except Exception as e:
-            logger.error(f"❌ Batch generation error: {e}", exc_info=True)
+            logger.error(f" Batch generation error: {e}", exc_info=True)
             raise
 
     async def generate_with_context(

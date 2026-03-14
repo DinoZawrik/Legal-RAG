@@ -4,16 +4,16 @@ API Key Manager с автоматической ротацией (МИГРАЦИ
 Поддерживает Google Gemini и OpenAI API ключи
 
 МИГРАЦИЯ v2.0 (13.10.2025):
-- ✅ Добавлена поддержка OpenAI provider
-- ✅ Сохранена обратная совместимость с Gemini (legacy)
-- ✅ Multi-provider architecture (можно переключаться между Gemini и OpenAI)
+- Добавлена поддержка OpenAI provider
+- Сохранена обратная совместимость с Gemini (legacy)
+- Multi-provider architecture (можно переключаться между Gemini и OpenAI)
 """
 
 import logging
 import os
+import secrets
 from typing import List, Optional
 from datetime import datetime, timedelta
-import random
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class APIKeyManager:
         self._key_errors = {i: 0 for i in range(len(self.API_KEYS))}
         self._last_error_time = {i: None for i in range(len(self.API_KEYS))}
 
-        logger.info(f"🔑 API Key Manager initialized: provider={self.provider}, keys={len(self.API_KEYS)}")
+        logger.info(f" API Key Manager initialized: provider={self.provider}, keys={len(self.API_KEYS)}")
 
     def _load_keys_from_env(self):
         """Загрузить ключи из переменных окружения (multi-provider)."""
@@ -114,7 +114,7 @@ class APIKeyManager:
         key = self.API_KEYS[self._current_index]
         self._key_usage[self._current_index] += 1
 
-        logger.debug(f"🔑 Using API key #{self._current_index + 1} (usage: {self._key_usage[self._current_index]})")
+        logger.debug(f" Using API key #{self._current_index + 1} (usage: {self._key_usage[self._current_index]})")
 
         self._current_index = (self._current_index + 1) % len(self.API_KEYS)
 
@@ -125,10 +125,10 @@ class APIKeyManager:
         if not self.API_KEYS:
             return self.get_next_key()
 
-        index = random.randint(0, len(self.API_KEYS) - 1)
+        index = secrets.randbelow(len(self.API_KEYS))
         self._key_usage[index] += 1
 
-        logger.debug(f"🔑 Random API key #{index + 1} selected")
+        logger.debug(f" Random API key #{index + 1} selected")
         return self.API_KEYS[index]
 
     def report_error(self, api_key: str, is_quota_error: bool = False):
@@ -141,23 +141,23 @@ class APIKeyManager:
         """
         try:
             if not api_key or len(api_key) < 4:
-                logger.warning("⚠️ Invalid API key provided for error report")
+                logger.warning(" Invalid API key provided for error report")
                 return
             index = self.API_KEYS.index(api_key) if self.API_KEYS else None
             if index is None:
-                logger.warning("⚠️ Unknown API key in error report")
+                logger.warning(" Unknown API key in error report")
                 return
 
             self._key_errors[index] += 1
 
             if is_quota_error:
                 self._last_error_time[index] = datetime.now()
-                logger.warning(f"⚠️ Quota error on API key #{index + 1} (total errors: {self._key_errors[index]})")
+                logger.warning(f" Quota error on API key #{index + 1} (total errors: {self._key_errors[index]})")
             else:
-                logger.error(f"❌ Error on API key #{index + 1}")
+                logger.error(f" Error on API key #{index + 1}")
 
         except ValueError:
-            logger.warning("⚠️ Unknown API key in error report")
+            logger.warning(" Unknown API key in error report")
 
     def get_available_keys(self) -> List[str]:
         """
@@ -181,10 +181,10 @@ class APIKeyManager:
                 available.append(key)
 
         if not available:
-            logger.warning("⚠️ All keys have recent errors, returning all keys")
+            logger.warning(" All keys have recent errors, returning all keys")
             return self.API_KEYS.copy()
 
-        logger.debug(f"✅ {len(available)}/{len(self.API_KEYS)} keys available")
+        logger.debug(f" {len(available)}/{len(self.API_KEYS)} keys available")
         return available
 
     def get_key_with_least_usage(self) -> str:
@@ -197,7 +197,7 @@ class APIKeyManager:
         for i, usage in self._key_usage.items():
             if usage == min_usage:
                 self._key_usage[i] += 1
-                logger.debug(f"🔑 Least used key #{i + 1} (usage: {usage})")
+                logger.debug(f" Least used key #{i + 1} (usage: {usage})")
                 return self.API_KEYS[i]
 
         return self.get_next_key()
@@ -225,7 +225,7 @@ class APIKeyManager:
         stats = self.get_stats()
 
         print("\n" + "="*60)
-        print("📊 API KEY MANAGER STATISTICS")
+        print(" API KEY MANAGER STATISTICS")
         print("="*60)
         print(f"Total Keys: {stats['total_keys']}")
         print(f"Available Keys: {stats['available_keys']}/{stats['total_keys']}")
@@ -238,7 +238,7 @@ class APIKeyManager:
                 usage = stats['usage_per_key'][i]
                 errors = stats['errors_per_key'][i]
                 key_preview = self.API_KEYS[i][:20] + "..."
-                print(f"  Key #{i+1}: {key_preview} - Usage: {usage:3d}, Errors: {errors:2d}")
+                print(f" Key #{i+1}: {key_preview} - Usage: {usage:3d}, Errors: {errors:2d}")
         print("="*60)
 
 

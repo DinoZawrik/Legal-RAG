@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 AI & Inference Suite (Compatibility Wrapper)
+AI & Inference Suite (Compatibility Wrapper)
 Обратная совместимость для модулярной архитектуры AI & Inference Suite.
 
 УСТАРЕЛ: Этот файл является wrapper для новых модулей:
@@ -63,8 +63,8 @@ __all__ = [
 ]
 
 # Compatibility notice for developers
-logger.info("📦 Loading modular AI & Inference Suite architecture (compatibility wrapper)")
-logger.debug(f"✅ Imported {len(__all__)} components from modular AI suite")
+logger.info(" Loading modular AI & Inference Suite architecture (compatibility wrapper)")
+logger.debug(f" Imported {len(__all__)} components from modular AI suite")
 
 # Architecture transition guide for developers
 def _show_migration_guide():
@@ -88,9 +88,9 @@ def _show_migration_guide():
         }
     }
 
-    logger.debug("🔄 AI & Inference Suite Architecture Migration Guide:")
+    logger.debug(" AI & Inference Suite Architecture Migration Guide:")
     for operation, examples in migration_examples.items():
-        logger.debug(f"  {operation}: {examples['old']} → {examples['new']}")
+        logger.debug(f" {operation}: {examples['old']} {examples['new']}")
 
 # Show migration guide in debug mode
 if logger.isEnabledFor(logging.DEBUG):
@@ -126,43 +126,43 @@ async def create_qa_pipeline(vector_store=None) -> QAPipeline:
 
 # Developer migration notes
 """
-📋 MIGRATION GUIDE: From Monolithic to Modular Architecture
+MIGRATION GUIDE: From Monolithic to Modular Architecture
 
-🗂️ Old Structure (v1.0):
-   └── core/ai_inference_suite.py (1177 lines)
-       ├── EnhancedInferenceEngine class
-       ├── QAPipeline class
-       ├── AgentManager class
-       ├── UnifiedAISystem class
-       └── Convenience functions
+Old Structure (v1.0):
+   core/ai_inference_suite.py (1177 lines)
+       EnhancedInferenceEngine class
+       QAPipeline class
+       AgentManager class
+       UnifiedAISystem class
+       Convenience functions
 
-🎯 New Structure (v2.0):
-   ├── core/ai_inference_core.py (~460 lines)
-   │   ├── EnhancedInferenceEngine class
-   │   ├── AIError exception
-   │   ├── Gemini 2.5 Flash integration
-   │   └── Telegram formatting fixes
-   │
-   ├── core/ai_qa_pipeline.py (~380 lines)
-   │   ├── QAPipeline class
-   │   ├── RAG optimization integration
-   │   ├── Database document emphasis
-   │   └── Vector store retrieval
-   │
-   ├── core/ai_agent_manager.py (~170 lines)
-   │   ├── AgentManager class
-   │   ├── Agent registration and chat
-   │   └── Conversation management
-   │
-   ├── core/ai_unified_system.py (~290 lines)
-   │   ├── UnifiedAISystem class
-   │   ├── Query processing coordination
-   │   └── System status monitoring
-   │
-   └── core/ai_inference_suite.py (~150 lines, this file)
-       └── Compatibility wrapper
+New Structure (v2.0):
+   core/ai_inference_core.py (~460 lines)
+   EnhancedInferenceEngine class
+   AIError exception
+   Gemini 2.5 Flash integration
+   Telegram formatting fixes
+   
+   core/ai_qa_pipeline.py (~380 lines)
+   QAPipeline class
+   RAG optimization integration
+   Database document emphasis
+   Vector store retrieval
+   
+   core/ai_agent_manager.py (~170 lines)
+   AgentManager class
+   Agent registration and chat
+   Conversation management
+   
+   core/ai_unified_system.py (~290 lines)
+   UnifiedAISystem class
+   Query processing coordination
+   System status monitoring
+   
+   core/ai_inference_suite.py (~150 lines, this file)
+       Compatibility wrapper
 
-🔄 Migration Steps:
+Migration Steps:
 1. Replace imports:
    OLD: from core.ai_inference_suite import UnifiedAISystem
    NEW: from core.ai_unified_system import UnifiedAISystem
@@ -175,18 +175,18 @@ async def create_qa_pipeline(vector_store=None) -> QAPipeline:
    OLD: from core.ai_inference_suite import QAPipeline
    NEW: from core.ai_qa_pipeline import QAPipeline
 
-📈 Benefits:
-- 87% code reduction per file (1177 → ~150-460 lines each)
+Benefits:
+- 87% code reduction per file (1177 ~150-460 lines each)
 - Clear separation of concerns
 - Improved testability
 - Better maintainability
 - Enhanced code organization
 - CRITICAL: Emphasis on database-only responses (complex_task.txt requirement)
 
-⚠️ Breaking Changes: None
+Breaking Changes: None
 This wrapper maintains 100% backward compatibility.
 
-🚨 ВАЖНОЕ ТРЕБОВАНИЕ из complex_task.txt:
+ВАЖНОЕ ТРЕБОВАНИЕ из complex_task.txt:
 Система должна использовать ТОЛЬКО документы из БД, а НЕ собственные знания модели!
 """
 
@@ -199,19 +199,19 @@ if __name__ == "__main__":
 
     async def test_modular_system():
         """Тестирование модульной архитектуры."""
-        logger.info("🧪 Тестирование модульной AI & Inference Suite...")
+        logger.info(" Тестирование модульной AI & Inference Suite...")
 
         try:
             # Создание системы
             system = await create_unified_ai_system()
             status = system.get_system_status()
 
-            logger.info(f"✅ Система инициализирована: {status['initialized']}")
-            logger.info(f"📊 Агентов зарегистрировано: {status['agent_manager']['registered_agents']}")
-            logger.info(f"🤖 Модель: {status['inference_engine']['model']}")
-            logger.info("✨ Модульная архитектура работает корректно!")
+            logger.info(f" Система инициализирована: {status['initialized']}")
+            logger.info(f" Агентов зарегистрировано: {status['agent_manager']['registered_agents']}")
+            logger.info(f" Модель: {status['inference_engine']['model']}")
+            logger.info(" Модульная архитектура работает корректно!")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка тестирования: {e}")
+            logger.error(f" Ошибка тестирования: {e}")
 
     asyncio.run(test_modular_system())

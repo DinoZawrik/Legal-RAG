@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 AI Inference Core
+AI Inference Core
 Основная инфраструктура и движок вывода для AI системы.
 
 Включает функциональность:
@@ -30,7 +30,7 @@ try:
     RAG_OPTIMIZER_AVAILABLE = True
 except ImportError:
     RAG_OPTIMIZER_AVAILABLE = False
-    logging.warning("⚠️ RAG Optimizer недоступен")
+    logging.warning(" RAG Optimizer недоступен")
 
 # External imports
 try:
@@ -98,13 +98,13 @@ class EnhancedInferenceEngine:
 
             # Инициализация Gemini LLM через LangChain
             self.llm = ChatGoogleGenerativeAI(
-                model=self.model_name,  # "gemini-1.5-flash" или "gemini-1.5-pro"
+                model=self.model_name, # "gemini-1.5-flash" или "gemini-1.5-pro"
                 google_api_key=api_key,
-                temperature=0.1,  # Optimized for legal precision
-                max_tokens=2048,  # Optimized for detailed answers
-                max_retries=3  # Auto retry on errors
+                temperature=0.1, # Optimized for legal precision
+                max_tokens=2048, # Optimized for detailed answers
+                max_retries=3 # Auto retry on errors
             )
-            logger.info(f"✅ Gemini модель инициализирована: {self.model_name}, температура: 0.1 (optimized)")
+            logger.info(f" Gemini модель инициализирована: {self.model_name}, температура: 0.1 (optimized)")
 
             # Инициализация токенайзера
             try:
@@ -115,30 +115,30 @@ class EnhancedInferenceEngine:
             # Загрузка системных промптов
             await self._load_system_prompts()
 
-            logger.info("✅ Enhanced Inference Engine инициализирован")
+            logger.info(" Enhanced Inference Engine инициализирован")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации inference engine: {e}")
+            logger.error(f" Ошибка инициализации inference engine: {e}")
             raise AIError(f"Initialization failed: {e}")
 
     async def _load_system_prompts(self):
         """Загрузка системных промптов."""
         # Специальный промпт для телеграм-бота с обязательным указанием источников
         telegram_qa_prompt = """
-        🚨🚨🚨 КРИТИЧЕСКИ ВАЖНО! ПРАВИЛА ФОРМАТИРОВАНИЯ ДЛЯ TELEGRAM 🚨🚨🚨
+        КРИТИЧЕСКИ ВАЖНО! ПРАВИЛА ФОРМАТИРОВАНИЯ ДЛЯ TELEGRAM 
 
-        ⚠️ TELEGRAM НЕ ПОДДЕРЖИВАЕТ СТАНДАРТНЫЙ MARKDOWN! ⚠️
+        TELEGRAM НЕ ПОДДЕРЖИВАЕТ СТАНДАРТНЫЙ MARKDOWN! 
 
         СТРОГО ЗАПРЕЩЕНО использовать:
-        🚫 ### заголовки (вместо этого **жирный текст**)
-        🚫 1. 2. 3. нумерованные списки (вместо этого • буллеты)
-        🚫 --- разделители (вместо этого пустые строки)
-        🚫 * звездочки для списков (вместо этого • буллеты)
+        ### заголовки (вместо этого **жирный текст**)
+        1. 2. 3. нумерованные списки (вместо этого • буллеты)
+        --- разделители (вместо этого пустые строки)
+        * звездочки для списков (вместо этого • буллеты)
 
         ОБЯЗАТЕЛЬНО использовать:
-        ✅ **Жирный заголовок** для всех заголовков
-        ✅ • буллеты для всех списков
-        ✅ Пустые строки для разделения разделов
+        **Жирный заголовок** для всех заголовков
+        • буллеты для всех списков
+        Пустые строки для разделения разделов
 
         ПРИМЕР ПРАВИЛЬНОГО ФОРМАТИРОВАНИЯ:
         **Постановление Правительства РФ**
@@ -160,41 +160,41 @@ class EnhancedInferenceEngine:
         КРИТИЧЕСКИ ВАЖНЫЕ ТРЕБОВАНИЯ К ССЫЛКАМ:
         1. ДЛЯ КАЖДОГО ФАКТА ОБЯЗАТЕЛЬНО указывай ПОЛНОЕ название документа
         2. ФОРМАТ ССЫЛОК:
-           ✅ ПРАВИЛЬНО: "согласно Постановлению Правительства РФ от 22.10.2012 N 1075"
-           ✅ ПРАВИЛЬНО: "в соответствии с Федеральным законом от 27.07.2010 N 190-ФЗ"
-           ❌ НЕПРАВИЛЬНО: "согласно постановлению" (без номера и даты)
-           ❌ НЕПРАВИЛЬНО: "согласно параграфу 70" (без названия документа)
+           ПРАВИЛЬНО: "согласно Постановлению Правительства РФ от 22.10.2012 N 1075"
+           ПРАВИЛЬНО: "в соответствии с Федеральным законом от 27.07.2010 N 190-ФЗ"
+           НЕПРАВИЛЬНО: "согласно постановлению" (без номера и даты)
+           НЕПРАВИЛЬНО: "согласно параграфу 70" (без названия документа)
         3. НЕ используй слова "пункт", "фрагмент", "чанк", "выдержка"
         4. Указывай полное название документа с номером и датой
 
-        🚨 СТРОГО ОБЯЗАТЕЛЬНО! ПРАВИЛА ФОРМАТИРОВАНИЯ ДЛЯ TELEGRAM:
+        СТРОГО ОБЯЗАТЕЛЬНО! ПРАВИЛА ФОРМАТИРОВАНИЯ ДЛЯ TELEGRAM:
 
-        ⚠️ ЗАПРЕЩЕНО использовать стандартный Markdown! Telegram его НЕ поддерживает!
+        ЗАПРЕЩЕНО использовать стандартный Markdown! Telegram его НЕ поддерживает!
 
         1. ЗАГОЛОВКИ - ТОЛЬКО **жирный текст**:
-           ✅ ПРАВИЛЬНО: **Постановление Правительства РФ**
-           ✅ ПРАВИЛЬНО: **1. Определение и правовая основа**
-           🚫 ЗАПРЕЩЕНО: ### Постановление Правительства РФ
-           🚫 ЗАПРЕЩЕНО: ## 1. Определение
-           🚫 ЗАПРЕЩЕНО: # Любые заголовки
+           ПРАВИЛЬНО: **Постановление Правительства РФ**
+           ПРАВИЛЬНО: **1. Определение и правовая основа**
+           ЗАПРЕЩЕНО: ### Постановление Правительства РФ
+           ЗАПРЕЩЕНО: ## 1. Определение
+           ЗАПРЕЩЕНО: # Любые заголовки
 
         2. СПИСКИ - ТОЛЬКО буллеты • (НЕ цифры!):
-           ✅ ПРАВИЛЬНО: • Первый пункт
-           ✅ ПРАВИЛЬНО: • Второй пункт
-           🚫 ЗАПРЕЩЕНО: 1. Первый пункт
-           🚫 ЗАПРЕЩЕНО: 2. Второй пункт
-           🚫 ЗАПРЕЩЕНО: - Любые дефисы
-           🚫 ЗАПРЕЩЕНО: * Любые звездочки
+           ПРАВИЛЬНО: • Первый пункт
+           ПРАВИЛЬНО: • Второй пункт
+           ЗАПРЕЩЕНО: 1. Первый пункт
+           ЗАПРЕЩЕНО: 2. Второй пункт
+           ЗАПРЕЩЕНО: - Любые дефисы
+           ЗАПРЕЩЕНО: * Любые звездочки
 
-        3. ПОДСПИСКИ - ТОЛЬКО ▪️ с отступом:
-           ✅ ПРАВИЛЬНО: • Основной пункт:
-           ✅ ПРАВИЛЬНО:   ▪️ Подпункт первый
-           ✅ ПРАВИЛЬНО:   ▪️ Подпункт второй
+        3. ПОДСПИСКИ - ТОЛЬКО с отступом:
+           ПРАВИЛЬНО: • Основной пункт:
+           ПРАВИЛЬНО: Подпункт первый
+           ПРАВИЛЬНО: Подпункт второй
 
         4. РАЗДЕЛИТЕЛИ:
-           🚫 ЗАПРЕЩЕНО: ---
-           🚫 ЗАПРЕЩЕНО: ===
-           ✅ ПРАВИЛЬНО: Просто пустая строка
+           ЗАПРЕЩЕНО: ---
+           ЗАПРЕЩЕНО: ===
+           ПРАВИЛЬНО: Просто пустая строка
 
         5. СТРУКТУРА:
            • **Жирный заголовок** для каждого раздела
@@ -206,7 +206,7 @@ class EnhancedInferenceEngine:
            • Полные названия с номерами
            • Не разбивать на строки
 
-        💡 ПОМНИ: Если используешь ###, 1.2.3., --- - ответ будет некрасивым!
+        ПОМНИ: Если используешь ###, 1.2.3., --- - ответ будет некрасивым!
 
         ПРИНЦИПЫ:
         • Отвечай ТОЛЬКО на основе предоставленных документов
@@ -222,7 +222,7 @@ class EnhancedInferenceEngine:
         self.system_prompts = {
             "default": "Вы - эксперт по российским нормативным документам. Отвечайте точно и подробно.",
 
-            "question_answering": telegram_qa_prompt,  # Используем новый промпт для QA
+            "question_answering": telegram_qa_prompt, # Используем новый промпт для QA
 
             "regulatory_analysis": """
             Вы - эксперт по анализу нормативно-правовых документов.
@@ -257,7 +257,7 @@ class EnhancedInferenceEngine:
         import re
 
         # Логирование оригинального текста
-        logger.info(f"🔧 ИСХОДНЫЙ ТЕКСТ: {text[:100]}...")
+        logger.info(f" ИСХОДНЫЙ ТЕКСТ: {text[:100]}...")
 
         # 1. Заменяем ### заголовки на **жирный текст**
         text = re.sub(r'^### (.+)$', r'**\1**', text, flags=re.MULTILINE)
@@ -282,7 +282,7 @@ class EnhancedInferenceEngine:
         text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
 
         # Логирование исправленного текста
-        logger.info(f"✅ ИСПРАВЛЕННЫЙ ТЕКСТ: {text[:100]}...")
+        logger.info(f" ИСПРАВЛЕННЫЙ ТЕКСТ: {text[:100]}...")
 
         return text.strip()
 
@@ -329,8 +329,8 @@ class EnhancedInferenceEngine:
             input_tokens = self.count_tokens(system_prompt + enhanced_prompt)
 
             # Логирование финального промпта для отладки
-            logger.info(f"🔍 СИСТЕМНЫЙ ПРОМПТ: {system_prompt[:200]}...")
-            logger.info(f"🔍 ПОЛЬЗОВАТЕЛЬСКИЙ ЗАПРОС: {enhanced_prompt[:200]}...")
+            logger.info(f" СИСТЕМНЫЙ ПРОМПТ: {system_prompt[:200]}...")
+            logger.info(f" ПОЛЬЗОВАТЕЛЬСКИЙ ЗАПРОС: {enhanced_prompt[:200]}...")
 
             # Создание промпта
             template = self.create_prompt_template(system_prompt, "{user_input}")
@@ -341,7 +341,7 @@ class EnhancedInferenceEngine:
 
             # Постобработка для Telegram форматирования
             response = self._fix_telegram_formatting(response)
-            logger.info(f"✅ ФИНАЛЬНЫЙ ОТВЕТ: {response[:200]}...")
+            logger.info(f" ФИНАЛЬНЫЙ ОТВЕТ: {response[:200]}...")
 
             # Подсчет токенов ответа
             output_tokens = self.count_tokens(response)
@@ -385,7 +385,53 @@ class EnhancedInferenceEngine:
             }
 
         except Exception as e:
-            logger.error(f"❌ Ошибка генерации ответа: {e}")
+            logger.error(f" Ошибка генерации ответа (Gemini): {e}")
+
+            # Fallback to OpenRouter when Gemini fails (rate limits, etc.)
+            try:
+                import os
+                openrouter_key = os.getenv("OPENROUTER_API_KEY")
+                openrouter_model = os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
+                if openrouter_key:
+                    logger.info(f" Falling back to OpenRouter: {openrouter_model}")
+                    from langchain_openai import ChatOpenAI
+                    from langchain_core.output_parsers import StrOutputParser as FallbackParser
+
+                    fallback_llm = ChatOpenAI(
+                        model=openrouter_model,
+                        openai_api_key=openrouter_key,
+                        openai_api_base="https://openrouter.ai/api/v1",
+                        temperature=0.1,
+                        max_tokens=max_tokens,
+                    )
+                    system_prompt = self.system_prompts.get(system_prompt_key,
+                                                           self.system_prompts.get("default", "Вы - полезный ИИ-ассистент."))
+                    if context:
+                        context_text = "\n\n".join(context)
+                        enhanced_prompt = f"Контекст из документов:\n{context_text}\n\nВопрос пользователя:\n{prompt}"
+                    else:
+                        enhanced_prompt = prompt
+
+                    template = self.create_prompt_template(system_prompt, "{user_input}")
+                    chain = template | fallback_llm | FallbackParser()
+                    response = await chain.ainvoke({"user_input": enhanced_prompt})
+
+                    response_time = time.time() - start_time
+                    self.performance_metrics["successful_requests"] += 1
+                    logger.info(f" OpenRouter fallback success: {len(response)} chars in {response_time:.1f}s")
+
+                    return {
+                        "success": True,
+                        "response": response,
+                        "tokens_used": 0,
+                        "response_time": response_time,
+                        "input_tokens": 0,
+                        "output_tokens": 0,
+                        "fallback": True,
+                    }
+            except Exception as fallback_err:
+                logger.error(f" OpenRouter fallback also failed: {fallback_err}")
+
             self.performance_metrics["failed_requests"] += 1
 
             return {
@@ -452,7 +498,7 @@ class EnhancedInferenceEngine:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Ошибка анализа документа: {e}")
+            logger.error(f" Ошибка анализа документа: {e}")
             return {
                 "success": False,
                 "error": str(e),

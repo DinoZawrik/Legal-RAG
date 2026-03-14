@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 AI Unified System
+AI Unified System
 Объединенная система ИИ комбинирующая все компоненты в единый интерфейс.
 
 Включает функциональность:
@@ -89,10 +89,10 @@ class UnifiedAISystem:
             })
 
             self.initialized = True
-            logger.info("✅ UnifiedAISystem автоматически инициализирован")
+            logger.info(" UnifiedAISystem автоматически инициализирован")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка автоинициализации: {e}")
+            logger.error(f" Ошибка автоинициализации: {e}")
             # Система может работать без векторного хранилища, но с ограниченным функционалом
             self.initialized = False
 
@@ -110,7 +110,7 @@ class UnifiedAISystem:
                     vector_store = await create_vector_store()
                     await self.qa_pipeline.initialize(vector_store)
                 except Exception as e:
-                    logger.warning(f"⚠️ Не удалось инициализировать векторное хранилище: {e}")
+                    logger.warning(f" Не удалось инициализировать векторное хранилище: {e}")
 
             # Регистрация базовых агентов
             self.agent_manager.register_agent("assistant", {
@@ -126,10 +126,10 @@ class UnifiedAISystem:
             })
 
             self.initialized = True
-            logger.info("✅ Unified AI System полностью инициализирован")
+            logger.info(" Unified AI System полностью инициализирован")
 
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации AI System: {e}")
+            logger.error(f" Ошибка инициализации AI System: {e}")
             raise AIError(f"AI System initialization failed: {e}")
 
     async def process_query(self, query: str, query_type: str = "auto",
@@ -166,8 +166,8 @@ class UnifiedAISystem:
 
                 # Диагностика пустых ответов
                 if not result.get("response", "").strip():
-                    logger.warning(f"❌ QA Pipeline вернул пустой ответ для: {query[:100]}...")
-                    logger.warning(f"   - Результат: {result}")
+                    logger.warning(f" QA Pipeline вернул пустой ответ для: {query[:100]}...")
+                    logger.warning(f" - Результат: {result}")
 
                 return result
 
@@ -190,7 +190,7 @@ class UnifiedAISystem:
                 }
 
         except Exception as e:
-            logger.error(f"❌ Ошибка обработки запроса: {e}")
+            logger.error(f" Ошибка обработки запроса: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -208,7 +208,7 @@ class UnifiedAISystem:
             if use_optimal_rag:
                 # Используем оптимизированный RAG
                 from core.optimal_rag import optimal_search
-                logger.info("🚀 Используем OptimalRAG для поиска документов БД")
+                logger.info(" Используем OptimalRAG для поиска документов БД")
 
                 search_result = await optimal_search(question)
 
@@ -216,7 +216,7 @@ class UnifiedAISystem:
                 context = [chunk["text"] for chunk in search_result.chunks]
 
                 if not context:
-                    logger.warning("❌ OptimalRAG не нашел документов в БД для вопроса")
+                    logger.warning(" OptimalRAG не нашел документов в БД для вопроса")
                     return {
                         "answer": "Для ответа на этот вопрос необходимы соответствующие документы в базе данных.",
                         "sources": [],
@@ -237,7 +237,7 @@ class UnifiedAISystem:
 
                 # Проверяем что ответ не пустой
                 if not answer or not answer.strip():
-                    logger.warning("❌ Пустой ответ несмотря на наличие контекста БД")
+                    logger.warning(" Пустой ответ несмотря на наличие контекста БД")
                     answer = "Не удалось сформировать ответ на основе документов БД."
 
                 return {
@@ -252,17 +252,17 @@ class UnifiedAISystem:
                         "search_time": search_result.total_time,
                         "search_method": search_result.search_method
                     },
-                    "source": "database_documents"  # Указываем что источник - БД
+                    "source": "database_documents" # Указываем что источник - БД
                 }
             else:
                 # Используем стандартный поиск по БД
-                logger.info("🔍 Используем стандартный поиск по документам БД")
+                logger.info(" Используем стандартный поиск по документам БД")
                 result = await self.qa_pipeline.answer_question(question)
                 answer = result.get("response", "Нет ответа")
 
                 # Проверяем что ответ не пустой
                 if not answer or not answer.strip():
-                    logger.warning("❌ Стандартный поиск вернул пустой ответ")
+                    logger.warning(" Стандартный поиск вернул пустой ответ")
                     answer = "Не удалось сформировать ответ на основе документов БД."
 
                 return {
@@ -271,10 +271,10 @@ class UnifiedAISystem:
                     "confidence": result.get("confidence", 0.7),
                     "context_used": result.get("context_used", False),
                     "success": result.get("success", True),
-                    "source": "database_documents"  # Указываем что источник - БД
+                    "source": "database_documents" # Указываем что источник - БД
                 }
         except Exception as e:
-            logger.error(f"❌ Ошибка обработки вопроса: {e}")
+            logger.error(f" Ошибка обработки вопроса: {e}")
             return {
                 "answer": f"Произошла ошибка при работе с документами БД: {e}",
                 "sources": [],

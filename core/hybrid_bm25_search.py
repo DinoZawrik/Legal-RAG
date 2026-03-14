@@ -177,7 +177,7 @@ class LegalTokenizer:
         Токенизация с сохранением юридических терминов
 
         Пример:
-        "плата концедента по Федеральному закону № 123-ФЗ" → ["плата концедента", "123-фз"]
+        "плата концедента по Федеральному закону 123-ФЗ" ["плата концедента", "123-фз"]
         (а не ["плата", "концедента", "по", "115", "фз"])
         """
         text_lower = text.lower()
@@ -214,7 +214,7 @@ class LegalTokenizer:
         for token in tokens:
             if token in term_map:
                 final_tokens.append(term_map[token])
-            elif len(token) > 2:  # Убираем короткие слова (по, в, и, etc.)
+            elif len(token) > 2: # Убираем короткие слова (по, в, и, etc.)
                 # Убираем пунктуацию
                 token_clean = re.sub(r'[^\w-]', '', token)
                 if token_clean:
@@ -227,8 +227,8 @@ async def hybrid_search(
     chroma_collection,
     query: str,
     k: int = 5,
-    bm25_weight: float = 0.7,
-    semantic_weight: float = 0.3,
+    bm25_weight: float = 0.5,
+    semantic_weight: float = 0.5,
 ) -> List[HybridSearchResult]:
     searcher = HybridBM25Search(chroma_collection)
     await searcher.initialize()
@@ -271,15 +271,29 @@ class HybridBM25Search:
         try:
             self.logger.info("Initializing Hybrid BM25 Search...")
 
-            # Загружаем все документы из ChromaDB
-            all_docs = await self.chroma.get()
+            # Загружаем документы из ChromaDB пакетами для ограничения памяти
+            BATCH_SIZE = 2000
+            offset = 0
+            self.documents = []
+            self.metadatas = []
+            self.ids = []
 
-            if not all_docs or not all_docs['documents']:
+            while True:
+                batch = await self.chroma.get(limit=BATCH_SIZE, offset=offset)
+                if not batch or not batch.get('ids'):
+                    break
+                batch_ids = batch['ids']
+                if not batch_ids:
+                    break
+                self.ids.extend(batch_ids)
+                self.documents.extend(batch.get('documents', []))
+                self.metadatas.extend(batch.get('metadatas', []))
+                if len(batch_ids) < BATCH_SIZE:
+                    break
+                offset += BATCH_SIZE
+
+            if not self.documents:
                 raise ValueError("ChromaDB collection is empty!")
-
-            self.documents = all_docs['documents']
-            self.metadatas = all_docs['metadatas']
-            self.ids = all_docs['ids']
 
             # Создаем mapping doc_id -> index
             self.doc_id_to_index = {doc_id: i for i, doc_id in enumerate(self.ids)}
@@ -295,11 +309,6 @@ class HybridBM25Search:
             self.bm25 = BM25Okapi(tokenized_docs, k1=1.5, b=0.8)
 
             self.logger.info(f"[OK] BM25 index built: {len(self.documents)} documents")
-
-            # Тестовый поиск
-            test_query = "концессионное соглашение"
-            test_scores = self.bm25.get_scores(self.tokenizer.tokenize(test_query))
-            self.logger.info(f"[TEST] BM25 max score for '{test_query}': {max(test_scores):.3f}")
 
         except Exception as e:
             self.logger.error(f"[ERROR] Failed to initialize BM25: {e}")
@@ -327,8 +336,8 @@ class HybridBM25Search:
         self,
         query: str,
         k: int = 5,
-        bm25_weight: float = 0.7,
-        semantic_weight: float = 0.3
+        bm25_weight: float = 0.5,
+        semantic_weight: float = 0.5
     ) -> List[HybridSearchResult]:
         """
         Гибридный поиск: BM25 + Semantic
@@ -336,8 +345,8 @@ class HybridBM25Search:
         Args:
             query: Запрос пользователя
             k: Количество результатов
-            bm25_weight: Вес BM25 (default: 0.7 - основной вес для точного поиска терминов)
-            semantic_weight: Вес Semantic (default: 0.3 - дополнительный вес для смысловой близости)
+            bm25_weight: Вес BM25 (default: 0.5 - точный поиск терминов)
+            semantic_weight: Вес Semantic (default: 0.5 - смысловая близость)
 
         Returns:
             Список HybridSearchResult отсортированный по hybrid_score
@@ -412,7 +421,7 @@ class HybridBM25Search:
         if semantic_results and semantic_results['ids'] and semantic_results['ids'][0]:
             for i, doc_id in enumerate(semantic_results['ids'][0]):
                 distance = semantic_results['distances'][0][i]
-                similarity = 1 - distance  # ChromaDB возвращает distance, конвертируем в similarity
+                similarity = 1 - distance # ChromaDB возвращает distance, конвертируем в similarity
                 semantic_scores_map[doc_id] = similarity
 
         self.logger.info(f"[SEMANTIC] Retrieved {len(semantic_scores_map)} results")
@@ -430,8 +439,12 @@ class HybridBM25Search:
             # Semantic score (из ChromaDB или 0 если не найден)
             semantic_score = semantic_scores_map.get(doc_id, 0.0)
 
-            # Hybrid score (взвешенная сумма)
-            hybrid_score = (bm25_weight * bm25_score) + (semantic_weight * semantic_score)
+            # Hybrid score: max-based formula
+            # Не наказываем документы, которые сильны по одной оси
+            # max обеспечивает базовый score, бонус за совпадение обеих осей
+            major = max(bm25_score, semantic_score)
+            minor = min(bm25_score, semantic_score)
+            hybrid_score = major + 0.3 * minor
 
             hybrid_scores.append(HybridSearchResult(
                 text=self.documents[i],
@@ -452,7 +465,7 @@ class HybridBM25Search:
             law = result.metadata.get('law', 'N/A')
             article = result.metadata.get('article', 'N/A')
             self.logger.info(
-                f"  {i}. Hybrid={result.hybrid_score:.3f} "
+                f" {i}. Hybrid={result.hybrid_score:.3f} "
                 f"(BM25={result.bm25_score:.3f}, Semantic={result.semantic_score:.3f}) "
                 f"Law={law}, Article={article}"
             )
@@ -467,7 +480,7 @@ class HybridBM25Search:
             {
                 'text': r.text,
                 'metadata': r.metadata,
-                'similarity': r.hybrid_score,  # Используем hybrid_score как similarity
+                'similarity': r.hybrid_score, # Используем hybrid_score как similarity
                 'id': r.doc_id,
                 'bm25_score': r.bm25_score,
                 'semantic_score': r.semantic_score,

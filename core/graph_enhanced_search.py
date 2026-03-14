@@ -29,9 +29,9 @@ class GraphEnrichedResult:
     semantic_score: float
 
     # Графовое обогащение
-    graph_context: List[Dict[str, Any]]  # Связанные статьи из графа
-    graph_score: float  # Бонус за графовую релевантность
-    final_score: float  # Итоговая оценка
+    graph_context: List[Dict[str, Any]] # Связанные статьи из графа
+    graph_score: float # Бонус за графовую релевантность
+    final_score: float # Итоговая оценка
 
     # Дополнительно
     article_number: Optional[str] = None
@@ -43,7 +43,7 @@ class GraphEnhancedHybridSearch:
     График-обогащенный гибридный поиск
 
     Стратегия:
-    1. Hybrid Search (BM25 + Semantic) → TOP-K статей
+    1. Hybrid Search (BM25 + Semantic) TOP-K статей
     2. Для каждой найденной статьи:
        - Извлекаем связанные статьи из Neo4j (RELATED_TO, REFERENCES)
        - Анализируем графовую близость
@@ -177,7 +177,7 @@ class GraphEnhancedHybridSearch:
                         'law_number': record['law'],
                         'article_number': record['article'],
                         'title': record['title'],
-                        'text': record['text'][:2000],  # Первые 2000 символов
+                        'text': record['text'][:2000], # Первые 2000 символов
                         'distance': record['distance'],
                         'relation_type': record['rel_type']
                     })
@@ -312,7 +312,7 @@ class GraphEnhancedHybridSearch:
 
 # Convenience функция для использования в Search Service
 async def graph_enhanced_hybrid_search(
-    chromadb_collection,
+    chroma_collection,
     query: str,
     k: int = 5,
     graph_depth: int = 1,
@@ -322,7 +322,7 @@ async def graph_enhanced_hybrid_search(
     Выполняет график-обогащенный гибридный поиск
 
     Args:
-        chromadb_collection: ChromaDB коллекция
+        chroma_collection: ChromaDB коллекция
         query: Поисковый запрос
         k: Количество результатов
         graph_depth: Глубина графового обхода
@@ -335,7 +335,7 @@ async def graph_enhanced_hybrid_search(
     from core.hybrid_bm25_search import hybrid_search
 
     hybrid_results = await hybrid_search(
-        chromadb_collection=chromadb_collection,
+        chroma_collection=chroma_collection,
         query=query,
         k=k
     )

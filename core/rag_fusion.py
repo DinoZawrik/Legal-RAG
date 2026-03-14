@@ -33,7 +33,7 @@ class RAGFusion:
         Стратегии:
         1. Оригинальный запрос
         2. Добавление контекста (115-ФЗ, концессия)
-        3. Переформулирование (что/какой/как → определение/описание)
+        3. Переформулирование (что/какой/как определение/описание)
         4. Разбиение сложных вопросов
         """
         variations = [original_query]
@@ -91,10 +91,10 @@ class RAGFusion:
                 seen.add(v_normalized)
                 unique_variations.append(v)
 
-        # 🔍 PHASE 2.1: Enhanced logging for debugging
-        self.logger.info(f"[🎯 RAG-FUSION] Generated {len(unique_variations)} query variations from: '{original_query}'")
+        # PHASE 2.1: Enhanced logging for debugging
+        self.logger.info(f"[ RAG-FUSION] Generated {len(unique_variations)} query variations from: '{original_query}'")
         for i, var in enumerate(unique_variations, 1):
-            self.logger.info(f"  📝 Variation {i}: {var}")
+            self.logger.info(f" Variation {i}: {var}")
 
         return unique_variations
 
@@ -115,7 +115,7 @@ class RAGFusion:
         Returns:
             Отсортированный список документов с RRF scores
         """
-        doc_scores = {}  # doc_id -> {score, doc_data}
+        doc_scores = {} # doc_id -> {score, doc_data}
 
         for query_idx, results in enumerate(results_per_query):
             for rank, doc in enumerate(results, start=1):
@@ -151,14 +151,14 @@ class RAGFusion:
             doc['query_appearances'] = item['query_count']
             final_results.append(doc)
 
-        # 🔍 PHASE 2.1: Enhanced RRF logging
-        self.logger.info(f"[🔗 RRF] Fused {len(doc_scores)} unique documents from {len(results_per_query)} queries")
+        # PHASE 2.1: Enhanced RRF logging
+        self.logger.info(f"[ RRF] Fused {len(doc_scores)} unique documents from {len(results_per_query)} queries")
         if final_results:
-            self.logger.info(f"[🏆 TOP-3 RRF SCORES]:")
+            self.logger.info(f"[ TOP-3 RRF SCORES]:")
             for i, doc in enumerate(final_results[:3], 1):
                 law = doc.get('metadata', {}).get('law', 'unknown')
                 similarity = doc.get('similarity', doc.get('distance', 0))
-                self.logger.info(f"  {i}. RRF={doc['rrf_score']:.4f}, Law={law}, Similarity={similarity:.3f}, Appearances={doc['query_appearances']}")
+                self.logger.info(f" {i}. RRF={doc['rrf_score']:.4f}, Law={law}, Similarity={similarity:.3f}, Appearances={doc['query_appearances']}")
 
         return final_results
 
@@ -191,8 +191,8 @@ class RAGFusion:
             for variation in variations:
                 task = self.storage.search_documents(
                     query=variation,
-                    k=top_k * 2,  # Больше результатов для fusion
-                    similarity_threshold=0.0  # Берем все
+                    k=top_k * 2, # Больше результатов для fusion
+                    similarity_threshold=0.0 # Берем все
                 )
                 search_tasks.append(task)
 
@@ -200,7 +200,7 @@ class RAGFusion:
 
             # Логируем результаты
             for i, results in enumerate(results_per_query):
-                self.logger.debug(f"  Query {i+1} returned {len(results)} docs")
+                self.logger.debug(f" Query {i+1} returned {len(results)} docs")
 
             # 3. Применяем Reciprocal Rank Fusion
             fused_results = await self.reciprocal_rank_fusion(results_per_query)
@@ -235,7 +235,7 @@ class RAGFusion:
             # Создаем единый расширенный запрос
             expanded_query = ' | '.join(variations[:3])
 
-            self.logger.info(f"[QUERY-EXPANSION] {len(variations)} variations → single query")
+            self.logger.info(f"[QUERY-EXPANSION] {len(variations)} variations single query")
 
             results = await self.storage.search_documents(
                 query=expanded_query,
@@ -253,7 +253,7 @@ class RAGFusion:
 async def enhance_retrieval_with_fusion(
     storage_manager,
     query: str,
-    method: str = 'fusion',  # 'fusion' или 'expansion'
+    method: str = 'fusion', # 'fusion' или 'expansion'
     top_k: int = 10
 ) -> List[Dict]:
     """

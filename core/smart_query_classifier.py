@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🧠 Smart Query Classifier
+Smart Query Classifier
 Умная система классификации запросов с NLP-анализом и правовой логикой.
 
 Обеспечивает:
@@ -24,31 +24,31 @@ logger = logging.getLogger(__name__)
 
 class QueryIntent(Enum):
     """Интенции правовых запросов."""
-    FIND_NORM = "find_norm"  # Найти конкретную норму
-    EXPLAIN_PROCEDURE = "explain_procedure"  # Объяснить процедуру
-    COMPARE_REQUIREMENTS = "compare_requirements"  # Сравнить требования
-    FIND_RESPONSIBILITY = "find_responsibility"  # Найти ответственность
-    GET_DEFINITION = "get_definition"  # Получить определение
-    CALCULATE_PARAMETERS = "calculate_parameters"  # Расчитать параметры
-    FIND_CONFLICTS = "find_conflicts"  # Найти коллизии
-    GENERAL_CONSULTATION = "general_consultation"  # Общая консультация
-    CASUAL_CHAT = "casual_chat"  # Обычное общение
+    FIND_NORM = "find_norm" # Найти конкретную норму
+    EXPLAIN_PROCEDURE = "explain_procedure" # Объяснить процедуру
+    COMPARE_REQUIREMENTS = "compare_requirements" # Сравнить требования
+    FIND_RESPONSIBILITY = "find_responsibility" # Найти ответственность
+    GET_DEFINITION = "get_definition" # Получить определение
+    CALCULATE_PARAMETERS = "calculate_parameters" # Расчитать параметры
+    FIND_CONFLICTS = "find_conflicts" # Найти коллизии
+    GENERAL_CONSULTATION = "general_consultation" # Общая консультация
+    CASUAL_CHAT = "casual_chat" # Обычное общение
 
 
 class QueryComplexity(Enum):
     """Сложность запроса."""
-    SIMPLE = "simple"  # Простой вопрос
-    MEDIUM = "medium"  # Средней сложности
-    COMPLEX = "complex"  # Сложный вопрос
-    EXPERT = "expert"  # Экспертный уровень
+    SIMPLE = "simple" # Простой вопрос
+    MEDIUM = "medium" # Средней сложности
+    COMPLEX = "complex" # Сложный вопрос
+    EXPERT = "expert" # Экспертный уровень
 
 
 class UserExpertiseLevel(Enum):
     """Уровень правовой экспертизы пользователя."""
-    BEGINNER = "beginner"        # Начинающий (без юридического образования)
-    INTERMEDIATE = "intermediate"  # Базовые знания (студенты, смежные профессии)
-    ADVANCED = "advanced"        # Продвинутый (практикующие юристы)
-    EXPERT = "expert"           # Эксперт (опытные юристы, судьи)
+    BEGINNER = "beginner" # Начинающий (без юридического образования)
+    INTERMEDIATE = "intermediate" # Базовые знания (студенты, смежные профессии)
+    ADVANCED = "advanced" # Продвинутый (практикующие юристы)
+    EXPERT = "expert" # Эксперт (опытные юристы, судьи)
 
 
 @dataclass
@@ -96,7 +96,7 @@ class SmartQueryClassifier:
         self.intent_patterns = self._load_intent_patterns()
         self.complexity_indicators = self._load_complexity_indicators()
         self.context_memory = {}
-        logger.info("✅ Smart Query Classifier инициализирован")
+        logger.info(" Smart Query Classifier инициализирован")
 
     def _load_intent_patterns(self) -> Dict[QueryIntent, List[str]]:
         """Загрузка паттернов для определения интенций."""
@@ -452,7 +452,7 @@ class SmartQueryClassifier:
                             legal_domain: LegalDomain, domain_confidence: float,
                             key_terms: List[str]) -> float:
         """Расчет общей уверенности в анализе."""
-        confidence = 0.5  # Базовая уверенность
+        confidence = 0.5 # Базовая уверенность
 
         # Бонус за найденную интенцию
         if intent != QueryIntent.GENERAL_CONSULTATION:
@@ -496,7 +496,7 @@ class SmartQueryClassifier:
         query_lower = query.lower()
 
         # Поиск упоминаний из предыдущих сообщений
-        for entry in conversation_history[-5:]:  # Последние 5 сообщений
+        for entry in conversation_history[-5:]: # Последние 5 сообщений
             prev_question = entry.get("question", "").lower()
             prev_answer = entry.get("answer", "").lower()
 
@@ -568,7 +568,7 @@ class SmartQueryClassifier:
             if current_terms & prev_terms:
                 related.append(prev_question)
 
-        return related[-3:]  # Последние 3 связанных запроса
+        return related[-3:] # Последние 3 связанных запроса
 
 
 # Глобальный экземпляр классификатора
@@ -584,7 +584,7 @@ def get_smart_classifier() -> SmartQueryClassifier:
 
 if __name__ == "__main__":
     # Демонстрация возможностей классификатора
-    print("🧠 Smart Query Classifier - Демонстрация")
+    print(" Smart Query Classifier - Демонстрация")
     print("=" * 50)
 
     classifier = SmartQueryClassifier()
@@ -600,18 +600,18 @@ if __name__ == "__main__":
     ]
 
     for query in test_queries:
-        print(f"\n🔍 Запрос: {query}")
+        print(f"\n Запрос: {query}")
         analysis = classifier.analyze_query(query)
 
-        print(f"   Тип: {analysis.query_type.value}")
-        print(f"   Интенция: {analysis.intent.value}")
-        print(f"   Сложность: {analysis.complexity.value}")
-        print(f"   Отрасль: {analysis.legal_area.value}")
-        print(f"   Уверенность: {analysis.confidence:.2f}")
-        print(f"   Уровень пользователя: {analysis.user_expertise_level}")
+        print(f" Тип: {analysis.query_type.value}")
+        print(f" Интенция: {analysis.intent.value}")
+        print(f" Сложность: {analysis.complexity.value}")
+        print(f" Отрасль: {analysis.legal_area.value}")
+        print(f" Уверенность: {analysis.confidence:.2f}")
+        print(f" Уровень пользователя: {analysis.user_expertise_level}")
 
         if analysis.key_concepts:
-            print(f"   Ключевые термины: {', '.join(analysis.key_concepts)}")
+            print(f" Ключевые термины: {', '.join(analysis.key_concepts)}")
 
         if analysis.extracted_references:
-            print(f"   Ссылки: {', '.join(analysis.extracted_references)}")
+            print(f" Ссылки: {', '.join(analysis.extracted_references)}")

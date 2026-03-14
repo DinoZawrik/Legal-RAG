@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔄 Document Reranker для улучшения качества retrieval
+Document Reranker для улучшения качества retrieval
 
 Supports:
 - BGE Reranker v2-m3 (open-source, бесплатный)
@@ -31,11 +31,11 @@ class RerankedDocument:
     """Document with reranking score."""
     text: str
     metadata: Dict[str, Any]
-    original_score: float  # Hybrid BM25 score
-    rerank_score: float    # Cross-encoder score
-    final_score: float     # Combined score
+    original_score: float # Hybrid BM25 score
+    rerank_score: float # Cross-encoder score
+    final_score: float # Combined score
     doc_id: str
-    rank: int              # Position in reranked list
+    rank: int # Position in reranked list
 
 
 class BaseReranker:
@@ -46,7 +46,7 @@ class BaseReranker:
         query: str,
         documents: List[Dict[str, Any]],
         top_k: int = 5,
-        combine_weight: float = 0.6  # Weight for rerank_score (vs original_score)
+        combine_weight: float = 0.6 # Weight for rerank_score (vs original_score)
     ) -> List[RerankedDocument]:
         """
         Rerank documents using cross-encoder.
@@ -136,7 +136,7 @@ class BGEReranker(BaseReranker):
         # 1. Prepare (query, document) pairs
         pairs = []
         for doc in candidates:
-            text = doc.get("text", "")[:500]  # Truncate long documents
+            text = doc.get("text", "")[:500] # Truncate long documents
             pairs.append([query, text])
 
         # 2. Score with cross-encoder (CPU intensive, run in thread pool)
@@ -175,7 +175,7 @@ class BGEReranker(BaseReranker):
                 rerank_score=normalized_rerank,
                 final_score=final_score,
                 doc_id=doc.get("id") or doc.get("doc_id", f"doc_{i}"),
-                rank=0  # Will be set after sorting
+                rank=0 # Will be set after sorting
             ))
 
         # 4. Sort by final_score
@@ -191,7 +191,7 @@ class BGEReranker(BaseReranker):
             law = doc.metadata.get('law', 'N/A')
             article = doc.metadata.get('article', 'N/A')
             logger.info(
-                f"  {i}. Final={doc.final_score:.3f} "
+                f" {i}. Final={doc.final_score:.3f} "
                 f"(Original={doc.original_score:.3f}, Rerank={doc.rerank_score:.3f}) "
                 f"Law={law}, Article={article}"
             )
@@ -223,7 +223,7 @@ class NoOpReranker(BaseReranker):
                 text=doc.get("text", ""),
                 metadata=doc.get("metadata", {}),
                 original_score=original_score,
-                rerank_score=original_score,  # Same as original
+                rerank_score=original_score, # Same as original
                 final_score=original_score,
                 doc_id=doc.get("id") or doc.get("doc_id", f"doc_{i}"),
                 rank=i
@@ -275,7 +275,7 @@ def convert_to_dict(reranked_docs: List[RerankedDocument]) -> List[Dict[str, Any
         {
             'text': doc.text,
             'metadata': doc.metadata,
-            'similarity': doc.final_score,  # Use final_score as similarity
+            'similarity': doc.final_score, # Use final_score as similarity
             'id': doc.doc_id,
             'original_score': doc.original_score,
             'rerank_score': doc.rerank_score,

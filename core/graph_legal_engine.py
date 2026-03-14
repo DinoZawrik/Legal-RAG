@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🕸️ Graph Legal Intelligence Engine
+Graph Legal Intelligence Engine
 Гибридная система: Neo4j (структура) + ChromaDB (семантика) + Universal Legal System (интеллект)
 
 Решает критические проблемы:
@@ -44,7 +44,7 @@ except Exception as e:
     Neo4jRealConnection = None
     get_neo4j_connection = None
 
-# MIGRATED: core.universal_legal_ner (deprecated) → core.ner
+# MIGRATED: core.universal_legal_ner (deprecated) core.ner
 from core.ner import UniversalLegalNER
 try:
     from core.ner.ner import LegalEntity
@@ -109,8 +109,8 @@ class MockNeo4jConnection:
     """
 
     def __init__(self):
-        self.nodes = {}  # id -> GraphNode
-        self.relations = []  # List[GraphRelation]
+        self.nodes = {} # id -> GraphNode
+        self.relations = [] # List[GraphRelation]
         self.logger = logging.getLogger(self.__class__.__name__)
 
     async def create_node(self, node: GraphNode) -> str:
@@ -161,7 +161,7 @@ class MockNeo4jConnection:
             central_node=central_node,
             related_nodes=related_nodes,
             relations=relevant_relations,
-            traversal_depth=1,  # Упрощенно
+            traversal_depth=1, # Упрощенно
             confidence_score=0.8 if related_nodes else 0.1
         )
 
@@ -667,7 +667,7 @@ class GraphLegalIntelligenceEngine:
 
     def __init__(self):
         # Инициализация компонентов
-        self.graph_db = None  # Будет установлен в initialize()
+        self.graph_db = None # Будет установлен в initialize()
         self.document_extractor = GraphDocumentExtractor()
         self.universal_system = UniversalLegalSystem()
 
@@ -690,33 +690,33 @@ class GraphLegalIntelligenceEngine:
     async def initialize(self) -> None:
         """Инициализация Graph Legal Intelligence Engine"""
         try:
-            self.logger.info("🕸️ Initializing Graph Legal Intelligence Engine...")
+            self.logger.info(" Initializing Graph Legal Intelligence Engine...")
 
             # Попытка подключения к реальному Neo4j
             if NEO4J_REAL_AVAILABLE:
                 try:
-                    self.logger.info("🔄 Attempting to connect to real Neo4j...")
+                    self.logger.info(" Attempting to connect to real Neo4j...")
                     self.graph_db = await get_neo4j_connection()
                     self.neo4j_available = True
                     self.stats["neo4j_mode"] = "real"
-                    self.logger.info("✅ Connected to real Neo4j successfully")
+                    self.logger.info(" Connected to real Neo4j successfully")
                 except Exception as e:
-                    self.logger.warning(f"⚠️ Failed to connect to real Neo4j: {e}")
+                    self.logger.warning(f" Failed to connect to real Neo4j: {e}")
                     self.graph_db = None
                     self.neo4j_available = False
 
             # Fallback к мок соединению если Neo4j недоступен
             if not self.neo4j_available:
-                self.logger.info("🔄 Falling back to Mock Neo4j Connection...")
+                self.logger.info(" Falling back to Mock Neo4j Connection...")
                 self.graph_db = MockNeo4jConnection()
                 self.fallback_to_mock = True
                 self.stats["neo4j_mode"] = "mock"
-                self.logger.info("✅ Mock Neo4j Connection initialized")
+                self.logger.info(" Mock Neo4j Connection initialized")
 
-            self.logger.info("✅ Graph Legal Intelligence Engine initialized successfully")
+            self.logger.info(" Graph Legal Intelligence Engine initialized successfully")
 
         except Exception as e:
-            self.logger.error(f"❌ Failed to initialize Graph Legal Intelligence Engine: {e}")
+            self.logger.error(f" Failed to initialize Graph Legal Intelligence Engine: {e}")
             raise
 
     async def process_document_to_graph(self, document: Dict[str, Any]) -> Dict[str, Any]:
@@ -901,7 +901,7 @@ class GraphLegalIntelligenceEngine:
 
             # Добавляем графовую информацию к ответу
             if graph_info:
-                graph_supplement = f"\n\n🕸️ Дополнительная информация из правового графа:\n" + "\n".join(f"• {info}" for info in graph_info[:5])
+                graph_supplement = f"\n\n Дополнительная информация из правового графа:\n" + "\n".join(f"• {info}" for info in graph_info[:5])
                 enhanced_result.answer += graph_supplement
 
                 # Повышаем уверенность если нашли точные связи
@@ -942,7 +942,7 @@ async def get_graph_legal_engine() -> GraphLegalIntelligenceEngine:
 if __name__ == "__main__":
     # Тестирование Graph Legal Intelligence Engine
     async def test_graph_system():
-        print("🕸️ Testing Graph Legal Intelligence Engine")
+        print(" Testing Graph Legal Intelligence Engine")
 
         engine = GraphLegalIntelligenceEngine()
 
@@ -967,12 +967,12 @@ if __name__ == "__main__":
         }
 
         # 1. Обрабатываем документ в граф
-        print("📄 Processing document to graph...")
+        print(" Processing document to graph...")
         process_result = await engine.process_document_to_graph(test_document)
-        print(f"✅ Processing result: {process_result}")
+        print(f" Processing result: {process_result}")
 
         # 2. Тестируем гибридный запрос
-        print("\n🔍 Testing graph-enhanced query...")
+        print("\n Testing graph-enhanced query...")
         test_query = "Каков размер платы концедента по этому нормативному акту?"
 
         result = await engine.graph_enhanced_query(
@@ -982,15 +982,15 @@ if __name__ == "__main__":
             graph_depth=2
         )
 
-        print(f"✅ Query result:")
-        print(f"   Success: {result.success}")
-        print(f"   Answer: {result.answer}")
-        print(f"   Confidence: {result.confidence_score:.2f}")
-        print(f"   Entities found: {len(result.entities_found)}")
-        print(f"   Processing time: {result.processing_time:.2f}s")
+        print(f" Query result:")
+        print(f" Success: {result.success}")
+        print(f" Answer: {result.answer}")
+        print(f" Confidence: {result.confidence_score:.2f}")
+        print(f" Entities found: {len(result.entities_found)}")
+        print(f" Processing time: {result.processing_time:.2f}s")
 
         # 3. Статистика системы
         stats = engine.get_graph_stats()
-        print(f"\n📊 System stats: {stats}")
+        print(f"\n System stats: {stats}")
 
     asyncio.run(test_graph_system())

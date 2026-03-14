@@ -33,11 +33,11 @@ logger = logging.getLogger(__name__)
 
 class MessageImportance(Enum):
     """Уровни важности сообщений в правовом контексте"""
-    CRITICAL = "critical"      # Ключевые правовые концепции, решения
-    HIGH = "high"             # Важные уточнения, ссылки на статьи
-    MEDIUM = "medium"         # Обычные вопросы и ответы
-    LOW = "low"              # Формальности, приветствия
-    REDUNDANT = "redundant"   # Дублирующая информация
+    CRITICAL = "critical" # Ключевые правовые концепции, решения
+    HIGH = "high" # Важные уточнения, ссылки на статьи
+    MEDIUM = "medium" # Обычные вопросы и ответы
+    LOW = "low" # Формальности, приветствия
+    REDUNDANT = "redundant" # Дублирующая информация
 
 @dataclass
 class LegalConcept:
@@ -52,7 +52,7 @@ class LegalConcept:
 class CompressedMessage:
     """Сжатое представление сообщения"""
     original_timestamp: datetime
-    message_type: str  # 'user' или 'bot'
+    message_type: str # 'user' или 'bot'
     importance: MessageImportance
     legal_concepts: List[LegalConcept]
     key_points: List[str]
@@ -96,8 +96,8 @@ class SemanticHistoryCompressor:
                 self.model = None
 
         # Пороги для семантического анализа
-        self.similarity_threshold = 0.75  # Порог для обнаружения дублирования
-        self.importance_threshold = 0.6   # Порог важности для сохранения
+        self.similarity_threshold = 0.75 # Порог для обнаружения дублирования
+        self.importance_threshold = 0.6 # Порог важности для сохранения
 
         # Регулярные выражения для поиска правовых ссылок
         self.legal_reference_patterns = [
@@ -107,7 +107,7 @@ class SemanticHistoryCompressor:
             r'ч\.\s*(\d+)\s+ст\.\s*(\d+)',
             r'пункт\s+(\d+)',
             r'п\.\s*(\d+)',
-            r'федеральный\s+закон\s+№?\s*(\d+[-\w]*)',
+            r'федеральный\s+закон\s+?\s*(\d+[-\w]*)',
             r'кодекс\s+(\w+)',
             r'конституция',
             r'указ\s+президента',
@@ -250,10 +250,10 @@ class SemanticHistoryCompressor:
                     'процедура', 'требование', 'нарушение', 'суд', 'решение'
                 ]):
                     filtered_points.append(point)
-                elif len(filtered_points) < 2:  # Сохраняем минимум контекста
+                elif len(filtered_points) < 2: # Сохраняем минимум контекста
                     filtered_points.append(point)
 
-            return filtered_points or key_points[:1]  # Хотя бы один пункт
+            return filtered_points or key_points[:1] # Хотя бы один пункт
 
         except Exception as e:
             logger.warning(f"Ошибка при извлечении ключевых моментов: {e}")
@@ -365,7 +365,7 @@ class SemanticHistoryCompressor:
 
         # Создание сжатого контента
         if importance in [MessageImportance.CRITICAL, MessageImportance.HIGH]:
-            compressed_content = content  # Сохраняем полностью
+            compressed_content = content # Сохраняем полностью
         elif importance == MessageImportance.MEDIUM:
             compressed_content = content[:300] + "..." if len(content) > 300 else content
         else:
@@ -495,14 +495,14 @@ class SemanticHistoryCompressor:
         conversation_flow_parts = []
         current_topic = None
 
-        for msg in compressed_messages[-10:]:  # Последние 10 сообщений
+        for msg in compressed_messages[-10:]: # Последние 10 сообщений
             if msg.legal_concepts:
                 topic = msg.legal_concepts[0].concept
                 if topic != current_topic:
                     conversation_flow_parts.append(topic)
                     current_topic = topic
 
-        conversation_flow = " → ".join(conversation_flow_parts[-5:])  # Последние 5 тем
+        conversation_flow = " ".join(conversation_flow_parts[-5:]) # Последние 5 тем
 
         # Коэффициент сжатия (примерный)
         original_size = sum(len(msg.compressed_content) for msg in compressed_messages)
@@ -517,7 +517,7 @@ class SemanticHistoryCompressor:
             user_expertise_level=user_expertise_level,
             dominant_legal_areas=dominant_legal_areas,
             key_legal_concepts=key_legal_concepts,
-            unresolved_questions=unresolved_questions[:3],  # Максимум 3
+            unresolved_questions=unresolved_questions[:3], # Максимум 3
             conversation_flow=conversation_flow,
             compression_ratio=compression_ratio
         )
@@ -616,12 +616,12 @@ class SemanticHistoryCompressor:
         for msg in compressed_messages:
             if msg.importance in [MessageImportance.CRITICAL, MessageImportance.HIGH]:
                 timestamp_str = msg.original_timestamp.strftime("%H:%M")
-                msg_prefix = "👤" if msg.message_type == 'user' else "🤖"
+                msg_prefix = "" if msg.message_type == 'user' else ""
                 context_parts.append(f"{timestamp_str} {msg_prefix}: {msg.compressed_content[:200]}...")
 
                 if msg.key_points:
-                    for point in msg.key_points[:2]:  # Максимум 2 ключевых момента
-                        context_parts.append(f"  • {point}")
+                    for point in msg.key_points[:2]: # Максимум 2 ключевых момента
+                        context_parts.append(f" • {point}")
 
         return "\n".join(context_parts)
 

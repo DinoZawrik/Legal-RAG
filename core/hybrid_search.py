@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔍 Hybrid Legal Search System
+Hybrid Legal Search System
 Гибридная система поиска для правовых документов.
 
 Объединяет:
@@ -90,9 +90,9 @@ class HybridLegalSearch:
 
         # Кэш для ускорения поиска
         self.search_cache = {}
-        self.cache_ttl = 300  # 5 минут
+        self.cache_ttl = 300 # 5 минут
 
-        logger.info("✅ Hybrid Legal Search инициализирована")
+        logger.info(" Hybrid Legal Search инициализирована")
 
     async def search_with_legal_context(self,
                                       query: str,
@@ -119,14 +119,14 @@ class HybridLegalSearch:
         cache_key = self._generate_cache_key(query, user_history, filters)
         cached_result = self._get_cached_result(cache_key)
         if cached_result:
-            logger.info(f"🎯 Результат из кэша для запроса: {query[:50]}...")
+            logger.info(f" Результат из кэша для запроса: {query[:50]}...")
             return cached_result
 
         # Анализ запроса если не предоставлен
         if not query_analysis:
             query_analysis = self.query_classifier.analyze_query(query, user_history)
 
-        logger.info(f"🔍 Гибридный поиск: {query} (интенция: {query_analysis.intent.value})")
+        logger.info(f" Гибридный поиск: {query} (интенция: {query_analysis.intent.value})")
 
         # 1. Расширение запроса синонимами
         expanded_queries = self._expand_query(query, query_analysis)
@@ -147,14 +147,21 @@ class HybridLegalSearch:
         # Терминологический поиск
         search_tasks.append(self._terminological_search(query, query_analysis))
 
-        # Выполнение всех поисков параллельно
-        search_results = await asyncio.gather(*search_tasks, return_exceptions=True)
+        # Выполнение всех поисков параллельно с таймаутом
+        try:
+            search_results = await asyncio.wait_for(
+                asyncio.gather(*search_tasks, return_exceptions=True),
+                timeout=30.0,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(" Search tasks timed out after 30s")
+            search_results = []
 
         # 3. Объединение результатов
         all_results = []
         for i, results in enumerate(search_results):
             if isinstance(results, Exception):
-                logger.warning(f"⚠️ Ошибка в поиске типа {i}: {results}")
+                logger.warning(f" Ошибка в поиске типа {i}: {results}")
                 continue
             all_results.extend(results)
 
@@ -177,7 +184,7 @@ class HybridLegalSearch:
         self._cache_result(cache_key, final_results)
 
         search_time = time.time() - start_time
-        logger.info(f"✅ Гибридный поиск завершен: {len(final_results)} результатов за {search_time:.2f}с")
+        logger.info(f" Гибридный поиск завершен: {len(final_results)} результатов за {search_time:.2f}с")
 
         return final_results
 
@@ -215,7 +222,7 @@ class HybridLegalSearch:
                     results.append(search_result)
 
         except Exception as e:
-            logger.error(f"❌ Ошибка семантического поиска: {e}")
+            logger.error(f" Ошибка семантического поиска: {e}")
 
         return results
 
@@ -241,7 +248,7 @@ class HybridLegalSearch:
                             document_type=ref.document_type,
                             legal_domain=self._infer_legal_domain(result),
                             search_type=SearchType.EXACT_REFERENCE,
-                            base_score=0.95,  # Высокий приоритет для точных ссылок
+                            base_score=0.95, # Высокий приоритет для точных ссылок
                             boosted_score=0.95,
                             metadata=result.get('metadata', {}),
                             matched_terms=[f"статья {ref.article}"],
@@ -252,7 +259,7 @@ class HybridLegalSearch:
                         results.append(search_result)
 
         except Exception as e:
-            logger.error(f"❌ Ошибка поиска точных ссылок: {e}")
+            logger.error(f" Ошибка поиска точных ссылок: {e}")
 
         return results
 
@@ -271,7 +278,7 @@ class HybridLegalSearch:
             context_terms = self._extract_context_terms(user_history, query_analysis.legal_area)
 
             # Расширение запроса контекстными терминами
-            for term in context_terms[:3]:  # Берем топ-3 контекстных термина
+            for term in context_terms[:3]: # Берем топ-3 контекстных термина
                 contextual_query = f"{query} {term}"
                 context_results = await self._query_vector_store(contextual_query, top_k=3)
 
@@ -296,7 +303,7 @@ class HybridLegalSearch:
                     results.append(search_result)
 
         except Exception as e:
-            logger.error(f"❌ Ошибка контекстного поиска: {e}")
+            logger.error(f" Ошибка контекстного поиска: {e}")
 
         return results
 
@@ -310,7 +317,7 @@ class HybridLegalSearch:
             # Получение синонимов из правовой онтологии
             expanded_queries = self.legal_ontology.expand_synonyms(query)
 
-            for synonym_query in expanded_queries[1:]:  # Пропускаем оригинальный запрос
+            for synonym_query in expanded_queries[1:]: # Пропускаем оригинальный запрос
                 if synonym_query != query.lower():
                     synonym_results = await self._query_vector_store(synonym_query, top_k=3)
 
@@ -321,7 +328,7 @@ class HybridLegalSearch:
                             document_type=self._parse_document_type(result.get('metadata', {})),
                             legal_domain=query_analysis.legal_area,
                             search_type=SearchType.TERMINOLOGICAL,
-                            base_score=result.get('similarity', 0.0) * 0.9,  # Небольшой штраф за синонимы
+                            base_score=result.get('similarity', 0.0) * 0.9, # Небольшой штраф за синонимы
                             boosted_score=result.get('similarity', 0.0) * 0.9,
                             metadata=result.get('metadata', {}),
                             matched_terms=[synonym_query],
@@ -332,7 +339,7 @@ class HybridLegalSearch:
                         results.append(search_result)
 
         except Exception as e:
-            logger.error(f"❌ Ошибка терминологического поиска: {e}")
+            logger.error(f" Ошибка терминологического поиска: {e}")
 
         return results
 
@@ -373,7 +380,7 @@ class HybridLegalSearch:
             search_type_bonus = self._get_search_type_bonus(result.search_type)
             boosted_score += search_type_bonus
 
-            result.boosted_score = min(boosted_score, 1.0)  # Ограничиваем максимальным значением
+            result.boosted_score = min(boosted_score, 1.0) # Ограничиваем максимальным значением
 
         # Сортировка по boosted_score
         return sorted(results, key=lambda x: x.boosted_score, reverse=True)
@@ -383,11 +390,11 @@ class HybridLegalSearch:
         hierarchy_level = self.legal_ontology.get_document_hierarchy_level(document_type)
 
         # Чем выше в иерархии, тем больше бонус
-        if hierarchy_level <= 2:  # Конституция, ФЗ, Кодексы
+        if hierarchy_level <= 2: # Конституция, ФЗ, Кодексы
             return 0.15
-        elif hierarchy_level <= 4:  # Указы, Постановления
+        elif hierarchy_level <= 4: # Указы, Постановления
             return 0.10
-        elif hierarchy_level <= 6:  # Приказы, Стандарты
+        elif hierarchy_level <= 6: # Приказы, Стандарты
             return 0.05
         else:
             return 0.0
@@ -419,13 +426,13 @@ class HybridLegalSearch:
 
             # Градированный бонус
             if age_days < 30:
-                return 0.15  # Документы младше месяца
+                return 0.15 # Документы младше месяца
             elif age_days < 90:
-                return 0.10  # Документы младше 3 месяцев
+                return 0.10 # Документы младше 3 месяцев
             elif age_days < 365:
-                return 0.05  # Документы младше года
-            elif age_days < 1825:  # 5 лет
-                return 0.02  # Документы младше 5 лет
+                return 0.05 # Документы младше года
+            elif age_days < 1825: # 5 лет
+                return 0.02 # Документы младше 5 лет
             else:
                 return 0.0
 
@@ -449,7 +456,7 @@ class HybridLegalSearch:
         keywords = intent_keywords.get(query_analysis.intent.value, [])
         matches = sum(1 for keyword in keywords if keyword in content_lower)
 
-        return min(matches * 0.05, 0.2)  # Максимум 0.2 бонуса
+        return min(matches * 0.05, 0.2) # Максимум 0.2 бонуса
 
     def _calculate_exact_match_bonus(self, result: SearchResult, query_analysis: QueryAnalysis) -> float:
         """Расчет бонуса за точные совпадения."""
@@ -466,12 +473,12 @@ class HybridLegalSearch:
             if ref.lower() in content_lower:
                 bonus += 0.10
 
-        return min(bonus, 0.3)  # Максимум 0.3 бонуса
+        return min(bonus, 0.3) # Максимум 0.3 бонуса
 
     def _get_search_type_bonus(self, search_type: SearchType) -> float:
         """Получение бонуса в зависимости от типа поиска."""
         bonuses = {
-            SearchType.EXACT_REFERENCE: 0.20,  # Максимальный приоритет
+            SearchType.EXACT_REFERENCE: 0.20, # Максимальный приоритет
             SearchType.SEMANTIC: 0.10,
             SearchType.CONTEXTUAL: 0.05,
             SearchType.TERMINOLOGICAL: 0.03
@@ -487,14 +494,14 @@ class HybridLegalSearch:
 
         # Добавление синонимов
         synonyms = self.legal_ontology.expand_synonyms(query)
-        expanded.extend(synonyms[:3])  # Максимум 3 синонима
+        expanded.extend(synonyms[:3]) # Максимум 3 синонима
 
         # Добавление ключевых терминов
-        for term in query_analysis.key_concepts[:2]:  # Максимум 2 термина
+        for term in query_analysis.key_concepts[:2]: # Максимум 2 термина
             if term not in query.lower():
                 expanded.append(f"{query} {term}")
 
-        return list(set(expanded))  # Убираем дубликаты
+        return list(set(expanded)) # Убираем дубликаты
 
     def _deduplicate_results(self, results: List[SearchResult]) -> List[SearchResult]:
         """Удаление дубликатов из результатов поиска."""
@@ -541,9 +548,9 @@ class HybridLegalSearch:
             # Интеграция с существующим ChromaDB
             from core.storage_coordinator import create_storage_coordinator
             self.storage_manager = await create_storage_coordinator()
-            logger.info("✅ Компоненты поиска инициализированы")
+            logger.info(" Компоненты поиска инициализированы")
         except Exception as e:
-            logger.error(f"❌ Ошибка инициализации компонентов: {e}")
+            logger.error(f" Ошибка инициализации компонентов: {e}")
 
     async def _query_vector_store(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Запрос к векторному хранилищу."""
@@ -557,7 +564,7 @@ class HybridLegalSearch:
             else:
                 return []
         except Exception as e:
-            logger.error(f"❌ Ошибка запроса к векторному хранилищу: {e}")
+            logger.error(f" Ошибка запроса к векторному хранилищу: {e}")
             return []
 
     async def _search_by_article(self, article: str, document_type: DocumentType) -> List[Dict[str, Any]]:
@@ -584,7 +591,7 @@ class HybridLegalSearch:
         """Извлечение контекстных терминов из истории пользователя."""
         context_terms = []
 
-        for entry in user_history[-3:]:  # Последние 3 записи
+        for entry in user_history[-3:]: # Последние 3 записи
             question = entry.get('question', '')
             answer = entry.get('answer', '')
 
@@ -659,7 +666,7 @@ def get_hybrid_search() -> HybridLegalSearch:
 
 if __name__ == "__main__":
     # Демонстрация возможностей гибридного поиска
-    print("🔍 Hybrid Legal Search - Демонстрация")
+    print(" Hybrid Legal Search - Демонстрация")
     print("=" * 50)
 
     async def demo():
@@ -673,7 +680,7 @@ if __name__ == "__main__":
         ]
 
         for query in test_queries:
-            print(f"\n🔍 Запрос: {query}")
+            print(f"\n Запрос: {query}")
 
             try:
                 results = await search.search_with_legal_context(
@@ -682,15 +689,15 @@ if __name__ == "__main__":
                     filters={'min_score': 0.3}
                 )
 
-                print(f"   Найдено результатов: {len(results)}")
+                print(f" Найдено результатов: {len(results)}")
 
                 for i, result in enumerate(results[:3]):
-                    print(f"   {i+1}. Тип поиска: {result.search_type.value}")
-                    print(f"      Скор: {result.boosted_score:.3f}")
-                    print(f"      Тип документа: {result.document_type.value}")
-                    print(f"      Контент: {result.content[:100]}...")
+                    print(f" {i+1}. Тип поиска: {result.search_type.value}")
+                    print(f" Скор: {result.boosted_score:.3f}")
+                    print(f" Тип документа: {result.document_type.value}")
+                    print(f" Контент: {result.content[:100]}...")
 
             except Exception as e:
-                print(f"   Ошибка: {e}")
+                print(f" Ошибка: {e}")
 
     asyncio.run(demo())

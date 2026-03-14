@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0c1929;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#d4a853" />
+      <stop offset="100%" style="stop-color:#e8c980" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="36" fill="url(#bg)"/>
+  <!-- Scale of Justice -->
+  <g transform="translate(100,50)" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Central pillar -->
+    <line x1="0" y1="0" x2="0" y2="68" opacity="0.9"/>
+    <!-- Balance beam -->
+    <line x1="-48" y1="8" x2="48" y2="8" stroke-width="2.5"/>
+    <!-- Left pan -->
+    <line x1="-48" y1="8" x2="-48" y2="38"/>
+    <path d="M-62,38 Q-48,52 -34,38" stroke-width="2"/>
+    <!-- Right pan -->
+    <line x1="48" y1="8" x2="48" y2="28"/>
+    <path d="M34,28 Q48,42 62,28" stroke-width="2"/>
+    <!-- Base -->
+    <line x1="-18" y1="68" x2="18" y2="68" stroke-width="3.5"/>
+    <!-- AI core node -->
+    <circle cx="0" cy="0" r="7" fill="url(#gold)" stroke="none"/>
+    <circle cx="0" cy="0" r="3" fill="#ffffff" stroke="none" opacity="0.9"/>
+  </g>
+  <!-- Text -->
+  <text x="100" y="152" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="26" font-weight="700" fill="#ffffff" letter-spacing="2">LegalRAG</text>
+  <text x="100" y="174" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="10" fill="url(#gold)" letter-spacing="3" text-transform="uppercase">AI LEGAL ASSISTANT</text>
+</svg>

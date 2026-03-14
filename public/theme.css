@@ -1,0 +1,272 @@
+/* ============================================================
+   LegalRAG — SOTA Chat Interface Theme
+   Premium legal-tech design system
+   ============================================================ */
+
+/* --- CSS Variables --- */
+:root {
+  --lr-navy: #0c1929;
+  --lr-navy-light: #162338;
+  --lr-blue: #1d4ed8;
+  --lr-blue-light: #3b82f6;
+  --lr-blue-muted: #1e3a5f;
+  --lr-gold: #d4a853;
+  --lr-gold-light: #e8c980;
+  --lr-text: #e2e8f0;
+  --lr-text-muted: #94a3b8;
+  --lr-surface: #1e293b;
+  --lr-border: rgba(255,255,255,0.06);
+  --lr-glass: rgba(30,41,59,0.7);
+  --lr-radius: 12px;
+  --lr-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  --lr-transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* --- Global Typography --- */
+body, html {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Chat Messages --- */
+
+/* User messages */
+.cl-message[data-author="user"] .cl-message-content,
+div[class*="userMessage"] {
+  background: linear-gradient(135deg, var(--lr-blue) 0%, #2563eb 100%) !important;
+  color: #fff !important;
+  border-radius: 18px 18px 4px 18px !important;
+  padding: 14px 20px !important;
+  box-shadow: 0 2px 12px rgba(29,78,216,0.3) !important;
+  max-width: 85% !important;
+  margin-left: auto !important;
+}
+
+/* Assistant messages */
+.cl-message[data-author="assistant"] .cl-message-content,
+div[class*="botMessage"] {
+  background: var(--lr-surface) !important;
+  border: 1px solid var(--lr-border) !important;
+  border-radius: 18px 18px 18px 4px !important;
+  padding: 18px 22px !important;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.15) !important;
+  max-width: 90% !important;
+  line-height: 1.7 !important;
+}
+
+/* Source citations */
+.cl-message-content hr {
+  border: none !important;
+  border-top: 1px solid var(--lr-border) !important;
+  margin: 16px 0 !important;
+}
+
+/* Confidence badge styling */
+.cl-message-content p:last-child {
+  font-size: 0.82rem !important;
+  opacity: 0.75;
+  letter-spacing: 0.01em;
+}
+
+/* --- Steps (RAG Pipeline Visualization) --- */
+.cl-step {
+  border: 1px solid var(--lr-border) !important;
+  border-radius: var(--lr-radius) !important;
+  background: var(--lr-glass) !important;
+  backdrop-filter: blur(12px) !important;
+  margin: 6px 0 !important;
+  transition: border-color var(--lr-transition) !important;
+}
+
+.cl-step:hover {
+  border-color: rgba(59,130,246,0.3) !important;
+}
+
+.cl-step-header {
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Step type indicators */
+.cl-step[data-type="retrieval"] {
+  border-left: 3px solid var(--lr-blue-light) !important;
+}
+
+.cl-step[data-type="llm"] {
+  border-left: 3px solid var(--lr-gold) !important;
+}
+
+.cl-step[data-type="tool"] {
+  border-left: 3px solid #10b981 !important;
+}
+
+/* --- Input Area --- */
+.cl-chat-input,
+textarea[class*="composer"],
+div[class*="composer"] {
+  background: var(--lr-surface) !important;
+  border: 1px solid var(--lr-border) !important;
+  border-radius: 16px !important;
+  transition: border-color var(--lr-transition), box-shadow var(--lr-transition) !important;
+}
+
+.cl-chat-input:focus-within,
+textarea[class*="composer"]:focus,
+div[class*="composer"]:focus-within {
+  border-color: var(--lr-blue-light) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15) !important;
+}
+
+/* Send button */
+button[class*="send"],
+button[class*="submit"] {
+  background: linear-gradient(135deg, var(--lr-blue), #2563eb) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  transition: transform var(--lr-transition), box-shadow var(--lr-transition) !important;
+}
+
+button[class*="send"]:hover,
+button[class*="submit"]:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 16px rgba(29,78,216,0.4) !important;
+}
+
+/* --- Starters (Quick Actions) --- */
+.cl-starter {
+  background: var(--lr-surface) !important;
+  border: 1px solid var(--lr-border) !important;
+  border-radius: var(--lr-radius) !important;
+  padding: 16px !important;
+  transition: all var(--lr-transition) !important;
+  cursor: pointer !important;
+}
+
+.cl-starter:hover {
+  border-color: var(--lr-blue-light) !important;
+  background: linear-gradient(135deg, var(--lr-surface), rgba(29,78,216,0.08)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+}
+
+.cl-starter-label {
+  font-weight: 600 !important;
+  color: var(--lr-text) !important;
+}
+
+.cl-starter-description {
+  color: var(--lr-text-muted) !important;
+  font-size: 0.85rem !important;
+}
+
+/* --- Sidebar / Header --- */
+header, .cl-header,
+div[class*="header"] {
+  backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid var(--lr-border) !important;
+}
+
+/* --- Code Blocks inside messages --- */
+.cl-message-content pre {
+  background: var(--lr-navy) !important;
+  border: 1px solid var(--lr-border) !important;
+  border-radius: 8px !important;
+  padding: 14px !important;
+}
+
+.cl-message-content code {
+  background: rgba(59,130,246,0.1) !important;
+  color: var(--lr-blue-light) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 0.88em !important;
+}
+
+/* --- Markdown Formatting --- */
+.cl-message-content h1,
+.cl-message-content h2,
+.cl-message-content h3 {
+  color: var(--lr-text) !important;
+  font-weight: 700 !important;
+  margin-top: 1.2em !important;
+  margin-bottom: 0.6em !important;
+}
+
+.cl-message-content strong {
+  color: var(--lr-gold-light) !important;
+  font-weight: 600 !important;
+}
+
+.cl-message-content ul, .cl-message-content ol {
+  padding-left: 1.4em !important;
+}
+
+.cl-message-content li {
+  margin-bottom: 0.3em !important;
+  line-height: 1.65 !important;
+}
+
+/* Horizontal rules as section dividers */
+.cl-message-content hr {
+  margin: 1rem 0 !important;
+  border-top: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* --- Scrollbar Styling --- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.25);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148,163,184,0.4);
+}
+
+/* --- File Upload Area --- */
+.cl-upload-area,
+div[class*="upload"] {
+  border: 2px dashed rgba(59,130,246,0.3) !important;
+  border-radius: var(--lr-radius) !important;
+  background: rgba(29,78,216,0.04) !important;
+  transition: all var(--lr-transition) !important;
+}
+
+.cl-upload-area:hover,
+div[class*="upload"]:hover {
+  border-color: var(--lr-blue-light) !important;
+  background: rgba(29,78,216,0.08) !important;
+}
+
+/* --- Loading / Thinking Animation --- */
+.cl-loading,
+div[class*="loading"],
+div[class*="thinking"] {
+  opacity: 0.7;
+}
+
+@keyframes lr-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .cl-message[data-author="user"] .cl-message-content,
+  div[class*="userMessage"] {
+    max-width: 95% !important;
+  }
+  
+  .cl-message[data-author="assistant"] .cl-message-content,
+  div[class*="botMessage"] {
+    max-width: 100% !important;
+  }
+}

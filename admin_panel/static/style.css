@@ -1,393 +1,333 @@
-/* 
-🎨 GCHPRO Admin Panel Styles
-Custom CSS для Streamlit админ-панели
-*/
+/* ============================================================
+   LegalRAG Admin Panel — SOTA Design System
+   Premium legal-tech administration interface
+   ============================================================ */
 
-/* Глобальные переменные */
+/* --- Design Tokens --- */
 :root {
-    --primary-color: #1f4e79;
-    --secondary-color: #2e8bc0;
-    --success-color: #28a745;
-    --warning-color: #ffc107;
-    --danger-color: #dc3545;
-    --info-color: #17a2b8;
-    --light-gray: #f8f9fa;
-    --dark-gray: #6c757d;
-    --border-radius: 8px;
-    --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --ap-navy: #0c1929;
+    --ap-navy-light: #162338;
+    --ap-blue: #1d4ed8;
+    --ap-blue-light: #3b82f6;
+    --ap-gold: #d4a853;
+    --ap-gold-light: #e8c980;
+    --ap-surface: #ffffff;
+    --ap-surface-alt: #f8fafc;
+    --ap-text: #1e293b;
+    --ap-text-muted: #64748b;
+    --ap-border: #e2e8f0;
+    --ap-success: #10b981;
+    --ap-warning: #f59e0b;
+    --ap-danger: #ef4444;
+    --ap-radius: 12px;
+    --ap-radius-sm: 8px;
+    --ap-shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --ap-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    --ap-shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --ap-transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+    --ap-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
-/* Основные стили */
+/* --- Global --- */
+html, body, .main, .block-container {
+    font-family: var(--ap-font) !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Hide Streamlit chrome */
+#MainMenu, footer, header[data-testid="stHeader"] {
+    visibility: hidden !important;
+    height: 0 !important;
+}
+
+.block-container {
+    padding-top: 1.5rem !important;
+}
+
+/* --- Header Banner --- */
 .main-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
+    background: linear-gradient(135deg, var(--ap-navy) 0%, var(--ap-blue) 100%);
+    padding: 1.8rem 2rem;
+    border-radius: var(--ap-radius);
     color: white;
     text-align: center;
     margin-bottom: 2rem;
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--ap-shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.main-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(212,168,83,0.08) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 .main-header h1 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
 .main-header p {
-    margin: 0.5rem 0 0 0;
-    opacity: 0.9;
-    font-size: 1.1rem;
+    margin: 0.4rem 0 0 0;
+    opacity: 0.85;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
 }
 
-/* Карточки метрик */
+/* --- Metric Cards --- */
 .metric-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    border-left: 4px solid var(--primary-color);
+    background: var(--ap-surface);
+    padding: 1.4rem;
+    border-radius: var(--ap-radius);
+    border: 1px solid var(--ap-border);
+    border-left: 4px solid var(--ap-blue);
     margin: 0.5rem 0;
-    box-shadow: var(--box-shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--ap-shadow-sm);
+    transition: transform var(--ap-transition), box-shadow var(--ap-transition);
 }
 
 .metric-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: var(--ap-shadow);
 }
 
 .metric-card h4 {
-    margin: 0 0 1rem 0;
-    color: var(--primary-color);
-    font-size: 1.2rem;
+    margin: 0 0 0.8rem 0;
+    color: var(--ap-navy);
+    font-size: 0.85rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .metric-card p {
-    margin: 0.5rem 0;
-    font-size: 0.95rem;
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+    color: var(--ap-text);
 }
 
-/* Статусы */
+.metric-card strong {
+    color: var(--ap-navy);
+}
+
+/* --- Status Badges --- */
 .status-online {
-    color: var(--success-color);
-    font-weight: bold;
+    color: var(--ap-success) !important;
+    font-weight: 600;
+    background: rgba(16,185,129,0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.82rem;
 }
 
 .status-offline {
-    color: var(--danger-color);
-    font-weight: bold;
+    color: var(--ap-danger) !important;
+    font-weight: 600;
+    background: rgba(239,68,68,0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.82rem;
 }
 
 .status-warning {
-    color: var(--warning-color);
-    font-weight: bold;
+    color: var(--ap-warning) !important;
+    font-weight: 600;
+    background: rgba(245,158,11,0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.82rem;
 }
 
-.status-info {
-    color: var(--info-color);
-    font-weight: bold;
-}
-
-/* Кнопки */
+/* --- Buttons --- */
 .stButton > button {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    background: linear-gradient(135deg, var(--ap-navy), var(--ap-blue)) !important;
     color: white !important;
     border: none !important;
-    border-radius: var(--border-radius) !important;
-    padding: 0.6rem 1.2rem !important;
+    border-radius: var(--ap-radius-sm) !important;
+    padding: 0.6rem 1.4rem !important;
     font-weight: 600 !important;
-    transition: all 0.3s ease !important;
-    box-shadow: var(--box-shadow) !important;
+    font-family: var(--ap-font) !important;
+    letter-spacing: 0.01em !important;
+    transition: all var(--ap-transition) !important;
+    box-shadow: var(--ap-shadow-sm) !important;
 }
 
 .stButton > button:hover {
     transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(31, 78, 121, 0.3) !important;
+    box-shadow: 0 4px 16px rgba(29,78,216,0.25) !important;
 }
 
 .stButton > button:active {
     transform: translateY(0) !important;
 }
 
-/* Сайдбар */
-.css-1d391kg {
-    background: linear-gradient(180deg, var(--primary-color), var(--secondary-color)) !important;
+/* --- Sidebar --- */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, var(--ap-navy) 0%, var(--ap-navy-light) 100%) !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
 }
 
-.css-1d391kg .css-17eq0hr {
+section[data-testid="stSidebar"] .stButton > button {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
     color: white !important;
+    border-radius: var(--ap-radius-sm) !important;
+    backdrop-filter: blur(4px);
 }
 
-/* Формы */
-.stTextInput > div > div > input {
-    border-radius: var(--border-radius) !important;
-    border: 2px solid #e0e0e0 !important;
-    transition: border-color 0.3s ease !important;
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: rgba(59,130,246,0.2) !important;
+    border-color: rgba(59,130,246,0.4) !important;
 }
 
-.stTextInput > div > div > input:focus {
-    border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 2px rgba(31, 78, 121, 0.2) !important;
+section[data-testid="stSidebar"] .stMarkdown {
+    color: rgba(255,255,255,0.85) !important;
+}
+
+section[data-testid="stSidebar"] hr {
+    border-color: rgba(255,255,255,0.1) !important;
+}
+
+/* --- Form Inputs --- */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    border-radius: var(--ap-radius-sm) !important;
+    border: 1.5px solid var(--ap-border) !important;
+    font-family: var(--ap-font) !important;
+    transition: border-color var(--ap-transition), box-shadow var(--ap-transition) !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: var(--ap-blue-light) !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
 }
 
 .stSelectbox > div > div {
-    border-radius: var(--border-radius) !important;
+    border-radius: var(--ap-radius-sm) !important;
 }
 
-/* Таблицы */
+/* --- Tables / DataFrames --- */
 .stDataFrame {
-    border-radius: var(--border-radius) !important;
+    border-radius: var(--ap-radius) !important;
     overflow: hidden !important;
-    box-shadow: var(--box-shadow) !important;
+    box-shadow: var(--ap-shadow-sm) !important;
+    border: 1px solid var(--ap-border) !important;
 }
 
-/* Метрики Streamlit */
-.css-1r6slb0 {
-    background: white !important;
-    border: 1px solid #e0e0e0 !important;
-    border-radius: var(--border-radius) !important;
+/* --- Streamlit Metrics --- */
+div[data-testid="stMetric"] {
+    background: var(--ap-surface) !important;
+    border: 1px solid var(--ap-border) !important;
+    border-radius: var(--ap-radius) !important;
     padding: 1rem !important;
-    box-shadow: var(--box-shadow) !important;
+    box-shadow: var(--ap-shadow-sm) !important;
 }
 
-/* Прогресс-бары */
+div[data-testid="stMetric"] label {
+    color: var(--ap-text-muted) !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+}
+
+div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: var(--ap-navy) !important;
+    font-weight: 700 !important;
+}
+
+/* --- Progress Bars --- */
 .stProgress > div > div > div {
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)) !important;
+    background: linear-gradient(90deg, var(--ap-blue), var(--ap-blue-light)) !important;
+    border-radius: 4px !important;
 }
 
-/* Алерты */
+/* --- Alerts --- */
 .stAlert {
-    border-radius: var(--border-radius) !important;
+    border-radius: var(--ap-radius-sm) !important;
     border: none !important;
-    box-shadow: var(--box-shadow) !important;
+    box-shadow: var(--ap-shadow-sm) !important;
 }
 
-/* Файл-загрузчик */
+/* --- File Uploader --- */
 .stFileUploader > div {
-    border: 2px dashed var(--primary-color) !important;
-    border-radius: var(--border-radius) !important;
-    background: var(--light-gray) !important;
+    border: 2px dashed rgba(29,78,216,0.25) !important;
+    border-radius: var(--ap-radius) !important;
+    background: var(--ap-surface-alt) !important;
     padding: 2rem !important;
     text-align: center !important;
+    transition: all var(--ap-transition) !important;
 }
 
 .stFileUploader > div:hover {
-    border-color: var(--secondary-color) !important;
-    background: #f0f8ff !important;
+    border-color: var(--ap-blue-light) !important;
+    background: rgba(29,78,216,0.03) !important;
 }
 
-/* Экспандеры */
-.streamlit-expanderHeader {
-    background: var(--light-gray) !important;
-    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
-    border: 1px solid #e0e0e0 !important;
-}
-
-.streamlit-expanderContent {
-    border: 1px solid #e0e0e0 !important;
-    border-top: none !important;
-    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
-}
-
-/* Вкладки */
+/* --- Tabs --- */
 .stTabs [data-baseweb="tab-list"] {
-    background: var(--light-gray) !important;
-    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    background: var(--ap-surface-alt) !important;
+    border-radius: var(--ap-radius) var(--ap-radius) 0 0 !important;
+    border-bottom: 1px solid var(--ap-border) !important;
+    gap: 0 !important;
 }
 
 .stTabs [data-baseweb="tab"] {
-    padding: 1rem 1.5rem !important;
-    font-weight: 600 !important;
+    padding: 0.8rem 1.5rem !important;
+    font-weight: 500 !important;
+    color: var(--ap-text-muted) !important;
+    border-radius: var(--ap-radius-sm) var(--ap-radius-sm) 0 0 !important;
 }
 
 .stTabs [aria-selected="true"] {
-    background: var(--primary-color) !important;
-    color: white !important;
+    color: var(--ap-blue) !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid var(--ap-blue) !important;
 }
 
-/* Чекбоксы */
-.stCheckbox > label {
-    font-size: 0.95rem !important;
+/* --- Expanders --- */
+.streamlit-expanderHeader {
+    background: var(--ap-surface-alt) !important;
+    border-radius: var(--ap-radius-sm) !important;
+    border: 1px solid var(--ap-border) !important;
     font-weight: 500 !important;
 }
 
-/* Слайдеры */
-.stSlider > div > div > div {
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)) !important;
+/* --- Logout Button Override --- */
+.logout-button-container .stButton > button {
+    background: linear-gradient(135deg, var(--ap-danger), #dc2626) !important;
 }
 
-/* События и логи */
-.event-card {
-    display: flex;
-    align-items: center;
-    margin: 0.5rem 0;
-    padding: 0.8rem;
-    background: white;
-    border-radius: var(--border-radius);
-    border-left: 3px solid var(--info-color);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: transform 0.2s ease;
+.logout-button-container .stButton > button:hover {
+    box-shadow: 0 4px 16px rgba(239,68,68,0.3) !important;
 }
 
-.event-card:hover {
-    transform: translateX(4px);
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+    width: 6px;
 }
 
-.event-time {
-    font-weight: bold;
-    margin-right: 1rem;
-    min-width: 60px;
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-.event-message {
-    flex: 1;
-    font-size: 0.9rem;
+::-webkit-scrollbar-thumb {
+    background: rgba(100,116,139,0.2);
+    border-radius: 3px;
 }
 
-/* Статистические карточки */
-.stats-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    text-align: center;
-    box-shadow: var(--box-shadow);
-    transition: all 0.3s ease;
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(100,116,139,0.35);
 }
-
-.stats-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-}
-
-.stats-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin: 0;
-}
-
-.stats-label {
-    font-size: 1rem;
-    color: var(--dark-gray);
-    margin: 0.5rem 0 0 0;
-}
-
-/* Загрузка файлов - drag and drop зона */
-.upload-zone {
-    border: 3px dashed var(--primary-color);
-    border-radius: var(--border-radius);
-    padding: 3rem;
-    text-align: center;
-    background: linear-gradient(135deg, #f8fbff, #e3f2fd);
-    margin: 2rem 0;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.upload-zone:hover {
-    border-color: var(--secondary-color);
-    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-    transform: scale(1.02);
-}
-
-.upload-zone h3 {
-    color: var(--primary-color);
-    margin: 0 0 1rem 0;
-    font-size: 1.8rem;
-}
-
-.upload-zone p {
-    color: var(--dark-gray);
-    margin: 0.5rem 0;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .main-header h1 {
-        font-size: 2rem;
-    }
-    
-    .metric-card {
-        margin: 0.5rem 0;
-    }
-    
-    .upload-zone {
-        padding: 2rem;
-    }
-    
-    .upload-zone h3 {
-        font-size: 1.5rem;
-    }
-}
-
-/* Темная тема (опционально) */
-@media (prefers-color-scheme: dark) {
-    .metric-card {
-        background: #2d3748;
-        color: white;
-    }
-    
-    .stats-card {
-        background: #2d3748;
-        color: white;
-    }
-    
-    .event-card {
-        background: #2d3748;
-        color: white;
-    }
-}
-
-/* Анимации */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in {
-    animation: fadeInUp 0.5s ease-out;
-}
-
-/* Прелоадер */
-.loader {
-    border: 4px solid var(--light-gray);
-    border-top: 4px solid var(--primary-color);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 20px auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Утилиты */
-.text-center {
-    text-align: center !important;
-}
-
-.text-left {
-    text-align: left !important;
-}
-
-.text-right {
-    text-align: right !important;
-}
-
-.mb-1 { margin-bottom: 0.5rem !important; }
-.mb-2 { margin-bottom: 1rem !important; }
-.mb-3 { margin-bottom: 1.5rem !important; }
-.mb-4 { margin-bottom: 2rem !important; }
 
 .mt-1 { margin-top: 0.5rem !important; }
 .mt-2 { margin-top: 1rem !important; }

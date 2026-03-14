@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔧 Улучшения accessibility для админ панели LegalRAG
+Улучшения accessibility для админ панели LegalRAG
 """
 
 import streamlit as st
@@ -305,22 +305,22 @@ def create_enhanced_navigation():
         <ul>
             <li>
                 <a href="#dashboard" class="nav-item" data-testid="nav-dashboard" id="nav-dashboard">
-                    📊 Панель управления
+                    Панель управления
                 </a>
             </li>
             <li>
                 <a href="#files" class="nav-item" data-testid="nav-file-management" id="nav-file-management">
-                    📁 Управление файлами
+                    Управление файлами
                 </a>
             </li>
             <li>
                 <a href="#users" class="nav-item" data-testid="nav-user-management" id="nav-user-management">
-                    👥 Пользователи
+                    Пользователи
                 </a>
             </li>
             <li>
                 <a href="#system" class="nav-item" data-testid="nav-system-info" id="nav-system-info">
-                    ⚙️ Системная информация
+                    Системная информация
                 </a>
             </li>
         </ul>

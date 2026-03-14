@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📁 File Uploader Component для Admin Panel
+File Uploader Component для Admin Panel
 Компонент для массовой загрузки и управления файлами
 """
 
@@ -22,8 +22,8 @@ class FileUploaderComponent:
     
     def __init__(self):
         self.api_gateway_url = os.getenv('API_GATEWAY_URL', 'http://localhost:8080')
-        self.max_file_size = 100 * 1024 * 1024  # 100MB на файл
-        self.max_batch_size = 1024 * 1024 * 1024  # 1GB на batch
+        self.max_file_size = 100 * 1024 * 1024 # 100MB на файл
+        self.max_batch_size = 1024 * 1024 * 1024 # 1GB на batch
         self.supported_formats = ['.pdf', '.docx', '.doc', '.txt', '.rtf', '.xlsx', '.xls', '.csv']
     
     def _get_auth_headers(self) -> Optional[Dict[str, str]]:
@@ -39,8 +39,8 @@ class FileUploaderComponent:
     def render_upload_interface(self):
         """Отображение интерфейса загрузки документов"""
         
-        st.subheader("📄 Загрузка отдельных документов")
-        st.info("💡 **Совет**: Для архивов используйте вкладку 'Архивы (ZIP/RAR/7z)'")
+        st.subheader(" Загрузка отдельных документов")
+        st.info(" **Совет**: Для архивов используйте вкладку 'Архивы (ZIP/RAR/7z)'")
         
         # Прямо отображаем интерфейс загрузки файлов
         self._render_single_files_upload()
@@ -70,17 +70,17 @@ class FileUploaderComponent:
                 st.metric("Статус", "Готово к загрузке" if total_size < self.max_batch_size else "Превышен лимит")
             
             # Автоматически установленные настройки обработки
-            skip_duplicates = True  # Всегда пропускаем дубликаты
-            process_immediately = True  # Всегда обрабатываем сразу
+            skip_duplicates = True # Всегда пропускаем дубликаты
+            process_immediately = True # Всегда обрабатываем сразу
 
             # Настройки типа документа
             document_type = st.selectbox(
                     "Тип обработки документа",
                     [
-                        "⚖️ Регуляторный акт",
-                        "📊 Презентация с контекстным извлечением",
-                        "📈 Табличные данные (Excel/CSV)",
-                        "🤖 Автоматическое определение"
+                        " Регуляторный акт",
+                        " Презентация с контекстным извлечением",
+                        " Табличные данные (Excel/CSV)",
+                        " Автоматическое определение"
                     ],
                     help="Выберите тип обработки для оптимизации анализа"
                 )
@@ -89,14 +89,14 @@ class FileUploaderComponent:
             category = "Общие"
             
             # Кнопка загрузки
-            if st.button("🚀 Загрузить файлы", type="primary", disabled=total_size > self.max_batch_size):
+            if st.button(" Загрузить файлы", type="primary", disabled=total_size > self.max_batch_size):
                 self._process_files_upload(uploaded_files, skip_duplicates, process_immediately, category, document_type)
     
     def _render_zip_upload(self):
         """Загрузка ZIP архива - УСТАРЕЛО, используйте UniversalArchiveProcessor"""
         
-        st.warning("⚠️ **Этот интерфейс устарел**")
-        st.info("📦 Используйте новый универсальный процессор архивов во вкладке 'Архивы (ZIP/RAR/7z)' для поддержки всех форматов архивов")
+        st.warning(" **Этот интерфейс устарел**")
+        st.info(" Используйте новый универсальный процессор архивов во вкладке 'Архивы (ZIP/RAR/7z)' для поддержки всех форматов архивов")
         
         st.write("**Загрузить ZIP архив с документами**")
         
@@ -111,7 +111,7 @@ class FileUploaderComponent:
             zip_info = self._analyze_zip_file(uploaded_zip)
             
             if zip_info['error']:
-                st.error(f"❌ Ошибка при анализе архива: {zip_info['error']}")
+                st.error(f" Ошибка при анализе архива: {zip_info['error']}")
                 return
             
             # Информация об архиве
@@ -125,9 +125,9 @@ class FileUploaderComponent:
             
             # Детальная информация
             if zip_info['file_list']:
-                with st.expander("📋 Содержимое архива"):
-                    for file_info in zip_info['file_list'][:20]:  # Показываем первые 20
-                        status_icon = "✅" if file_info['supported'] else "⚠️"
+                with st.expander(" Содержимое архива"):
+                    for file_info in zip_info['file_list'][:20]: # Показываем первые 20
+                        status_icon = "" if file_info['supported'] else ""
                         st.write(f"{status_icon} {file_info['name']} ({file_info['size_mb']:.1f} МБ)")
                     
                     if len(zip_info['file_list']) > 20:
@@ -148,10 +148,10 @@ class FileUploaderComponent:
             
             # Кнопка загрузки
             if zip_info['supported_files'] > 0:
-                if st.button("🚀 Обработать архив", type="primary"):
+                if st.button(" Обработать архив", type="primary"):
                     self._process_zip_upload(uploaded_zip, skip_duplicates, extract_subfolders, category)
             else:
-                st.warning("⚠️ В архиве нет поддерживаемых файлов")
+                st.warning(" В архиве нет поддерживаемых файлов")
     
     def _render_batch_upload(self):
         """Массовая загрузка с drag-and-drop"""
@@ -168,7 +168,7 @@ class FileUploaderComponent:
             margin: 1rem 0;
             background: #f8f9fa;
         ">
-            <h3>📦 Перетащите файлы сюда</h3>
+            <h3> Перетащите файлы сюда</h3>
             <p>Или используйте стандартный загрузчик ниже</p>
             <p><small>Поддерживаемые форматы: PDF, DOCX, DOC, TXT, RTF, XLSX, XLS, CSV</small></p>
         </div>
@@ -204,11 +204,11 @@ class FileUploaderComponent:
         
         # Прогресс обработки
         if 'batch_processing' in st.session_state and st.session_state.batch_processing:
-            st.info("🔄 Обработка файлов в процессе...")
+            st.info(" Обработка файлов в процессе...")
             progress_bar = st.progress(st.session_state.get('batch_progress', 0))
         
         # Настройки
-        with st.expander("⚙️ Настройки обработки"):
+        with st.expander(" Настройки обработки"):
             col1, col2 = st.columns(2)
             with col1:
                 skip_duplicates = st.checkbox("Пропускать дубликаты", value=True, key="batch_skip_dupes")
@@ -224,7 +224,7 @@ class FileUploaderComponent:
                 chunk_size = st.slider("Размер chunk (для больших файлов)", 500, 2000, 1000)
         
         # Кнопка запуска
-        if st.button("🚀 Начать массовую обработку", type="primary"):
+        if st.button(" Начать массовую обработку", type="primary"):
             self._start_batch_processing(files, {
                 'skip_duplicates': skip_duplicates,
                 'parallel_processing': parallel_processing,
@@ -260,7 +260,7 @@ class FileUploaderComponent:
                             'extension': file_path.suffix.lower()
                         })
             
-            os.unlink(tmp_file_path)  # Удаляем временный файл
+            os.unlink(tmp_file_path) # Удаляем временный файл
             
             return {
                 'total_files': len(file_list),
@@ -294,15 +294,15 @@ class FileUploaderComponent:
             'total_size_mb': total_size / (1024 * 1024)
         }
     
-    def _process_files_upload(self, files: List, skip_duplicates: bool, process_immediately: bool, category: str, document_type: str = "⚖️ Регуляторный акт"):
+    def _process_files_upload(self, files: List, skip_duplicates: bool, process_immediately: bool, category: str, document_type: str = " Регуляторный акт"):
         """Обработка загрузки отдельных файлов"""
         
         # Специальное предупреждение для презентаций с контекстным извлечением
-        if document_type == "📊 Презентация с контекстным извлечением":
-            st.warning("⏳ **Внимание!** Презентации с контекстным извлечением обрабатываются 5-20 минут в зависимости от размера. Пожалуйста, дождитесь завершения.")
-            st.info("🧠 Universal Contextual Extraction v2.0 анализирует каждую страницу через AI для сохранения семантических связей между элементами.")
+        if document_type == " Презентация с контекстным извлечением":
+            st.warning(" **Внимание!** Презентации с контекстным извлечением обрабатываются 5-20 минут в зависимости от размера. Пожалуйста, дождитесь завершения.")
+            st.info(" Universal Contextual Extraction v2.0 анализирует каждую страницу через AI для сохранения семантических связей между элементами.")
         
-        st.info("🔄 Начинаем загрузку файлов...")
+        st.info(" Начинаем загрузку файлов...")
         
         progress_bar = st.progress(0)
         status_text = st.empty()
@@ -314,10 +314,10 @@ class FileUploaderComponent:
         for i, file in enumerate(files):
             try:
                 # Специальное сообщение для презентаций
-                if document_type == "📊 Презентация с контекстным извлечением":
-                    status_text.text(f"🧠 Добавляем в очередь контекстного анализа: {file.name}")
+                if document_type == " Презентация с контекстным извлечением":
+                    status_text.text(f" Добавляем в очередь контекстного анализа: {file.name}")
                 else:
-                    status_text.text(f"📝 Добавляем в очередь обработки: {file.name}")
+                    status_text.text(f" Добавляем в очередь обработки: {file.name}")
                 
                 # Проверка дубликатов
                 if skip_duplicates and self._check_file_duplicate(file):
@@ -345,21 +345,21 @@ class FileUploaderComponent:
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.success(f"✅ В очереди: {uploaded_count}")
+            st.success(f" В очереди: {uploaded_count}")
         with col2:
-            st.info(f"⏭️ Пропущено: {skipped_count}")
+            st.info(f" Пропущено: {skipped_count}")
         with col3:
             if error_count > 0:
-                st.error(f"❌ Ошибок: {error_count}")
+                st.error(f" Ошибок: {error_count}")
         
-        st.info(f"📤 **Файлы добавлены в очередь**: {uploaded_count} из {len(files)} файлов отправлены на обработку")
-        st.warning("⏳ **Обработка документов запущена в фоне**. Используйте вкладку 'Мониторинг задач' для отслеживания прогресса.")
+        st.info(f" **Файлы добавлены в очередь**: {uploaded_count} из {len(files)} файлов отправлены на обработку")
+        st.success(" **Обработка документов запущена в фоне**. Обновите страницу через некоторое время, чтобы увидеть результат.")
 
     
     def _process_zip_upload(self, zip_file, skip_duplicates: bool, extract_subfolders: bool, category: str):
         """Обработка загрузки ZIP архива с интеграцией через API Gateway"""
         
-        st.info("🔄 Начинаем обработку ZIP архива...")
+        st.info(" Начинаем обработку ZIP архива...")
         
         try:
             import tempfile
@@ -381,7 +381,7 @@ class FileUploaderComponent:
                 with zipfile.ZipFile(tmp_path, 'r') as zip_ref:
                     # Получаем список файлов в архиве
                     file_list = zip_ref.namelist()
-                    st.info(f"📦 Найдено файлов в архиве: {len(file_list)}")
+                    st.info(f" Найдено файлов в архиве: {len(file_list)}")
                     
                     for file_path in file_list:
                         # Пропускаем директории
@@ -405,17 +405,17 @@ class FileUploaderComponent:
                                         'archive_path': file_path
                                     })
                                 else:
-                                    st.warning(f"⚠️ Неподдерживаемый формат: {filename}")
+                                    st.warning(f" Неподдерживаемый формат: {filename}")
                                     
                         except Exception as e:
-                            st.warning(f"⚠️ Ошибка извлечения файла {file_path}: {str(e)}")
+                            st.warning(f" Ошибка извлечения файла {file_path}: {str(e)}")
                             continue
                 
                 if not extracted_files:
-                    st.error("❌ В архиве не найдено поддерживаемых файлов")
+                    st.error(" В архиве не найдено поддерживаемых файлов")
                     return
                 
-                st.info(f"📄 Будет обработано файлов: {len(extracted_files)}")
+                st.info(f" Будет обработано файлов: {len(extracted_files)}")
                 
                 # Создаем прогресс бар
                 progress_bar = st.progress(0)
@@ -458,7 +458,7 @@ class FileUploaderComponent:
                                 continue
                         
                         # Загружаем файл через API (для ZIP файлов используем регуляторный тип по умолчанию)
-                        success = self._upload_single_file(file_obj, category, "⚖️ Регуляторный акт")
+                        success = self._upload_single_file(file_obj, category, " Регуляторный акт")
                         
                         if success:
                             processed_count += 1
@@ -486,7 +486,7 @@ class FileUploaderComponent:
                             'filename': filename,
                             'error': str(e)
                         })
-                        st.warning(f"⚠️ Ошибка обработки {filename}: {str(e)}")
+                        st.warning(f" Ошибка обработки {filename}: {str(e)}")
                         continue
                 
                 # Очищаем прогресс
@@ -496,35 +496,35 @@ class FileUploaderComponent:
                 # Показываем результаты
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.success(f"✅ Обработано: {processed_count}")
+                    st.success(f" Обработано: {processed_count}")
                 with col2:
-                    st.info(f"⏭️ Пропущено: {skipped_count}")
+                    st.info(f" Пропущено: {skipped_count}")
                 with col3:
-                    st.error(f"❌ Ошибки: {error_count}")
+                    st.error(f" Ошибки: {error_count}")
                 
                 # Детализация
                 if processed_files:
-                    with st.expander(f"📋 Успешно обработанные файлы ({len(processed_files)})"):
+                    with st.expander(f" Успешно обработанные файлы ({len(processed_files)})"):
                         for file_info in processed_files:
-                            st.write(f"✅ {file_info['filename']} ({file_info.get('size', 0)} байт)")
+                            st.write(f" {file_info['filename']} ({file_info.get('size', 0)} байт)")
                 
                 if skipped_files:
-                    with st.expander(f"⏭️ Пропущенные файлы ({len(skipped_files)})"):
+                    with st.expander(f" Пропущенные файлы ({len(skipped_files)})"):
                         for file_info in skipped_files:
                             reason = file_info.get('reason', 'Unknown')
-                            st.write(f"⏭️ {file_info['filename']} - {reason}")
+                            st.write(f" {file_info['filename']} - {reason}")
                 
                 if error_files:
-                    with st.expander(f"❌ Файлы с ошибками ({len(error_files)})"):
+                    with st.expander(f" Файлы с ошибками ({len(error_files)})"):
                         for file_info in error_files:
                             error = file_info.get('error', 'Unknown error')
-                            st.write(f"❌ {file_info['filename']} - {error}")
+                            st.write(f" {file_info['filename']} - {error}")
                 
                 # Итоговое сообщение - ИСПРАВЛЕНО: показываем реальный статус
                 if processed_count > 0:
-                    st.info(f"📤 **ZIP файлы отправлены в очередь**: {processed_count} файлов добавлены в систему")
-                    st.warning("⏳ **Обработка документов запущена в фоне**. Используйте вкладку 'Мониторинг задач' для отслеживания прогресса.")
-                    st.info("💡 **Совет**: Фактическая обработка займет 30-60 секунд на документ. Проверьте статус через несколько минут.")
+                    st.info(f" **ZIP файлы отправлены в очередь**: {processed_count} файлов добавлены в систему")
+                    st.success(" **Обработка документов запущена в фоне**. Обновите страницу через некоторое время, чтобы увидеть результат.")
+                    st.info(" **Совет**: Фактическая обработка займет 30-60 секунд на документ. Проверьте статус через несколько минут.")
                     
                     
                     # Логируем общий результат
@@ -537,7 +537,7 @@ class FileUploaderComponent:
                         'user': st.session_state.get('username', 'unknown')
                     })
                 else:
-                    st.error("❌ Не удалось обработать ни одного файла из архива")
+                    st.error(" Не удалось обработать ни одного файла из архива")
                     
                 # Очищаем временные файлы
                 import shutil
@@ -549,7 +549,7 @@ class FileUploaderComponent:
                     os.unlink(tmp_path)
                     
         except Exception as e:
-            st.error(f"❌ Ошибка обработки ZIP архива: {str(e)}")
+            st.error(f" Ошибка обработки ZIP архива: {str(e)}")
             import traceback
             st.error(f"Подробности: {traceback.format_exc()}")
             
@@ -569,7 +569,7 @@ class FileUploaderComponent:
             response = requests.get(
                 f"{self.api_gateway_url}/admin/files/check-duplicate/{file_hash}",
                 headers=headers,
-                timeout=120  # Увеличиваем timeout для проверки дубликатов больших файлов
+                timeout=120 # Увеличиваем timeout для проверки дубликатов больших файлов
             )
             
             if response.status_code == 200:
@@ -587,7 +587,7 @@ class FileUploaderComponent:
         st.session_state.batch_processing = True
         st.session_state.batch_progress = 0
         
-        st.info("🔄 Запуск массовой обработки...")
+        st.info(" Запуск массовой обработки...")
         
         try:
             # Обрабатываем файлы по одному
@@ -611,7 +611,7 @@ class FileUploaderComponent:
                     success = self._upload_single_file(
                         file, 
                         options.get('category', 'Общие'),
-                        options.get('document_type', "⚖️ Регуляторный акт")
+                        options.get('document_type', " Регуляторный акт")
                     )
                     
                     if success:
@@ -627,17 +627,17 @@ class FileUploaderComponent:
             # Финальные результаты
             col1, col2 = st.columns(2)
             with col1:
-                st.success(f"✅ Обработано: {processed_count}")
+                st.success(f" Обработано: {processed_count}")
             with col2:
                 if error_count > 0:
-                    st.error(f"❌ Ошибок: {error_count}")
+                    st.error(f" Ошибок: {error_count}")
             
-            st.info(f"📤 **Файлы отправлены в очередь**: {processed_count} из {len(files)} файлов добавлены в систему")
-            st.warning("⏳ **Обработка документов запущена в фоне**. Используйте вкладку 'Мониторинг задач' для отслеживания прогресса.")
+            st.info(f" **Файлы отправлены в очередь**: {processed_count} из {len(files)} файлов добавлены в систему")
+            st.success(" **Обработка документов запущена в фоне**. Обновите страницу через некоторое время, чтобы увидеть результат.")
             
             
         except Exception as e:
-            st.error(f"❌ Критическая ошибка массовой обработки: {str(e)}")
+            st.error(f" Критическая ошибка массовой обработки: {str(e)}")
         finally:
             st.session_state.batch_processing = False
             st.session_state.batch_progress = 0
@@ -649,7 +649,7 @@ class FileUploaderComponent:
             # Получаем заголовки авторизации и добавляем Content-Type для JSON
             headers = self._get_auth_headers()
             if not headers:
-                st.error("❌ Ошибка авторизации")
+                st.error(" Ошибка авторизации")
                 return False
             
             # Для JSON запросов добавляем Content-Type
@@ -657,36 +657,36 @@ class FileUploaderComponent:
             
             # Вычисляем хеш файла
             file_hash = hashlib.sha256(file.read()).hexdigest()
-            file.seek(0)  # Возвращаем указатель в начало
+            file.seek(0) # Возвращаем указатель в начало
             
             # Проверяем через API
             response = requests.post(
                 f"{self.api_gateway_url}/admin/files/check-duplicate",
                 json={"file_hash": file_hash, "filename": file.name},
                 headers=headers,
-                timeout=120  # Увеличиваем timeout для проверки дубликатов больших файлов
+                timeout=120 # Увеличиваем timeout для проверки дубликатов больших файлов
             )
             
             if response.status_code == 200:
                 data = response.json()
                 return data.get('is_duplicate', False)
             elif response.status_code == 401:
-                st.error("❌ Ошибка авторизации - обновите страницу")
+                st.error(" Ошибка авторизации - обновите страницу")
                 return False
             
             return False
             
         except Exception as e:
-            st.error(f"❌ Ошибка проверки дубликата: {str(e)}")
-            return False  # При ошибке считаем, что дубликата нет
+            st.error(f" Ошибка проверки дубликата: {str(e)}")
+            return False # При ошибке считаем, что дубликата нет
     
-    def _upload_single_file(self, file, category: str, document_type: str = "⚖️ Регуляторный акт") -> bool:
+    def _upload_single_file(self, file, category: str, document_type: str = " Регуляторный акт") -> bool:
         """Загрузка одного файла через API с логированием"""
         
         try:
             # Получаем токен авторизации (для файлов НЕ устанавливаем Content-Type - requests сделает это автоматически)
             if not hasattr(st.session_state, 'auth_token'):
-                st.error("❌ Ошибка авторизации")
+                st.error(" Ошибка авторизации")
                 return False
             
             headers = {
@@ -706,16 +706,16 @@ class FileUploaderComponent:
 
             # Определяем параметры на основе типа документа
             # Если выбрано автоматическое определение, определяем тип для каждого файла
-            if document_type == "🤖 Автоматическое определение":
+            if document_type == " Автоматическое определение":
                 # Сначала анализируем по названию
                 auto_detected_type = self._auto_detect_document_type(file.name)
 
                 # Для PDF файлов без явных признаков дополнительно проверяем ориентацию
-                if auto_detected_type == "⚖️ Регуляторный акт" and file.name.lower().endswith('.pdf'):
+                if auto_detected_type == " Регуляторный акт" and file.name.lower().endswith('.pdf'):
                     orientation = self._check_pdf_orientation(file_content)
                     if orientation == "landscape":
-                        auto_detected_type = "📊 Презентация с контекстным извлечением"
-                        print(f"📐 PDF {file.name} определен как презентация по горизонтальной ориентации")
+                        auto_detected_type = " Презентация с контекстным извлечением"
+                        print(f" PDF {file.name} определен как презентация по горизонтальной ориентации")
 
                 doc_type_params = self._get_document_type_params(auto_detected_type)
                 # Добавляем информацию о том, что тип был определен автоматически
@@ -734,15 +734,15 @@ class FileUploaderComponent:
             # Form data
             form_data = {
                 'category': category,
-                'auto_process': 'false',  # Используем очередь вместо мгновенной обработки
-                'async_processing': 'true',  # Включаем асинхронную обработку через очередь
-                'skip_duplicates': 'true'  # Добавляем skip_duplicates
+                'auto_process': 'true',
+                'async_processing': 'false',
+                'skip_duplicates': 'true'
             }
             
             # Добавляем параметры типа документа
             form_data.update(doc_type_params)
             
-            # Отправка на API Gateway с правильным multipart/form-data через Task Queue endpoint
+            # Отправка на API Gateway с синхронной обработкой
             response = requests.post(
                 f"{self.api_gateway_url}/api/upload",
                 files={'file': (file.name, file_content, file.type)},
@@ -753,60 +753,39 @@ class FileUploaderComponent:
                     'presentation_supplement': str(doc_type_params.get('presentation_supplement', False)).lower(),
                     'contextual_extraction': str(doc_type_params.get('contextual_extraction', False)).lower(),
                     'force_reprocess': 'false',
-                    'async_processing': 'true'  # Всегда используем Task Queue для мониторинга
+                    'async_processing': 'false'
                 },
                 headers=headers,
-                timeout=1200  # 20 минут для контекстного извлечения презентаций
+                timeout=1200 # 20 минут для больших документов
             )
             
             if response.status_code == 200:
-                # Получаем task_id из ответа API для мониторинга прогресса
                 response_data = response.json()
-                task_id = response_data.get('task_id')
-                file_id = response_data.get('file_id')
                 
-                # Сохраняем task_id в session state для мониторинга
-                if 'processing_tasks' not in st.session_state:
-                    st.session_state.processing_tasks = {}
+                if response_data.get('success'):
+                    chunks = response_data.get('chunks_created', 0)
+                    doc_id = response_data.get('document_id', '')
+                    self._log_upload_action(file.name, "upload_success", {
+                        'document_id': doc_id,
+                        'chunks_created': chunks,
+                        'user': st.session_state.get('username', 'unknown')
+                    })
+                else:
+                    self._log_upload_action(file.name, "upload_completed", {
+                        'response': str(response_data)[:200],
+                        'user': st.session_state.get('username', 'unknown')
+                    })
                 
-                # Определяем какой тип показывать в мониторинге
-                display_type = document_type
-                if document_type == "🤖 Автоматическое определение":
-                    display_type = f"{auto_detected_type} (авто-определение)"
-
-                task_info = {
-                    'task_id': task_id,
-                    'file_id': file_id,
-                    'document_type': display_type,
-                    'original_type': document_type,
-                    'status': 'pending',
-                    'created_at': time.time()
-                }
-
-                st.session_state.processing_tasks[file.name] = task_info
-
-                # Сохраняем в Redis для persistent storage
-                self._save_task_to_redis(file.name, task_info)
-
-                # Также сохраняем в localStorage через JavaScript
-                self._save_task_to_localStorage(file.name, task_info)
-                
-                self._log_upload_action(file.name, "upload_queued", {
-                    'file_id': file_id,
-                    'task_id': task_id,
-                    'document_type': document_type,
-                    'user': st.session_state.get('username', 'unknown')
-                })
                 return True
             elif response.status_code == 401:
-                st.error("❌ Ошибка авторизации - обновите страницу")
+                st.error(" Ошибка авторизации - обновите страницу")
                 self._log_upload_action(file.name, "upload_failed", {
                     'error': 'authorization_error',
                     'user': st.session_state.get('username', 'unknown')
                 })
                 return False
             elif response.status_code == 413:
-                st.error(f"❌ Файл {file.name} слишком большой")
+                st.error(f" Файл {file.name} слишком большой")
                 self._log_upload_action(file.name, "upload_failed", {
                     'error': 'file_too_large',
                     'file_size': file.size,
@@ -821,7 +800,7 @@ class FileUploaderComponent:
                 except:
                     pass
                 
-                st.error(f"❌ Ошибка загрузки файла {file.name}: {error_message}")
+                st.error(f" Ошибка загрузки файла {file.name}: {error_message}")
                 self._log_upload_action(file.name, "upload_failed", {
                     'error': error_message,
                     'status_code': response.status_code,
@@ -830,21 +809,21 @@ class FileUploaderComponent:
                 return False
             
         except requests.exceptions.Timeout:
-            st.error(f"❌ Превышено время ожидания при загрузке {file.name}")
+            st.error(f" Превышено время ожидания при загрузке {file.name}")
             self._log_upload_action(file.name, "upload_failed", {
                 'error': 'timeout',
                 'user': st.session_state.get('username', 'unknown')
             })
             return False
         except requests.exceptions.ConnectionError:
-            st.error("❌ Нет соединения с API Gateway")
+            st.error(" Нет соединения с API Gateway")
             self._log_upload_action(file.name, "upload_failed", {
                 'error': 'connection_error',
                 'user': st.session_state.get('username', 'unknown')
             })
             return False
         except Exception as e:
-            st.error(f"❌ Ошибка загрузки файла {file.name}: {str(e)}")
+            st.error(f" Ошибка загрузки файла {file.name}: {str(e)}")
             self._log_upload_action(file.name, "upload_failed", {
                 'error': str(e),
                 'user': st.session_state.get('username', 'unknown')
@@ -878,7 +857,7 @@ class FileUploaderComponent:
             current_tasks[file_name] = task_info
 
             # Сохраняем с TTL 7 дней
-            r.setex(redis_key, 604800, json.dumps(current_tasks))  # 7 дней = 604800 секунд
+            r.setex(redis_key, 604800, json.dumps(current_tasks)) # 7 дней = 604800 секунд
 
         except Exception:
             # Не логируем ошибки сохранения - это не критично
@@ -887,29 +866,29 @@ class FileUploaderComponent:
     def _get_document_type_params(self, document_type: str) -> Dict[str, str]:
         """Определение параметров на основе типа документа для API"""
         
-        if document_type == "📊 Презентация с контекстным извлечением":
+        if document_type == " Презентация с контекстным извлечением":
             return {
                 'document_type': 'presentation',
                 'is_presentation': 'true', 
                 'contextual_extraction': 'true',
                 'presentation_supplement': 'true'
             }
-        elif document_type == "⚖️ Регуляторный акт":
+        elif document_type == " Регуляторный акт":
             return {
                 'document_type': 'regulatory'
             }
-        elif document_type == "📈 Табличные данные (Excel/CSV)":
+        elif document_type == " Табличные данные (Excel/CSV)":
             return {
                 'document_type': 'spreadsheet',
                 'enhanced_table_extraction': 'true',
                 'preserve_table_structure': 'true'
             }
-        elif document_type == "🤖 Автоматическое определение":
+        elif document_type == " Автоматическое определение":
             return {
                 'document_type': 'auto_detect',
                 'auto_detect_type': 'true'
             }
-        else:  # "⚖️ Регуляторный акт" или любой другой
+        else: # " Регуляторный акт" или любой другой
             return {
                 'document_type': 'regulatory'
             }
@@ -1013,15 +992,15 @@ class FileUploaderComponent:
 
         # Проверяем презентации (ПРИОРИТЕТ - презентации могут быть в PDF!)
         if any(indicator in filename_lower for indicator in presentation_indicators):
-            return "📊 Презентация с контекстным извлечением"
+            return " Презентация с контекстным извлечением"
 
         # Проверяем табличные данные
         if any(indicator in filename_lower for indicator in spreadsheet_indicators):
-            return "📈 Табличные данные (Excel/CSV)"
+            return " Табличные данные (Excel/CSV)"
 
         # Проверяем регуляторные документы (НО НЕ если это может быть презентация в PDF)
         if any(indicator in filename_lower for indicator in regulatory_indicators):
-            return "⚖️ Регуляторный акт"
+            return " Регуляторный акт"
 
         # Для PDF файлов без явных индикаторов - проверяем дополнительные признаки презентаций
         if filename_lower.endswith('.pdf'):
@@ -1032,14 +1011,14 @@ class FileUploaderComponent:
                 'материал', 'material', 'лекция', 'lecture'
             ]
             if any(hint in filename_lower for hint in pdf_presentation_hints):
-                return "📊 Презентация с контекстным извлечением"
+                return " Презентация с контекстным извлечением"
 
         # Документы по расширению (doc, docx, rtf, txt - точно документы)
         if filename_lower.endswith(('.doc', '.docx', '.rtf', '.txt')):
-            return "⚖️ Регуляторный акт"
+            return " Регуляторный акт"
 
         # По умолчанию - регуляторный акт (основная специализация системы)
-        return "⚖️ Регуляторный акт"
+        return " Регуляторный акт"
 
     def _check_pdf_orientation(self, file_content: bytes) -> str:
         """Определение ориентации PDF страниц для выявления презентаций"""
@@ -1101,7 +1080,7 @@ class FileUploaderComponent:
             landscape_count = 0
             portrait_count = 0
 
-            for match in matches[:5]:  # Первые 5 найденных MediaBox
+            for match in matches[:5]: # Первые 5 найденных MediaBox
                 try:
                     x1, y1, x2, y2 = map(float, match)
                     width = abs(x2 - x1)

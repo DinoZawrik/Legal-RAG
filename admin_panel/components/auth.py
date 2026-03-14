@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔐 Authentication Manager для Admin Panel
+Authentication Manager для Admin Panel
 JWT аутентификация и управление сессиями
 """
 
@@ -11,6 +11,12 @@ import streamlit as st
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 
 class AuthenticationManager:
     """Простой менеджер аутентификации для единственного админа"""
@@ -18,7 +24,7 @@ class AuthenticationManager:
     def __init__(self):
         self.secret_key = os.getenv('ADMIN_JWT_SECRET', 'change-jwt-secret-in-production')
         self.algorithm = 'HS256'
-        self.token_expiry = timedelta(hours=8)  # Токен действует 8 часов
+        self.token_expiry = timedelta(hours=8) # Токен действует 8 часов
 
         # Единственный администратор
         self.admin_password = os.getenv('ADMIN_PANEL_PASSWORD', 'change_me_in_env')
@@ -69,7 +75,9 @@ class AuthenticationManager:
         """
         
         payload = {
+            'sub': username,
             'username': username,
+            'role': 'admin',
             'iat': datetime.utcnow(),
             'exp': datetime.utcnow() + self.token_expiry
         }
@@ -154,7 +162,7 @@ def require_auth():
     auth = AuthenticationManager()
     
     if not auth.is_authenticated():
-        st.error("🔐 Требуется аутентификация")
+        st.error(" Требуется аутентификация")
         st.stop()
 
 

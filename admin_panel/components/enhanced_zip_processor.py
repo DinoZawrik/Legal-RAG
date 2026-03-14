@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📦 Enhanced ZIP Processor - Улучшенная обработка ZIP архивов
+Enhanced ZIP Processor - Улучшенная обработка ZIP архивов
 """
 
 import streamlit as st
@@ -24,9 +24,9 @@ class EnhancedZipProcessor:
     def __init__(self):
         self.api_gateway_url = os.getenv('API_GATEWAY_URL', 'http://localhost:8080')
         self.supported_formats = ['.pdf', '.docx', '.doc', '.txt', '.rtf']
-        self.max_file_size = 100 * 1024 * 1024  # 100MB
-        self.max_archive_size = 500 * 1024 * 1024  # 500MB
-        self.max_concurrent_uploads = 3  # Количество параллельных загрузок
+        self.max_file_size = 100 * 1024 * 1024 # 100MB
+        self.max_archive_size = 500 * 1024 * 1024 # 500MB
+        self.max_concurrent_uploads = 3 # Количество параллельных загрузок
         
     def process_zip_archive_enhanced(self, uploaded_file, progress_callback=None) -> Dict[str, Any]:
         """
@@ -262,7 +262,7 @@ class EnhancedZipProcessor:
                 files=files,
                 data=data,
                 headers=auth_headers,
-                timeout=1200  # 20 минут для контекстного извлечения презентаций
+                timeout=1200 # 20 минут для контекстного извлечения презентаций
             )
             
             if response.status_code == 200:
@@ -306,18 +306,18 @@ class EnhancedZipProcessor:
     def render_enhanced_zip_upload(self):
         """Рендеринг улучшенного интерфейса загрузки ZIP архивов"""
         
-        st.subheader("📦 Улучшенная загрузка ZIP архивов")
+        st.subheader(" Улучшенная загрузка ZIP архивов")
         
         # Информация о возможностях
-        with st.expander("ℹ️ Возможности улучшенной обработки", expanded=False):
+        with st.expander(" Возможности улучшенной обработки", expanded=False):
             st.write("""
             **Улучшения:**
-            - 🚀 Параллельная обработка файлов (до 3 одновременно)
-            - 📊 Подробный прогресс-бар с информацией о процессе  
-            - 🔍 Интеллектуальная проверка дубликатов
-            - 📈 Детальная статистика обработки
-            - ⚡ Оптимизированная производительность
-            - 🛡️ Улучшенная обработка ошибок
+            - Параллельная обработка файлов (до 3 одновременно)
+            - Подробный прогресс-бар с информацией о процессе 
+            - Интеллектуальная проверка дубликатов
+            - Детальная статистика обработки
+            - Оптимизированная производительность
+            - Улучшенная обработка ошибок
             
             **Поддерживаемые форматы:** PDF, DOCX, DOC, TXT, RTF
             
@@ -338,22 +338,22 @@ class EnhancedZipProcessor:
             file_size = len(uploaded_zip.getvalue())
             file_size_mb = file_size / (1024 * 1024)
             
-            st.info(f"📦 Архив: **{uploaded_zip.name}** ({file_size_mb:.1f} МБ)")
+            st.info(f" Архив: **{uploaded_zip.name}** ({file_size_mb:.1f} МБ)")
             
             # Проверка размера архива
             if file_size > self.max_archive_size:
-                st.error(f"❌ Архив слишком большой! Максимальный размер: {self.max_archive_size/(1024*1024):.0f} МБ")
+                st.error(f" Архив слишком большой! Максимальный размер: {self.max_archive_size/(1024*1024):.0f} МБ")
                 return
             
             # Кнопка обработки
-            if st.button("🚀 Обработать архив (улучшенно)", key="enhanced_zip_process"):
+            if st.button(" Обработать архив (улучшенно)", key="enhanced_zip_process"):
                 
                 # Контейнеры для прогресса и результатов
                 progress_container = st.container()
                 results_container = st.container()
                 
                 with progress_container:
-                    st.info("🔄 Начинаем обработку архива...")
+                    st.info(" Начинаем обработку архива...")
                     
                     # Прогресс-бар и статус
                     progress_bar = st.progress(0)
@@ -375,28 +375,28 @@ class EnhancedZipProcessor:
         """Отображение результатов обработки"""
         
         if result["success"]:
-            st.success(f"🎉 Архив успешно обработан!")
+            st.success(f" Архив успешно обработан!")
         else:
-            st.warning("⚠️ Обработка архива завершена с ошибками")
+            st.warning(" Обработка архива завершена с ошибками")
         
         # Статистика
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("📁 Всего файлов", result["total_files"])
+            st.metric(" Всего файлов", result["total_files"])
         
         with col2:
-            st.metric("✅ Загружено", result["processed"])
+            st.metric(" Загружено", result["processed"])
         
         with col3:
-            st.metric("⏭️ Пропущено", result["skipped"])
+            st.metric(" Пропущено", result["skipped"])
         
         with col4:
-            st.metric("❌ Ошибок", result["errors"])
+            st.metric(" Ошибок", result["errors"])
         
         # Детальная информация о файлах
         if result["files"]:
-            st.subheader("📋 Детальная информация")
+            st.subheader(" Детальная информация")
             
             # Фильтры
             filter_status = st.selectbox(
@@ -418,10 +418,10 @@ class EnhancedZipProcessor:
             # Отображаем файлы
             for file_info in filtered_files:
                 status_icon = {
-                    "success": "✅",
-                    "skipped": "⏭️",
-                    "error": "❌"
-                }.get(file_info["status"], "❓")
+                    "success": "",
+                    "skipped": "",
+                    "error": ""
+                }.get(file_info["status"], "")
                 
                 with st.expander(f"{status_icon} {file_info['filename']}"):
                     col1, col2 = st.columns(2)
@@ -443,7 +443,7 @@ class EnhancedZipProcessor:
         
         # Ошибки обработки
         if result["error_details"]:
-            st.subheader("🚨 Ошибки обработки")
+            st.subheader(" Ошибки обработки")
             for error in result["error_details"]:
                 st.error(error)
 

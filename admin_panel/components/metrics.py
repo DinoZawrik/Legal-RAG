@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📊 System Metrics Manager для Admin Panel
+System Metrics Manager для Admin Panel
 Сбор и обработка метрик системы LegalRAG
 """
 
@@ -18,7 +18,7 @@ class SystemMetrics:
     
     def __init__(self):
         self.api_gateway_url = os.getenv('API_GATEWAY_URL', 'http://localhost:8080')
-        self.cache_ttl = 30  # Кеширование метрик на 30 секунд
+        self.cache_ttl = 30 # Кеширование метрик на 30 секунд
         self._metrics_cache = {}
         self._last_update = {}
         self._active_services_count = 0
@@ -97,9 +97,9 @@ class SystemMetrics:
                 'system': {
                     'cpu_usage': round(cpu_usage, 1),
                     'memory_usage': round(memory.percent, 1),
-                    'memory_available': round(memory.available / (1024**3), 2),  # GB
+                    'memory_available': round(memory.available / (1024**3), 2), # GB
                     'disk_usage': round(disk.percent, 1),
-                    'disk_free': round(disk.free / (1024**3), 2),  # GB
+                    'disk_free': round(disk.free / (1024**3), 2), # GB
                     'timestamp': datetime.now().isoformat()
                 },
                 'services': services_metrics,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-📊 Task Monitor Component для Admin Panel
+Task Monitor Component для Admin Panel
 Компонент для мониторинга очереди задач обработки документов
 """
 
@@ -22,23 +22,23 @@ class TaskMonitorComponent:
     def render_task_monitor(self):
         """Основной интерфейс мониторинга задач"""
         
-        st.header("📊 Мониторинг задач обработки")
+        st.header(" Мониторинг задач обработки")
         
         # Автообновление
         col1, col2, col3, col4 = st.columns([1.5, 1, 1, 1.5])
         with col1:
-            auto_refresh = st.checkbox("🔄 Автообновление (5с)", value=True)
+            auto_refresh = st.checkbox(" Автообновление (5с)", value=True)
         with col2:
-            if st.button("🔃 Обновить"):
+            if st.button(" Обновить"):
                 # Очищаем кэш и перезагружаем
                 st.cache_data.clear()
                 st.rerun()
         with col3:
-            if st.button("🛠️ Отладка"):
+            if st.button(" Отладка"):
                 st.session_state['debug_mode'] = not st.session_state.get('debug_mode', False)
                 st.rerun()
         with col4:
-            st.caption(f"🔗 {self.api_gateway_url}")
+            st.caption(f" {self.api_gateway_url}")
 
         if auto_refresh:
             # Рабочее автообновление через JavaScript и st.rerun()
@@ -55,7 +55,7 @@ class TaskMonitorComponent:
             """, unsafe_allow_html=True)
 
             # Показываем статус автообновления
-            st.caption("⏱️ Автообновление каждые 5 секунд (только при наличии активных задач)")
+            st.caption(" Автообновление каждые 5 секунд (только при наличии активных задач)")
         
         # Статистика очереди
         self._render_queue_stats()
@@ -80,23 +80,23 @@ class TaskMonitorComponent:
                 col1, col2, col3, col4, col5 = st.columns(5)
                 
                 with col1:
-                    st.metric("⏳ Ожидают", stats.get('queue_size', 0))
+                    st.metric(" Ожидают", stats.get('queue_size', 0))
                 with col2:
-                    st.metric("🔄 Обрабатываются", stats.get('processing_count', 0))
+                    st.metric(" Обрабатываются", stats.get('processing_count', 0))
                 with col3:
                     completed_count = stats.get('total_tasks', 0) - stats.get('tasks_failed', 0) - stats.get('queue_size', 0) - stats.get('processing_count', 0)
-                    st.metric("✅ Завершено", max(0, completed_count))
+                    st.metric(" Завершено", max(0, completed_count))
                 with col4:
-                    st.metric("❌ Ошибки", stats.get('tasks_failed', 0))
+                    st.metric(" Ошибки", stats.get('tasks_failed', 0))
                 with col5:
-                    st.metric("📊 Всего", stats.get('total_tasks', 0))
+                    st.metric(" Всего", stats.get('total_tasks', 0))
         except Exception as e:
-            st.error(f"❌ Ошибка получения статистики: {e}")
+            st.error(f" Ошибка получения статистики: {e}")
     
     def _render_user_tasks(self):
         """Отображение задач текущего пользователя"""
 
-        st.subheader("📝 Ваши задачи обработки")
+        st.subheader(" Ваши задачи обработки")
 
         # Получаем задачи из session state и localStorage
         processing_tasks = self._get_user_tasks()
@@ -105,14 +105,14 @@ class TaskMonitorComponent:
         if st.session_state.get('username') == 'admin':
             all_queue_tasks = self._get_all_queue_tasks()
             if all_queue_tasks:
-                st.subheader("🔧 Все задачи в системе (админ)")
-                for task_id, task_info in list(all_queue_tasks.items())[:20]:  # Показываем последние 20
+                st.subheader(" Все задачи в системе (админ)")
+                for task_id, task_info in list(all_queue_tasks.items())[:20]: # Показываем последние 20
                     self._render_single_task(task_info.get('original_filename', task_id[:8]), task_info)
                 st.markdown("---")
 
         if not processing_tasks:
             if st.session_state.get('username') != 'admin':
-                st.info("📭 У вас нет активных задач обработки")
+                st.info(" У вас нет активных задач обработки")
             return
         
         # Обновляем статусы всех задач
@@ -153,7 +153,7 @@ class TaskMonitorComponent:
         
         # Отладочная информация
         if st.session_state.get('debug_mode', False):
-            with st.expander("🛠️ Отладочная информация"):
+            with st.expander(" Отладочная информация"):
                 st.write(f"**Session tasks:** {len(st.session_state.get('processing_tasks', {}))}")
                 st.write(f"**Updated tasks:** {len(updated_tasks)}")
                 st.write(f"**Tasks to display:** {len(tasks_to_display)}")
@@ -178,23 +178,23 @@ class TaskMonitorComponent:
         
         # Выбираем иконку и цвет на основе статуса
         if status == 'pending':
-            status_icon = "⏳"
+            status_icon = ""
             status_color = "orange"
             status_text = "Ожидает обработки"
         elif status == 'processing':
-            status_icon = "🔄"
+            status_icon = ""
             status_color = "blue"
             status_text = "Обрабатывается"
         elif status == 'completed':
-            status_icon = "✅"
+            status_icon = ""
             status_color = "green"
             status_text = "Завершено"
         elif status == 'failed':
-            status_icon = "❌"
+            status_icon = ""
             status_color = "red"
             status_text = "Ошибка"
         else:
-            status_icon = "❓"
+            status_icon = ""
             status_color = "gray"
             status_text = "Неизвестно"
         
@@ -203,7 +203,7 @@ class TaskMonitorComponent:
             col1, col2, col3, col4 = st.columns([3, 2, 2, 1])
             
             with col1:
-                st.write(f"📄 **{file_name}**")
+                st.write(f" **{file_name}**")
                 st.caption(f"Тип: {document_type}")
             
             with col2:
@@ -224,31 +224,31 @@ class TaskMonitorComponent:
                         st.progress(progress / 100.0)
                         st.caption(f"{progress}% завершено")
                         if latest_message:
-                            st.caption(f"📝 {latest_message}")
+                            st.caption(f" {latest_message}")
                     else:
                         # Показываем индикатор обработки если нет конкретного прогресса
                         progress_value = self._estimate_processing_progress(created_at, document_type)
                         st.progress(progress_value)
                         st.caption(f"~{int(progress_value*100)}% завершено")
                         if latest_message:
-                            st.caption(f"📝 {latest_message}")
+                            st.caption(f" {latest_message}")
                 elif status == 'completed':
                     st.progress(1.0)
                     st.caption("100% завершено")
                     if latest_message:
-                        st.caption(f"✅ {latest_message}")
+                        st.caption(f" {latest_message}")
                 elif status == 'failed':
                     st.progress(0.0)
                     error_message = task_info.get('error_message', '')
                     if error_message:
-                        st.caption(f"❌ {error_message}")
+                        st.caption(f" {error_message}")
                     elif latest_message:
-                        st.caption(f"❌ {latest_message}")
+                        st.caption(f" {latest_message}")
                 elif status == 'pending':
                     # Для pending задач показываем позицию в очереди
                     queue_position = self._get_queue_position(task_id)
                     if queue_position:
-                        st.caption(f"🗓️ Позиция в очереди: #{queue_position}")
+                        st.caption(f" Позиция в очереди: #{queue_position}")
             
             with col3:
                 elapsed_time = time.time() - created_at
@@ -258,12 +258,12 @@ class TaskMonitorComponent:
                     time_str = f"{int(elapsed_time/60)}м назад"
                 else:
                     time_str = f"{int(elapsed_time/3600)}ч назад"
-                st.caption(f"⏰ {time_str}")
+                st.caption(f" {time_str}")
                 st.caption(f"ID: {task_id[:8]}...")
             
             with col4:
                 if status in ['completed', 'failed']:
-                    if st.button("🗑️", key=f"remove_{task_id}", help="Убрать из списка"):
+                    if st.button("", key=f"remove_{task_id}", help="Убрать из списка"):
                         self._remove_task_from_session(file_name)
                         st.rerun()
         
@@ -277,19 +277,19 @@ class TaskMonitorComponent:
         # Разные временные рамки для разных типов документов
         if "презентация" in document_type.lower():
             # Презентации: 10-20 минут
-            total_time = 1200  # 20 минут
+            total_time = 1200 # 20 минут
         else:
             # Обычные документы: 2-5 минут
-            total_time = 300   # 5 минут
+            total_time = 300 # 5 минут
 
         # Логарифмический прогресс
-        if elapsed < total_time * 0.1:  # первые 10%
+        if elapsed < total_time * 0.1: # первые 10%
             return min(0.3, elapsed / (total_time * 0.1) * 0.3)
-        elif elapsed < total_time * 0.5:  # до 50%
+        elif elapsed < total_time * 0.5: # до 50%
             return 0.3 + min(0.4, (elapsed - total_time * 0.1) / (total_time * 0.4) * 0.4)
-        elif elapsed < total_time:  # до полного времени
+        elif elapsed < total_time: # до полного времени
             return 0.7 + min(0.25, (elapsed - total_time * 0.5) / (total_time * 0.5) * 0.25)
-        else:  # превышено время
+        else: # превышено время
             return 0.95
     
     def _get_queue_stats(self) -> Optional[Dict[str, Any]]:
@@ -303,7 +303,7 @@ class TaskMonitorComponent:
             response = requests.get(
                 f"{self.api_gateway_url}/api/tasks/queue/stats",
                 headers=headers,
-                timeout=30  # Увеличиваем таймаут до 30 секунд
+                timeout=30 # Увеличиваем таймаут до 30 секунд
             )
 
             if response.status_code == 200:
@@ -311,15 +311,15 @@ class TaskMonitorComponent:
             else:
                 # Показываем отладочную информацию только админам
                 if st.session_state.get('username') == 'admin':
-                    st.error(f"🔍 Debug: API response status: {response.status_code}, text: {response.text}")
+                    st.error(f" Debug: API response status: {response.status_code}, text: {response.text}")
                 return None
         except requests.exceptions.RequestException as e:
             if st.session_state.get('username') == 'admin':
-                st.error(f"🔍 Debug: Request exception in _get_queue_stats: {e}")
+                st.error(f" Debug: Request exception in _get_queue_stats: {e}")
             return None
         except Exception as e:
             if st.session_state.get('username') == 'admin':
-                st.error(f"🔍 Debug: Exception in _get_queue_stats: {e}")
+                st.error(f" Debug: Exception in _get_queue_stats: {e}")
             return None
     
     def _get_task_status(self, task_id: str) -> Optional[Dict[str, Any]]:
@@ -333,7 +333,7 @@ class TaskMonitorComponent:
             response = requests.get(
                 f"{self.api_gateway_url}/api/tasks/{task_id}/status",
                 headers=headers,
-                timeout=30  # Увеличиваем таймаут до 30 секунд
+                timeout=30 # Увеличиваем таймаут до 30 секунд
             )
 
             if response.status_code == 200:
@@ -349,15 +349,15 @@ class TaskMonitorComponent:
             else:
                 # Показываем отладочную информацию только админам
                 if st.session_state.get('username') == 'admin':
-                    st.error(f"🔍 Debug: Task status API error: {response.status_code} - {response.text}")
+                    st.error(f" Debug: Task status API error: {response.status_code} - {response.text}")
                 return None
         except requests.exceptions.RequestException as e:
             if st.session_state.get('username') == 'admin':
-                st.error(f"🔍 Debug: Request exception in _get_task_status: {e}")
+                st.error(f" Debug: Request exception in _get_task_status: {e}")
             return None
         except Exception as e:
             if st.session_state.get('username') == 'admin':
-                st.error(f"🔍 Debug: Exception in _get_task_status: {e}")
+                st.error(f" Debug: Exception in _get_task_status: {e}")
             return None
     
     def _cleanup_old_tasks(self, hours: int = 24) -> Optional[Dict[str, Any]]:
@@ -406,7 +406,7 @@ class TaskMonitorComponent:
                     session_tasks = restored_tasks
             except Exception as e:
                 if st.session_state.get('username') == 'admin':
-                    st.error(f"🔍 Debug: Error restoring tasks from Redis: {e}")
+                    st.error(f" Debug: Error restoring tasks from Redis: {e}")
 
         return session_tasks
 
@@ -434,7 +434,7 @@ class TaskMonitorComponent:
         if stats:
             st.json(stats)
         else:
-            st.error("❌ Не удалось получить детальную статистику")
+            st.error(" Не удалось получить детальную статистику")
 
     def _restore_tasks_from_redis(self) -> Dict[str, Any]:
         """Восстановление задач из Redis по user_id"""
@@ -482,7 +482,7 @@ class TaskMonitorComponent:
             redis_key = f"legalrag:user_tasks:{user_id}"
 
             # Сохраняем с TTL 7 дней
-            r.setex(redis_key, 604800, json.dumps(tasks))  # 7 дней = 604800 секунд
+            r.setex(redis_key, 604800, json.dumps(tasks)) # 7 дней = 604800 секунд
 
         except Exception:
             # Не логируем ошибки сохранения - это не критично
@@ -569,7 +569,7 @@ class TaskMonitorComponent:
             current_tasks[file_name] = task_info
 
             # Сохраняем обновленный список
-            r.setex(redis_key, 604800, json.dumps(current_tasks))  # 7 дней
+            r.setex(redis_key, 604800, json.dumps(current_tasks)) # 7 дней
 
         except Exception:
             # Не логируем ошибки сохранения - это не критично

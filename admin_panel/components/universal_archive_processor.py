@@ -44,9 +44,9 @@ class UniversalArchiveProcessor:
     def __init__(self):
         self.api_gateway_url = os.getenv('API_GATEWAY_URL', 'http://localhost:8080')
         self.supported_formats = ['.pdf', '.docx', '.doc', '.txt', '.rtf']
-        self.max_file_size = 100 * 1024 * 1024  # 100MB
-        self.max_archive_size = 500 * 1024 * 1024  # 500MB
-        self.max_concurrent_uploads = 3  # Количество параллельных загрузок
+        self.max_file_size = 100 * 1024 * 1024 # 100MB
+        self.max_archive_size = 500 * 1024 * 1024 # 500MB
+        self.max_concurrent_uploads = 3 # Количество параллельных загрузок
         
         # Определяем поддерживаемые типы архивов
         self.supported_archive_types = {
@@ -85,7 +85,7 @@ class UniversalArchiveProcessor:
             if header.startswith(b'PK'):
                 return '.zip'
             
-            # RAR архив (Rar!)    
+            # RAR архив (Rar!) 
             if header.startswith(b'Rar!'):
                 return '.rar'
             
@@ -105,7 +105,7 @@ class UniversalArchiveProcessor:
 
         # Плашка с предупреждением о разработке
         st.warning("""
-        ⚠️ **ЭКСПЕРИМЕНТАЛЬНАЯ ФУНКЦИЯ**
+        **ЭКСПЕРИМЕНТАЛЬНАЯ ФУНКЦИЯ**
 
         Обработка архивов находится в стадии разработки и тестирования.
         Могут возникать проблемы с извлечением файлов или кодировкой имен файлов.
@@ -116,7 +116,7 @@ class UniversalArchiveProcessor:
         # Получаем поддерживаемые форматы
         supported_info = self.get_supported_archive_info()
         # Загрузчик архивов
-        supported_extensions = [ext[1:] for ext in supported_info['supported_types']]  # убираем точку
+        supported_extensions = [ext[1:] for ext in supported_info['supported_types']] # убираем точку
         
         uploaded_archive = st.file_uploader(
             "Выберите архив для загрузки",
@@ -145,7 +145,7 @@ class UniversalArchiveProcessor:
         st.info(f"[INFO] Обнаружен архив: **{archive_type.upper()[1:]}** ({uploaded_file.size / (1024*1024):.1f} МБ)")
         
         # Автоматическое определение типа документов
-        document_type = "🤖 Автоматическое определение"
+        document_type = " Автоматическое определение"
         
         # Кнопка для запуска обработки
         if st.button(f"Обработать {archive_type.upper()[1:]} архив", key="process_universal_archive"):
@@ -165,7 +165,7 @@ class UniversalArchiveProcessor:
             # Показываем результат
             self._display_processing_results(result, archive_type)
     
-    def process_archive_universal(self, uploaded_file, archive_type: str, progress_callback=None, document_type: str = "🤖 Автоматическое определение") -> Dict[str, Any]:
+    def process_archive_universal(self, uploaded_file, archive_type: str, progress_callback=None, document_type: str = " Автоматическое определение") -> Dict[str, Any]:
         """
         Универсальная обработка архива любого поддерживаемого типа
         """
@@ -281,15 +281,15 @@ class UniversalArchiveProcessor:
         
         # Проверяем презентации (ПРИОРИТЕТ - презентации могут быть в PDF!)
         if any(indicator in filename_lower for indicator in presentation_indicators):
-            return "📊 Презентация с контекстным извлечением"
+            return " Презентация с контекстным извлечением"
 
         # Проверяем табличные данные
         if any(indicator in filename_lower for indicator in spreadsheet_indicators):
-            return "📈 Табличные данные (Excel/CSV)"
+            return " Табличные данные (Excel/CSV)"
 
         # Проверяем регуляторные документы (НО НЕ если это может быть презентация в PDF)
         if any(indicator in filename_lower for indicator in regulatory_indicators):
-            return "⚖️ Регуляторный акт"
+            return " Регуляторный акт"
 
         # Для PDF файлов без явных индикаторов - проверяем дополнительные признаки презентаций
         if filename_lower.endswith('.pdf'):
@@ -300,14 +300,14 @@ class UniversalArchiveProcessor:
                 'материал', 'material', 'лекция', 'lecture'
             ]
             if any(hint in filename_lower for hint in pdf_presentation_hints):
-                return "📊 Презентация с контекстным извлечением"
+                return " Презентация с контекстным извлечением"
 
         # Документы по расширению (doc, docx, rtf, txt - точно документы)
         if filename_lower.endswith(('.doc', '.docx', '.rtf', '.txt')):
-            return "⚖️ Регуляторный акт"
+            return " Регуляторный акт"
         
         # По умолчанию - регуляторный акт (основная специализация системы)
-        return "⚖️ Регуляторный акт"
+        return " Регуляторный акт"
     
     def _analyze_zip_archive(self, zip_path: str) -> List[Dict[str, Any]]:
         """Анализ ZIP архива с поддержкой русских имен файлов"""
@@ -458,7 +458,7 @@ class UniversalArchiveProcessor:
     
     def _process_files_sequential_universal(self, archive_path: str, archive_type: str, 
                                           files_to_process: List[Dict[str, Any]], 
-                                          progress_callback=None, document_type: str = "🤖 Автоматическое определение") -> List[Dict[str, Any]]:
+                                          progress_callback=None, document_type: str = " Автоматическое определение") -> List[Dict[str, Any]]:
         """Последовательная обработка файлов из архива (без потоков для совместимости с Streamlit)"""
         processed_files = []
         total_files = len(files_to_process)
@@ -491,7 +491,7 @@ class UniversalArchiveProcessor:
         return processed_files
     
     def _extract_and_upload_file_universal(self, archive_path: str, archive_type: str, 
-                                         file_info: Dict[str, Any], document_type: str = "🤖 Автоматическое определение") -> Dict[str, Any]:
+                                         file_info: Dict[str, Any], document_type: str = " Автоматическое определение") -> Dict[str, Any]:
         """Извлечение файла из архива и загрузка в систему"""
         
         try:
@@ -608,7 +608,7 @@ class UniversalArchiveProcessor:
             logger.error(f"Ошибка проверки дубликата {filename}: {e}")
             return False
     
-    def _upload_file_to_api(self, file_content: bytes, filename: str, document_type: str = "🤖 Автоматическое определение") -> Dict[str, Any]:
+    def _upload_file_to_api(self, file_content: bytes, filename: str, document_type: str = " Автоматическое определение") -> Dict[str, Any]:
         """Загрузка файла через API"""
         try:
             headers = self._get_auth_headers()
@@ -616,8 +616,8 @@ class UniversalArchiveProcessor:
                 return {"success": False, "error": "Ошибка авторизации"}
             
             # Определяем тип документа
-            if document_type == "🤖 Автоматическое определение":
-                # Автоматическое определение по имени файла  
+            if document_type == " Автоматическое определение":
+                # Автоматическое определение по имени файла 
                 auto_detected_type = self._auto_detect_document_type(filename)
                 document_category = self._convert_document_type_to_category(auto_detected_type)
                 # Обновляем параметры на основе автоопределенного типа
@@ -636,9 +636,9 @@ class UniversalArchiveProcessor:
             # Form data
             data = {
                 'category': document_category,
-                'auto_process': 'false',  # Используем очередь вместо мгновенной обработки
-                'async_processing': 'true',  # Включаем асинхронную обработку через очередь
-                'skip_duplicates': 'true'  # Добавляем skip_duplicates
+                'auto_process': 'true',
+                'async_processing': 'false',
+                'skip_duplicates': 'true'
             }
             
             # Добавляем параметры типа документа
@@ -747,9 +747,9 @@ class UniversalArchiveProcessor:
         """Преобразование выбранного типа документа в API категорию"""
         
         type_mapping = {
-            "⚖️ Регуляторный акт": "regulatory", 
-            "📊 Презентация с контекстным извлечением": "presentation",
-            "📈 Табличные данные (Excel/CSV)": "spreadsheet"
+            " Регуляторный акт": "regulatory", 
+            " Презентация с контекстным извлечением": "presentation",
+            " Табличные данные (Excel/CSV)": "spreadsheet"
         }
         
         return type_mapping.get(document_type, "auto")
@@ -757,30 +757,30 @@ class UniversalArchiveProcessor:
     def _get_document_type_params(self, document_type: str) -> Dict[str, str]:
         """Определение параметров на основе типа документа для API"""
         
-        if document_type == "📊 Презентация с контекстным извлечением":
+        if document_type == " Презентация с контекстным извлечением":
             return {
                 'document_type': 'presentation',
                 'is_presentation': 'true', 
                 'contextual_extraction': 'true',
                 'presentation_supplement': 'true'
             }
-        elif document_type == "⚖️ Регуляторный акт":
+        elif document_type == " Регуляторный акт":
             return {
                 'document_type': 'regulatory'
             }
-        elif document_type == "📈 Табличные данные (Excel/CSV)":
+        elif document_type == " Табличные данные (Excel/CSV)":
             return {
                 'document_type': 'spreadsheet',
                 'enhanced_table_extraction': 'true',
                 'preserve_table_structure': 'true'
             }
-        elif document_type == "🤖 Автоматическое определение":
+        elif document_type == " Автоматическое определение":
             # Для автоопределения оставляем пустые параметры - backend сам определит
             return {
                 'document_type': 'auto',
                 'auto_detect_type': 'true'
             }
-        else:  # Fallback - регуляторный документ по умолчанию
+        else: # Fallback - регуляторный документ по умолчанию
             return {
                 'document_type': 'regulatory'
             }
@@ -799,13 +799,13 @@ class UniversalArchiveProcessor:
         with col2:
             st.metric("Загружено", result.get('processed', 0))
         with col3:
-            st.metric("⏭️ Пропущено", result.get('skipped', 0))
+            st.metric(" Пропущено", result.get('skipped', 0))
         with col4:
             st.metric("Ошибок", result.get('errors', 0))
         
         # Детальная информация о файлах
         if result.get('files'):
-            st.subheader("📋 Детали обработки файлов")
+            st.subheader(" Детали обработки файлов")
             
             for file_info in result['files']:
                 with st.expander(f"{file_info['filename']}"):
@@ -814,9 +814,9 @@ class UniversalArchiveProcessor:
                     with col1:
                         status_emoji = {
                             'success': '[OK]',
-                            'skipped': '⏭️',
+                            'skipped': '',
                             'error': '[FAIL]'
-                        }.get(file_info['status'], '❓')
+                        }.get(file_info['status'], '')
                         
                         st.write(f"**Статус:** {status_emoji} {file_info['status'].title()}")
                         
@@ -848,25 +848,18 @@ class UniversalArchiveProcessor:
         
         # Ошибки обработки
         if result.get('error_details'):
-            st.subheader("🚨 Ошибки обработки")
+            st.subheader(" Ошибки обработки")
             for error in result['error_details']:
                 st.error(f"[FAIL] {error}")
         
         # Итоговое сообщение - ИСПРАВЛЕНО: показываем реальный статус
         if result.get('success'):
             if result.get('processed') == result.get('total_files'):
-                st.info(f"📤 **Файлы отправлены в очередь обработки**: {result['processed']} из {result['total_files']}")
-                st.warning("⏳ **Обработка документов запущена в фоне**. Используйте вкладку 'Мониторинг задач' для отслеживания прогресса.")
-                st.info("💡 **Совет**: Фактическая обработка займет 30-60 секунд на документ. Проверьте статус через несколько минут.")
-                
-                # Кнопка быстрого перехода к мониторингу
-                col1, col2, col3 = st.columns([1, 1, 2])
-                with col2:
-                    if st.button("📊 Открыть мониторинг задач", type="secondary", help="Перейти к отслеживанию прогресса обработки"):
-                        st.session_state['current_page'] = 'tasks'
-                        st.rerun()
+                st.info(f" **Файлы отправлены в очередь обработки**: {result['processed']} из {result['total_files']}")
+                st.success(" **Обработка документов запущена в фоне**. Обновите страницу через некоторое время, чтобы увидеть результат.")
+                st.info(" **Совет**: Фактическая обработка займет 30-60 секунд на документ. Проверьте статус через несколько минут.")
             else:
-                st.info(f"📤 **Частично отправлено**: {result['processed']} из {result['total_files']} файлов добавлены в очередь")
-                st.warning("⚠️ **Некоторые файлы не удалось отправить**. Проверьте логи выше для деталей.")
+                st.info(f" **Частично отправлено**: {result['processed']} из {result['total_files']} файлов добавлены в очередь")
+                st.warning(" **Некоторые файлы не удалось отправить**. Проверьте логи выше для деталей.")
         else:
-            st.error("❌ **Ошибка**: Не удалось отправить файлы на обработку. Проверьте подключение к серверу.")
+            st.error(" **Ошибка**: Не удалось отправить файлы на обработку. Проверьте подключение к серверу.")

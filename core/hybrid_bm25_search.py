@@ -223,6 +223,11 @@ class LegalTokenizer:
         return final_tokens
 
 
+
+# Global singleton for the searcher
+_global_searcher = None
+import asyncio
+
 async def hybrid_search(
     chroma_collection,
     query: str,
@@ -230,9 +235,19 @@ async def hybrid_search(
     bm25_weight: float = 0.5,
     semantic_weight: float = 0.5,
 ) -> List[HybridSearchResult]:
-    searcher = HybridBM25Search(chroma_collection)
-    await searcher.initialize()
-    return await searcher.search(query, k=k, bm25_weight=bm25_weight, semantic_weight=semantic_weight)
+    global _global_searcher
+    if _global_searcher is None:
+        _global_searcher = HybridBM25Search(chroma_collection)
+        await _global_searcher.initialize()
+    
+    # Ensure the searcher is using the correct collection (basic check)
+    if _global_searcher.chroma != chroma_collection:
+        # Reset if collection changed (rare case in microservices)
+        logger.warning("ChromaDB collection changed, rebuilding BM25 index...")
+        _global_searcher = HybridBM25Search(chroma_collection)
+        await _global_searcher.initialize()
+
+    return await _global_searcher.search(query, k=k, bm25_weight=bm25_weight, semantic_weight=semantic_weight)
 
 
 class HybridBM25Search:
@@ -259,6 +274,8 @@ class HybridBM25Search:
         self.metadatas = []
         self.ids = []
         self.doc_id_to_index = {}
+        self._initialized = False
+        self._init_lock = asyncio.Lock()
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -268,51 +285,67 @@ class HybridBM25Search:
 
         ВАЖНО: Вызвать один раз при старте!
         """
-        try:
-            self.logger.info("Initializing Hybrid BM25 Search...")
+        if self._initialized:
+            return
 
-            # Загружаем документы из ChromaDB пакетами для ограничения памяти
-            BATCH_SIZE = 2000
-            offset = 0
-            self.documents = []
-            self.metadatas = []
-            self.ids = []
+        async with self._init_lock:
+            if self._initialized:
+                return
 
-            while True:
-                batch = await self.chroma.get(limit=BATCH_SIZE, offset=offset)
-                if not batch or not batch.get('ids'):
-                    break
-                batch_ids = batch['ids']
-                if not batch_ids:
-                    break
-                self.ids.extend(batch_ids)
-                self.documents.extend(batch.get('documents', []))
-                self.metadatas.extend(batch.get('metadatas', []))
-                if len(batch_ids) < BATCH_SIZE:
-                    break
-                offset += BATCH_SIZE
+            try:
+                self.logger.info("Initializing Hybrid BM25 Search...")
 
-            if not self.documents:
-                raise ValueError("ChromaDB collection is empty!")
+                # Загружаем документы из ChromaDB пакетами для ограничения памяти
+                BATCH_SIZE = 2000
+                offset = 0
+                self.documents = []
+                self.metadatas = []
+                self.ids = []
 
-            # Создаем mapping doc_id -> index
-            self.doc_id_to_index = {doc_id: i for i, doc_id in enumerate(self.ids)}
+                while True:
+                    batch = await self.chroma.get(limit=BATCH_SIZE, offset=offset)
+                    if not batch or not batch.get('ids'):
+                        break
+                    batch_ids = batch['ids']
+                    if not batch_ids:
+                        break
+                    self.ids.extend(batch_ids)
+                    self.documents.extend(batch.get('documents', []))
+                    self.metadatas.extend(batch.get('metadatas', []))
+                    if len(batch_ids) < BATCH_SIZE:
+                        break
+                    offset += BATCH_SIZE
 
-            # Токенизируем все документы для BM25
-            self.logger.info(f"Tokenizing {len(self.documents)} documents for BM25...")
-            tokenized_docs = [self.tokenizer.tokenize(doc) for doc in self.documents]
+                if not self.documents:
+                    self.logger.warning("ChromaDB collection is empty! BM25 will not be available.")
+                    self._initialized = True
+                    return
 
-            # Строим BM25 индекс с оптимизированными параметрами
-            # k1=1.5 (было 1.2): больше влияния частоты термина для юридических текстов
-            # b=0.8 (было 0.75): больше влияния длины документа
-            # Эти параметры лучше подходят для Russian legal text
-            self.bm25 = BM25Okapi(tokenized_docs, k1=1.5, b=0.8)
+                # Создаем mapping doc_id -> index
+                self.doc_id_to_index = {doc_id: i for i, doc_id in enumerate(self.ids)}
 
-            self.logger.info(f"[OK] BM25 index built: {len(self.documents)} documents")
+                # Токенизируем все документы для BM25
+                self.logger.info(f"Tokenizing {len(self.documents)} documents for BM25...")
+                
+                # Run tokenization in a thread pool to avoid blocking the event loop
+                loop = asyncio.get_running_loop()
+                tokenized_docs = await loop.run_in_executor(
+                    None, 
+                    lambda: [self.tokenizer.tokenize(doc) for doc in self.documents]
+                )
 
-        except Exception as e:
-            self.logger.error(f"[ERROR] Failed to initialize BM25: {e}")
-            raise
+                # Строим BM25 индекс с оптимизированными параметрами
+                # k1=1.5 (было 1.2): больше влияния частоты термина для юридических текстов
+                # b=0.8 (было 0.75): больше влияния длины документа
+                # Эти параметры лучше подходят для Russian legal text
+                self.bm25 = BM25Okapi(tokenized_docs, k1=1.5, b=0.8)
+
+                self._initialized = True
+                self.logger.info(f"[OK] BM25 index built: {len(self.documents)} documents")
+
+            except Exception as e:
+                self.logger.error(f"[ERROR] Failed to initialize BM25: {e}")
+                raise
 
     def _normalize_scores(self, scores: List[float]) -> np.ndarray:
         """
@@ -351,20 +384,20 @@ class HybridBM25Search:
         Returns:
             Список HybridSearchResult отсортированный по hybrid_score
         """
-        if not self.bm25:
-            raise RuntimeError("BM25 not initialized! Call initialize() first.")
+        if not self._initialized:
+            await self.initialize()
 
         self.logger.info(f"[HYBRID SEARCH] Query: '{query[:100]}...'")
 
         # 1. BM25 scores для всех документов
-        tokenized_query = self.tokenizer.tokenize(query)
-        self.logger.info(f"[BM25] Tokenized query: {tokenized_query}")
+        if self.bm25:
+            tokenized_query = self.tokenizer.tokenize(query)
+            # self.logger.info(f"[BM25] Tokenized query: {tokenized_query}") # Verbose
 
-        bm25_scores = self.bm25.get_scores(tokenized_query)
-        bm25_normalized = self._normalize_scores(bm25_scores)
-
-        top_bm25_idx = np.argsort(bm25_scores)[-3:][::-1]
-        self.logger.info(f"[BM25] Top-3 scores: {[bm25_scores[i] for i in top_bm25_idx]}")
+            bm25_scores = self.bm25.get_scores(tokenized_query)
+            bm25_normalized = self._normalize_scores(bm25_scores)
+        else:
+            bm25_normalized = np.zeros(len(self.documents))
 
         # 2. Semantic scores из ChromaDB
         # Создаем Gemini embedding вручную (384-dim) вместо использования collection.query()
@@ -408,11 +441,12 @@ class HybridBM25Search:
             )
         except Exception as e:
             from core.api_key_manager import get_key_manager
-            get_key_manager().report_error(api_key if 'api_key' in locals() else '', is_quota_error="quota" in str(e).lower() or "429" in str(e))
+            # Only report quota errors, not generic ones
+            is_quota = "quota" in str(e).lower() or "429" in str(e)
+            get_key_manager().report_error(api_key if 'api_key' in locals() else '', is_quota_error=is_quota)
+            
             self.logger.error(f"Failed to create Gemini embedding: {e}")
-            # Fallback: use default embeddings if Gemini fails
-            # Жесткая деградация: отключаем семантическую часть вовсе, чтобы избежать
-            # несовпадения размерности эмбеддингов коллекции при client-side embed
+            # Fallback: disable semantic
             self.logger.warning("[SEMANTIC-FALLBACK] Disabling semantic component due to embedding errors; using BM25 only")
             semantic_results = {"ids": [[]], "distances": [[]]}
 
@@ -424,27 +458,18 @@ class HybridBM25Search:
                 similarity = 1 - distance # ChromaDB возвращает distance, конвертируем в similarity
                 semantic_scores_map[doc_id] = similarity
 
-        self.logger.info(f"[SEMANTIC] Retrieved {len(semantic_scores_map)} results")
-        if semantic_scores_map:
-            top_semantic = sorted(semantic_scores_map.items(), key=lambda x: x[1], reverse=True)[:3]
-            self.logger.info(f"[SEMANTIC] Top-3 similarities: {[s for _, s in top_semantic]}")
-
         # 3. Hybrid scoring для каждого документа
         hybrid_scores = []
 
         for i, doc_id in enumerate(self.ids):
             # BM25 score (normalized)
-            bm25_score = float(bm25_normalized[i])
+            bm25_score = float(bm25_normalized[i]) if i < len(bm25_normalized) else 0.0
 
             # Semantic score (из ChromaDB или 0 если не найден)
             semantic_score = semantic_scores_map.get(doc_id, 0.0)
 
-            # Hybrid score: max-based formula
-            # Не наказываем документы, которые сильны по одной оси
-            # max обеспечивает базовый score, бонус за совпадение обеих осей
-            major = max(bm25_score, semantic_score)
-            minor = min(bm25_score, semantic_score)
-            hybrid_score = major + 0.3 * minor
+            # Hybrid score: Weighted Sum
+            hybrid_score = (bm25_score * bm25_weight) + (semantic_score * semantic_weight)
 
             hybrid_scores.append(HybridSearchResult(
                 text=self.documents[i],
@@ -459,18 +484,8 @@ class HybridBM25Search:
         hybrid_scores.sort(key=lambda x: x.hybrid_score, reverse=True)
         top_k_results = hybrid_scores[:k]
 
-        # Логируем TOP-3
-        self.logger.info(f"[HYBRID] TOP-{k} results:")
-        for i, result in enumerate(top_k_results[:3], 1):
-            law = result.metadata.get('law', 'N/A')
-            article = result.metadata.get('article', 'N/A')
-            self.logger.info(
-                f" {i}. Hybrid={result.hybrid_score:.3f} "
-                f"(BM25={result.bm25_score:.3f}, Semantic={result.semantic_score:.3f}) "
-                f"Law={law}, Article={article}"
-            )
-
         return top_k_results
+
 
     def convert_to_dict(self, results: List[HybridSearchResult]) -> List[Dict[str, Any]]:
         """

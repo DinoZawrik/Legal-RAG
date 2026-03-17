@@ -92,6 +92,9 @@ class BGEReranker(BaseReranker):
             from sentence_transformers import CrossEncoder
 
             logger.info(f"Loading BGE Reranker model: {self._model_name}...")
+            # WARNING: This might trigger a large download (~1GB)
+            logger.warning(f"Downloading/Loading heavy model ({self._model_name}). This may take a while on first run.")
+            
             self.model = CrossEncoder(self._model_name, max_length=512)
             self._initialized = True
             logger.info("[OK] BGE Reranker loaded successfully")
@@ -136,7 +139,8 @@ class BGEReranker(BaseReranker):
         # 1. Prepare (query, document) pairs
         pairs = []
         for doc in candidates:
-            text = doc.get("text", "")[:500] # Truncate long documents
+            # INCREASED TRUNCATION: 500 -> 4000 chars for legal documents
+            text = doc.get("text", "")[:4000] 
             pairs.append([query, text])
 
         # 2. Score with cross-encoder (CPU intensive, run in thread pool)

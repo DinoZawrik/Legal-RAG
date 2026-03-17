@@ -24,12 +24,12 @@ from typing import Any, Dict, List, Optional, Tuple, TypedDict
 
 from langgraph.graph import StateGraph, END
 
-# МИГРАЦИЯ v3.0: OpenRouter (Nemotron) вместо OpenAI GPT-4
+# МИГРАЦИЯ v3.0: Поддержка нескольких провайдеров
 from langchain_openai import ChatOpenAI
-# LEGACY: from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-from core.api_key_manager import get_key_manager
-# LEGACY: from core.gemini_rate_limiter import GeminiRateLimiter
+from core.api_key_manager import get_key_manager, get_api_key
+from core.gemini_rate_limiter import GeminiRateLimiter
 
 from core.hybrid_bm25_search import hybrid_search
 from tools.rag_tools import get_chroma_collection
@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 # МИГРАЦИЯ v2.0: OpenAI key manager
 _key_manager = get_key_manager(provider="openai")
+_gemini_key_manager = get_key_manager(provider="gemini")
 
 # Reranker instance (singleton)
 _reranker = None
@@ -241,31 +242,50 @@ async def _perform_web_search(query: str) -> Tuple[List[Dict[str, Any]], Optiona
 class LangGraphRAGWorkflow:
     def __init__(self, api_key: Optional[str] = None, use_reranker: bool = True):
         """
-        МИГРАЦИЯ v2.0: Инициализация с OpenAI GPT-4 Turbo (готовность к GPT-5).
-
-        Args:
-            api_key: OpenAI API key (optional, берется из manager)
-            use_reranker: Enable BGE reranker (default True)
+        МИГРАЦИЯ v2.0: Инициализация с поддержкой OpenAI (OpenRouter) и Gemini.
+        
+        Автоматический выбор провайдера:
+        1. OpenRouter/OpenAI (если заданы ключи)
+        2. Google Gemini (fallback)
         """
-        self.api_key = api_key or _key_manager.get_next_key()
-
-        # МИГРАЦИЯ v3.0: OpenRouter Nemotron (бесплатный, 120B параметров)
-        # Используем OpenRouter API (совместим с OpenAI SDK)
-        openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
-        openrouter_base = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-        openrouter_model = os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
-
-        self.answer_llm = ChatOpenAI(
-            model=openrouter_model,
-            openai_api_key=openrouter_key,
-            openai_api_base=openrouter_base,
-            temperature=0.2,
-            max_tokens=2048,
-            max_retries=3
-        )
-
-        # Reranker (BGE v2-m3, бесплатный open-source)
+        self.api_key = api_key
         self.use_reranker = use_reranker
+        self.provider = "openai" # Default
+
+        # 1. Try OpenRouter/OpenAI
+        openrouter_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+        if openrouter_key:
+            self.provider = "openai"
+            openrouter_base = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+            openrouter_model = os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
+            
+            logger.info(f"Using OpenAI/OpenRouter provider with model: {openrouter_model}")
+            self.answer_llm = ChatOpenAI(
+                model=openrouter_model,
+                openai_api_key=openrouter_key,
+                openai_api_base=openrouter_base,
+                temperature=0.2,
+                max_tokens=2048,
+                max_retries=3
+            )
+        # 2. Fallback to Gemini
+        else:
+            gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+            if gemini_key:
+                self.provider = "gemini"
+                logger.info("Using Google Gemini provider as fallback")
+                self.answer_llm = ChatGoogleGenerativeAI(
+                    model="gemini-2.0-flash", # Use a stable model
+                    google_api_key=gemini_key,
+                    temperature=0.2,
+                    max_output_tokens=2048,
+                    convert_system_message_to_human=True
+                )
+            else:
+                logger.warning("No API keys found for OpenAI or Gemini! LLM generation will fail.")
+                self.answer_llm = None
+
+        # Reranker
         if use_reranker:
             global _reranker
             if _reranker is None:
@@ -469,62 +489,41 @@ class LangGraphRAGWorkflow:
 
 Сформулируй ответ кратко (3-5 предложений), указывая статьи и законы, если цитируешь их.
 """
+        if not self.answer_llm:
+            state["final_answer"] = "Ошибка: LLM провайдер не настроен (отсутствуют API ключи)."
+            state["needs_repair"] = False
+            return state
 
-        # МИГРАЦИЯ v2.0: Упрощенная генерация через OpenAI (без ротации ключей и rate limiting)
         final_answer = ""
-        last_error: Optional[Exception] = None
-
-        # OpenAI не требует такой частой ротации как Gemini
-        for retry in range(3): # 3 попытки при ошибках
+        success = False
+        
+        # Попытка генерации с ретраями
+        for retry in range(3):
             try:
-                # OpenAI SDK имеет встроенный retry, поэтому не нужен GeminiRateLimiter
+                # Rate Limiting для Gemini
+                if self.provider == "gemini":
+                    await GeminiRateLimiter.wait("flash")
+                    
                 response = await self.answer_llm.ainvoke(prompt)
                 final_answer = response.content
-                last_error = None
+                success = True
                 break
+                
             except Exception as exc:
-                last_error = exc
-                message = str(exc).lower()
-
-                state["reasoning_trace"].append(f"Answer generation error (attempt {retry + 1}/3): {exc}")
-
-                # Retry только для network/timeout ошибок
-                if "timeout" in message or "connection" in message:
-                    await asyncio.sleep(2 ** retry) # Exponential backoff
-                    continue
+                logger.error(f"Generate answer error (attempt {retry+1}): {exc}")
+                state["reasoning_trace"].append(f"Gen error: {str(exc)}")
+                
+                # Если ошибка квоты в Gemini - ротируем ключ и ждем
+                if self.provider == "gemini" and ("429" in str(exc) or "quota" in str(exc).lower()):
+                    # Rotate key manually if possible or just wait longer
+                    await asyncio.sleep(2 * (retry + 1))
                 else:
-                    # Другие ошибки - сразу прерываем
-                    raise
+                    await asyncio.sleep(1)
 
-        # LEGACY: Gemini ротация ключей
-        # for _ in range(len(_key_manager.API_KEYS)):
-        # answer_key = _key_manager.get_next_key()
-        # self.answer_llm = ChatGoogleGenerativeAI(
-        # model="gemini-2.5-flash-preview-09-2025",
-        # google_api_key=answer_key,
-        # temperature=0.2,
-        # )
-        # try:
-        # await GeminiRateLimiter.wait("flash")
-        # response = await self.answer_llm.ainvoke(prompt)
-        # final_answer = response.content
-        # last_error = None
-        # break
-        # except Exception as exc:
-        # last_error = exc
-        # message = str(exc).lower()
-        # quota_error = "quota" in message or "429" in message
-        # _key_manager.report_error(answer_key, is_quota_error=quota_error)
-        # state["reasoning_trace"].append(
-        # "Answer generation quota hit, rotating key" if quota_error else f"Answer generation error: {exc}"
-        # )
-        # if quota_error:
-        # await asyncio.sleep(2)
-        # continue
-        # raise
-
-        if last_error:
-            raise last_error
+        if not success:
+            # Graceful degradation instead of crash
+            final_answer = "Извините, в данный момент сервис перегружен и не может сгенерировать ответ. Пожалуйста, попробуйте позже."
+            state["quality_flags"].append("generation_failed")
 
         sources: List[Dict[str, Any]] = []
         if definition:
@@ -556,7 +555,7 @@ class LangGraphRAGWorkflow:
 
         state["final_answer"] = final_answer
         state["sources"] = sources
-        state["reasoning_trace"].append("Answer generated")
+        state["reasoning_trace"].append("Answer generated" if success else "Answer generation failed")
         return state
 
     async def _critique_answer_node(self, state: AgentState) -> AgentState:

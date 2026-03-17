@@ -24,8 +24,9 @@ def _rpm_to_interval(rpm_env: str, default_rpm: float) -> float:
 
 
 _DEFAULT_INTERVALS: Dict[str, float] = {
-    "flash": _rpm_to_interval("GEMINI_FLASH_RPM", 10.0),
-    "flash-lite": _rpm_to_interval("GEMINI_FLASH_LITE_RPM", 15.0),
+    # Increased defaults assuming multiple API keys (key rotation)
+    "flash": _rpm_to_interval("GEMINI_FLASH_RPM", 60.0),
+    "flash-lite": _rpm_to_interval("GEMINI_FLASH_LITE_RPM", 60.0),
 }
 
 

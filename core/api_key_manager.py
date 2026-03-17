@@ -102,22 +102,57 @@ class APIKeyManager:
 
     def get_next_key(self) -> str:
         """
-        Получить следующий ключ по round-robin
-        Возвращает ключ с наименьшим использованием
+        Получить следующий ключ по round-robin, пропуская 'остывающие' после ошибок.
         """
-        # Round-robin для балансировки
         if not self.API_KEYS:
             self._load_keys_from_env()
             if not self.API_KEYS:
                 raise RuntimeError("No API keys configured. Set GEMINI_API_KEY or GEMINI_API_KEY_N")
 
-        key = self.API_KEYS[self._current_index]
-        self._key_usage[self._current_index] += 1
+        # Пробуем найти живой ключ
+        start_index = self._current_index
+        keys_count = len(self.API_KEYS)
+        now = datetime.now()
+        cooldown_period = timedelta(seconds=60) # 60 секунд на "остывание"
 
-        logger.debug(f" Using API key #{self._current_index + 1} (usage: {self._key_usage[self._current_index]})")
+        for _ in range(keys_count):
+            idx = self._current_index
+            last_error = self._last_error_time[idx]
 
-        self._current_index = (self._current_index + 1) % len(self.API_KEYS)
+            # Если ошибок не было или прошло достаточно времени
+            if last_error is None or (now - last_error) > cooldown_period:
+                key = self.API_KEYS[idx]
+                self._key_usage[idx] += 1
+                logger.debug(f" Using API key #{idx + 1} (usage: {self._key_usage[idx]})")
+                
+                # Сдвигаем индекс для следующего вызова
+                self._current_index = (self._current_index + 1) % keys_count
+                return key
+            
+            # Если ключ "горячий", пропускаем его
+            logger.debug(f" Skipping API key #{idx + 1} (cooling down, last error: {last_error.strftime('%H:%M:%S')})")
+            self._current_index = (self._current_index + 1) % keys_count
 
+        # Если все ключи в кулдауне, берем тот, у которого ошибка была давно
+        # или просто следующий, чтобы не блокировать работу
+        logger.warning(" All API keys are in cooldown! Using the next available key regardless of errors.")
+        
+        # Fallback logic: find key with oldest error
+        oldest_error_idx = -1
+        oldest_error_time = now
+
+        for i in range(keys_count):
+            err_time = self._last_error_time[i]
+            if err_time and err_time < oldest_error_time:
+                oldest_error_time = err_time
+                oldest_error_idx = i
+        
+        fallback_idx = oldest_error_idx if oldest_error_idx != -1 else self._current_index
+        
+        key = self.API_KEYS[fallback_idx]
+        self._key_usage[fallback_idx] += 1
+        self._current_index = (fallback_idx + 1) % keys_count
+        
         return key
 
     def get_random_key(self) -> str:

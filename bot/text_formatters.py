@@ -250,56 +250,59 @@ class EnhancedFormatter:
 
     @staticmethod
     def _escape_markdown(text: Any) -> str:
-        """Экранирует специальные символы Markdown в строке."""
+        """
+        Экранирует специальные символы для Markdown (версия 2).
+        Используется там, где мы хотим отобразить текст 'как есть', без форматирования.
+        """
         if not isinstance(text, str):
             text = str(text)
-        escape_chars = r"\_*[]()~`>#+-=|{}.!"
+        # MarkdownV2 escape chars: _ * [ ] ( ) ~ ` > # + - = | { } . !
+        escape_chars = r"_*[]()~`>#+-=|{}.!"
         return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
-
-    @staticmethod
-    def truncate_text(text: str, max_length: int = 1000) -> str:
-        """Обрезает текст до заданной длины."""
-        return text[:max_length] + "..." if len(text) > max_length else text
 
     @staticmethod
     def format_text(text: str) -> str:
         """
-        Форматирует текст для отображения в Telegram с использованием HTML разметки.
-        Убирает экранирование и улучшает читаемость.
+        Форматирует текст для отображения в Telegram (HTML mode).
+        Преобразует Markdown-подобный синтаксис (**bold**, *italic*) в HTML теги.
+        Безопасно экранирует остальной текст.
         """
         if not text:
             return ""
+
+        # 1. Экранируем HTML спецсимволы, чтобы пользовательский ввод не сломал верстку
+        # Но нам нужно сохранить нашу разметку (если она уже есть в тексте от LLM).
+        # Проблема: LLM может выдавать **bold**, и мы хотим это превратить в <b>bold</b>.
+        # Если мы сделаем html.escape() сначала, то **bold** останется **bold**.
         
-        # Удаляем экранирование символов
-        formatted_text = text.replace('\\*', '*').replace('\\_', '_').replace('\\(', '(').replace('\\)', ')')
-        formatted_text = formatted_text.replace('\\.', '.').replace('\\-', '-').replace('\\|', '|')
-        formatted_text = formatted_text.replace('\\[', '[').replace('\\]', ']').replace('\\{', '{').replace('\\}', '}')
+        # Стратегия: 
+        # Разбить текст на токены (разметка и текст). 
+        # Или использовать простой regex replace, но с предварительным экранированием `<` и `>`.
         
-        # Конвертируем Markdown в HTML
-        # Жирный текст **text** -> <b>text</b>
-        formatted_text = re.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', formatted_text)
-        # Курсив *text* -> <i>text</i>
-        formatted_text = re.sub(r'(?<!\*)\*([^*\n]+)\*(?!\*)', r'<i>\1</i>', formatted_text)
-        # Подчеркивание _text_ -> <u>text</u>
-        formatted_text = re.sub(r'_([^_\n]+)_', r'<i>\1</i>', formatted_text)
+        # Шаг 1: Экранируем амперсанды и угловые скобки, чтобы они не воспринимались как HTML
+        text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
         
-        # Улучшаем форматирование списков
-        formatted_text = re.sub(r'^\s*[*•]\s+([^\n]+)', r'• \1', formatted_text, flags=re.MULTILINE)
+        # Шаг 2: Обрабатываем Markdown разметку
+        # Жирный: **text** -> <b>text</b>
+        text = re.sub(r'\*\*([^*\n]+)\*\*', r'<b>\1</b>', text)
         
-        # Убираем двойные переносы строк
-        formatted_text = re.sub(r'\n\n+', '\n\n', formatted_text)
+        # Курсив: *text* (без пробелов внутри) -> <i>text</i>
+        text = re.sub(r'(?<!\*)\*([^*\n]+)\*(?!\*)', r'<i>\1</i>', text)
         
-        # Улучшаем форматирование источников
-        formatted_text = re.sub(r' Источники?:\s*\n', '\n <b>Источники:</b>\n', formatted_text)
+        # Подчеркивание: __text__ -> <u>text</u> (Telegram поддерживает)
+        text = re.sub(r'__([^_\n]+)__', r'<u>\1</u>', text)
+
+        # Моноширинный: `text` -> <code>text</code>
+        text = re.sub(r'`([^`\n]+)`', r'<code>\1</code>', text)
         
-        # Экранируем HTML символы
-        formatted_text = formatted_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-        # Восстанавливаем наши HTML теги
-        formatted_text = formatted_text.replace('&lt;b&gt;', '<b>').replace('&lt;/b&gt;', '</b>')
-        formatted_text = formatted_text.replace('&lt;i&gt;', '<i>').replace('&lt;/i&gt;', '</i>')
-        formatted_text = formatted_text.replace('&lt;u&gt;', '<u>').replace('&lt;/u&gt;', '</u>')
+        # Шаг 3: Форматирование списков
+        # Заменяем маркеры списков на буллиты
+        text = re.sub(r'^\s*[\-\*]\s+', r'• ', text, flags=re.MULTILINE)
         
-        return formatted_text.strip()
+        # Шаг 4: Секция источников
+        text = re.sub(r'(?i)Источники?:', r'\n<b>Источники:</b>', text)
+
+        return text.strip()
 
     @staticmethod
     def split_long_message(text: str, max_length: int = 4000) -> List[str]:
